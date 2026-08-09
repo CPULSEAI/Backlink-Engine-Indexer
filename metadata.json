@@ -1,0 +1,6 @@
+{
+  "name": "Backlink Engine & Indexer",
+  "description": "Automated URL multi-site backlink generator, live confirmation verifier, and SEO indexing dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
