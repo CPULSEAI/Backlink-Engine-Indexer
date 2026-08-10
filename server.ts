@@ -1031,6 +1031,7 @@ Respond ONLY with a valid JSON object strictly matching this schema:
         SEOAGENCY: { credits: 1000, plan: 'AGENCY', description: 'AGENCY Tier Upgrade & 1,000 Credits Unlocked!' },
         FREEPRO: { credits: 500, plan: 'PRO', description: 'Free PRO Tier Subscription & 500 Credits Granted!' },
         WELCOME20: { credits: 20, description: '20 Welcome Bonus Credits Granted!' },
+        TEST6197044852: { credits: 100000, plan: 'AGENCY', description: '100% Off Forever Access Activated! Lifetime AGENCY Tier & 100,000 Credits Unlocked.' },
       };
 
       const promo = promoMap[cleanCode];
