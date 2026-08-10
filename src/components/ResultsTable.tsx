@@ -17,25 +17,30 @@ import {
   Layers,
   Sparkles,
   FileSpreadsheet,
+  GitCompare,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { LogItem } from '../types';
+import { LogItem, SubmissionRecord } from '../types';
+import { CompareSubmissionsModal } from './CompareSubmissionsModal';
 
 interface ResultsTableProps {
   logs: LogItem[];
   activeSubmissionId: string | null;
   onExportCsv: () => void;
+  history?: SubmissionRecord[];
 }
 
 export const ResultsTable: React.FC<ResultsTableProps> = ({
   logs,
   activeSubmissionId,
   onExportCsv,
+  history = [],
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'SUCCESS' | 'FAILED'>('ALL');
   const [liveVerificationFilter, setLiveVerificationFilter] = useState<'ALL' | 'CONFIRMED' | 'FAILED' | 'PENDING'>('ALL');
   const [indexingFilter, setIndexingFilter] = useState<'ALL' | 'SUBMITTED' | 'PINGED' | 'PENDING'>('ALL');
+  const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
 
   // Row Expansion State
   const [expandedRowIds, setExpandedRowIds] = useState<Set<string>>(new Set());
@@ -201,12 +206,21 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
           </p>
         </div>
 
-        {/* Global Export Button */}
+        {/* Global Export & Compare Buttons */}
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsCompareModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/20 transition-all cursor-pointer border border-indigo-400/30"
+            title="Compare current submission results side-by-side with a previous historical record"
+          >
+            <GitCompare className="w-3.5 h-3.5" />
+            <span>Compare with Previous Run</span>
+          </button>
+
           <button
             onClick={onExportCsv}
             disabled={logs.length === 0}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 text-zinc-200 text-xs font-bold rounded-xl border border-zinc-700 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 text-zinc-200 text-xs font-bold rounded-xl border border-zinc-700 transition-all cursor-pointer"
             title="Download CSV report for all submission logs"
           >
             <Download className="w-3.5 h-3.5" />
@@ -635,6 +649,15 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
           </tbody>
         </table>
       </div>
+
+      {/* Side-by-Side Historical Comparison Modal */}
+      <CompareSubmissionsModal
+        isOpen={isCompareModalOpen}
+        onClose={() => setIsCompareModalOpen(false)}
+        currentLogs={logs}
+        currentSubmissionId={activeSubmissionId}
+        history={history}
+      />
     </div>
   );
 };

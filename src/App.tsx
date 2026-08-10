@@ -536,11 +536,11 @@ export default function App() {
           onStopAutonomous={handleStopAutonomous}
         />
 
-        {/* SmartBatchScheduler Component */}
-        <SmartBatchScheduler onJobStarted={fetchHistory} />
-
         {/* Keyword Gap Radar Component */}
         <KeywordGapRadar onOpenContentGrader={handleOpenContentGrader} />
+
+        {/* SmartBatchScheduler Component */}
+        <SmartBatchScheduler onJobStarted={fetchHistory} />
 
         {/* Visual SEO Lifecycle Funnel Timeline Widget */}
         <SeoFunnelTimeline
@@ -561,6 +561,7 @@ export default function App() {
           logs={logs}
           activeSubmissionId={activeSubmissionId}
           onExportCsv={() => handleExportCsv()}
+          history={history}
         />
       </main>
 

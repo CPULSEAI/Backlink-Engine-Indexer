@@ -33,8 +33,35 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   onRefreshBilling,
 }) => {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [promoCode, setPromoCode] = useState<string>('');
+  const [applyingPromo, setApplyingPromo] = useState<boolean>(false);
 
   if (!isOpen) return null;
+
+  const handleApplyPromoCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!promoCode.trim()) {
+      toast.error('Please enter a valid promo code.');
+      return;
+    }
+
+    setApplyingPromo(true);
+    const toastId = toast.loading('Validating & applying promo code...');
+    try {
+      const res = await axios.post('/api/billing/promo', { code: promoCode });
+      if (res.data && res.data.success) {
+        toast.success(res.data.message || 'Promo code applied successfully!', { id: toastId });
+        setPromoCode('');
+        onRefreshBilling();
+      } else {
+        toast.error(res.data?.error || 'Failed to apply promo code', { id: toastId });
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Invalid promo code. Try PROMO50 or LAUNCH2026', { id: toastId });
+    } finally {
+      setApplyingPromo(false);
+    }
+  };
 
   const handleCheckout = async (plan: 'PRO' | 'AGENCY' | 'TOPUP_100') => {
     setLoadingPlan(plan);
@@ -167,6 +194,43 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               <span>Current Plan: <strong className="text-zinc-200">{currentPlan}</strong></span>
               <span>1 URL Submission = 1 Credit</span>
             </div>
+          </div>
+
+          {/* Promo Code Redemption Option */}
+          <div className="bg-zinc-950 border border-indigo-500/30 rounded-2xl p-4">
+            <form onSubmit={handleApplyPromoCode} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="flex items-center gap-2 flex-1">
+                <div className="p-2 bg-indigo-500/10 border border-indigo-500/30 rounded-xl text-indigo-400 shrink-0">
+                  <Gift className="w-4 h-4" />
+                </div>
+                <div className="flex-1">
+                  <label htmlFor="promoCodeInput" className="block text-xs font-bold text-zinc-300">
+                    Redeem Promo Code or Coupon
+                  </label>
+                  <span className="text-[11px] text-zinc-500">
+                    Apply discount or claim free bonus indexation credits (e.g., <code className="text-indigo-400">PROMO50</code>, <code className="text-indigo-400">LAUNCH2026</code>)
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  id="promoCodeInput"
+                  type="text"
+                  placeholder="Enter code (e.g. PROMO50)"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value)}
+                  className="bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white uppercase tracking-wider font-mono focus:outline-none focus:border-indigo-500 w-full sm:w-48"
+                />
+                <button
+                  type="submit"
+                  disabled={applyingPromo || !promoCode.trim()}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl transition-all shrink-0 cursor-pointer border border-indigo-400/30 shadow-md shadow-indigo-600/20"
+                >
+                  {applyingPromo ? 'Applying...' : 'Apply Code'}
+                </button>
+              </div>
+            </form>
           </div>
 
           {/* Pricing Tiers Grid */}

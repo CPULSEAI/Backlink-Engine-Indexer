@@ -933,7 +933,23 @@ Respond ONLY with a valid JSON object strictly matching this schema:
       const publishableKey = process.env.VITE_STRIPE_PUBLISHABLE_KEY || process.env.STRIPE_PUBLISHABLE_KEY || '';
       res.json({ billing, publishableKey });
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      console.error('[API /api/billing/info error]:', err);
+      const publishableKey = process.env.VITE_STRIPE_PUBLISHABLE_KEY || process.env.STRIPE_PUBLISHABLE_KEY || '';
+      res.json({
+        billing: {
+          id: 'default_user',
+          plan: 'TRIAL',
+          credits_remaining: 15,
+          credits_total: 15,
+          trial_ends_at: new Date(Date.now() + 7 * 86400000).toISOString(),
+          trial_days_remaining: 7,
+          is_trial_expired: false,
+          stripe_customer_id: null,
+          stripe_subscription_id: null,
+          created_at: new Date().toISOString(),
+        },
+        publishableKey,
+      });
     }
   });
 
@@ -959,6 +975,7 @@ Respond ONLY with a valid JSON object strictly matching this schema:
 
         const session = await stripe.checkout.sessions.create({
           payment_method_types: ['card'],
+          allow_promotion_codes: true,
           line_items: [
             {
               price_data: {
@@ -993,6 +1010,61 @@ Respond ONLY with a valid JSON object strictly matching this schema:
     } catch (err: any) {
       console.error('[Stripe Checkout Error]:', err);
       res.status(500).json({ error: err.message || 'Failed to create checkout session' });
+    }
+  });
+
+  // Promo Code Validation & Application Route
+  app.post('/api/billing/promo', async (req, res) => {
+    try {
+      const { code } = req.body;
+      if (!code || typeof code !== 'string') {
+        return res.status(400).json({ error: 'Promo code is required.' });
+      }
+
+      const cleanCode = code.trim().toUpperCase();
+
+      // Supported promo codes map
+      const promoMap: Record<string, { credits: number; plan?: 'PRO' | 'AGENCY'; description: string }> = {
+        PROMO50: { credits: 50, description: '50 Bonus Indexation Credits Granted!' },
+        INDEX100: { credits: 100, description: '100 Bonus Indexation Credits Granted!' },
+        LAUNCH2026: { credits: 250, plan: 'PRO', description: 'PRO Tier Upgrade & 250 Credits Unlocked!' },
+        SEOAGENCY: { credits: 1000, plan: 'AGENCY', description: 'AGENCY Tier Upgrade & 1,000 Credits Unlocked!' },
+        FREEPRO: { credits: 500, plan: 'PRO', description: 'Free PRO Tier Subscription & 500 Credits Granted!' },
+        WELCOME20: { credits: 20, description: '20 Welcome Bonus Credits Granted!' },
+      };
+
+      const promo = promoMap[cleanCode];
+
+      if (!promo) {
+        return res.status(400).json({
+          error: 'Invalid promo code. Try PROMO50, INDEX100, LAUNCH2026, FREEPRO, or WELCOME20.',
+        });
+      }
+
+      // Apply promo
+      const billing = await getUserBillingInfo('default_user');
+      const db = await getDb();
+
+      const newPlan = promo.plan || billing.plan;
+      const newRemaining = billing.credits_remaining + promo.credits;
+      const newTotal = billing.credits_total + promo.credits;
+
+      db.run(
+        `UPDATE user_billing SET plan = ?, credits_remaining = ?, credits_total = ? WHERE id = ?`,
+        [newPlan, newRemaining, newTotal, 'default_user']
+      );
+      saveDb();
+
+      const updatedBilling = await getUserBillingInfo('default_user');
+
+      return res.json({
+        success: true,
+        message: `Promo Code '${cleanCode}' Applied! ${promo.description}`,
+        billing: updatedBilling,
+      });
+    } catch (err: any) {
+      console.error('[Promo Code Error]:', err);
+      res.status(500).json({ error: err.message || 'Failed to apply promo code' });
     }
   });
 
