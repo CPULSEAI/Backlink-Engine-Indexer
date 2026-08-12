@@ -181,6 +181,60 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
     toast.success(`Exported ${selectedLogs.length} selected backlink logs to CSV!`);
   };
 
+  // Bulk JSON Export Function (Selected)
+  const handleExportSelectedJson = () => {
+    const selectedLogs = logs.filter((log) => selectedLogIds.has(log.id));
+    if (selectedLogs.length === 0) {
+      toast.error('No rows selected to export');
+      return;
+    }
+
+    const exportPayload = {
+      exportedAt: new Date().toISOString(),
+      activeSubmissionId,
+      totalRecords: selectedLogs.length,
+      format: 'BI_AUDIT_LOG_JSON_V1',
+      logs: selectedLogs,
+    };
+
+    const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `selected_backlinks_${selectedLogs.length}_records.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success(`Exported ${selectedLogs.length} selected backlink logs to JSON!`);
+  };
+
+  // Global All JSON Export Function
+  const handleExportAllJson = () => {
+    if (logs.length === 0) {
+      toast.error('No audit logs available to export.');
+      return;
+    }
+
+    const exportPayload = {
+      exportedAt: new Date().toISOString(),
+      activeSubmissionId,
+      totalRecords: logs.length,
+      format: 'BI_AUDIT_LOG_JSON_V1',
+      webhookCompatible: true,
+      logs,
+    };
+
+    const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `all_audit_logs_${logs.length}_records.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success(`Exported all ${logs.length} audit logs to JSON for BI tools & webhooks!`);
+  };
+
   // Copy Backlink Handler
   const handleCopyBacklink = (e: React.MouseEvent, backlinkUrl: string, id: string) => {
     e.stopPropagation();
@@ -214,7 +268,7 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
             title="Compare current submission results side-by-side with a previous historical record"
           >
             <GitCompare className="w-3.5 h-3.5" />
-            <span>Compare with Previous Run</span>
+            <span>Compare Runs</span>
           </button>
 
           <button
@@ -223,8 +277,18 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
             className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 text-zinc-200 text-xs font-bold rounded-xl border border-zinc-700 transition-all cursor-pointer"
             title="Download CSV report for all submission logs"
           >
-            <Download className="w-3.5 h-3.5" />
-            <span>Export All ({logs.length})</span>
+            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Export CSV ({logs.length})</span>
+          </button>
+
+          <button
+            onClick={handleExportAllJson}
+            disabled={logs.length === 0}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-950 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-200 text-xs font-bold rounded-xl shadow-sm transition-all cursor-pointer disabled:opacity-40"
+            title="Download structured JSON payload for BI dashboard integration & webhooks"
+          >
+            <Download className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Export JSON</span>
           </button>
         </div>
       </div>
@@ -358,16 +422,25 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={handleExportSelectedCsv}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
             >
               <FileSpreadsheet className="w-3.5 h-3.5" />
-              <span>Export Selected CSV ({selectedLogIds.size})</span>
+              <span>Export CSV ({selectedLogIds.size})</span>
             </button>
+
+            <button
+              onClick={handleExportSelectedJson}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl shadow-md shadow-cyan-600/20 transition-all cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export JSON ({selectedLogIds.size})</span>
+            </button>
+
             <button
               onClick={() => setSelectedLogIds(new Set())}
-              className="px-2.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium rounded-xl transition-all"
+              className="px-2.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium rounded-xl transition-all cursor-pointer"
             >
-              Clear Selection
+              Clear
             </button>
           </div>
         </div>

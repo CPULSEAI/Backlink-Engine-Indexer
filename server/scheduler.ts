@@ -1,6 +1,5 @@
 import { getDb, saveDb } from './db.js';
 import { jobManager, TaskJobConfig } from './queue.js';
-import { deductUserCredits } from './stripe.js';
 
 export interface ScheduledJobRecord {
   id: string;
@@ -241,20 +240,6 @@ async function triggerBatchRun(job: ScheduledJobRecord) {
     } else {
       urlsToProcess = job.target_urls.slice(0, job.batch_size);
     }
-  }
-
-  // Deduct indexation credits for this batch run
-  const creditResult = await deductUserCredits(urlsToProcess.length);
-  if (!creditResult.success) {
-    console.warn(`[SmartBatchScheduler] Job ${job.id} paused due to insufficient credits.`);
-    db.run(`UPDATE scheduled_jobs SET status = 'PAUSED' WHERE id = ?`, [job.id]);
-    saveDb();
-    jobManager.broadcast('scheduled_job_updated', {
-      id: job.id,
-      status: 'PAUSED',
-      error: creditResult.error || 'Insufficient indexation credits remaining.',
-    });
-    return;
   }
 
   const submissionId = `sub_sched_${job.id}_${Date.now()}`;

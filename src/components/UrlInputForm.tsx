@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { Play, Sparkles, CheckCircle2, Sliders, Globe, ShieldCheck, Zap, AlertCircle, RefreshCw, Bot, Target, Repeat, StopCircle, Filter } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Play, Sparkles, CheckCircle2, Sliders, Globe, ShieldCheck, Zap, AlertCircle, RefreshCw, Bot, Target, Repeat, StopCircle, Filter, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { DirectoryEntry, AutonomousConfig, BillingInfo } from '../types';
+import { DirectoryEntry, AutonomousConfig } from '../types';
 import { SmartUrlBatcherModal } from './SmartUrlBatcherModal';
+import { SeoReadinessScorecard } from './SeoReadinessScorecard';
 
 interface UrlInputFormProps {
   directories: DirectoryEntry[];
@@ -11,8 +12,6 @@ interface UrlInputFormProps {
   autonomousAccumulatedCount?: number;
   autonomousTargetGoal?: number;
   autonomousBatchCount?: number;
-  billing?: BillingInfo | null;
-  onOpenSubscription?: () => void;
   onStartJob: (config: {
     targetUrls: string[];
     features: {
@@ -37,8 +36,6 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
   autonomousAccumulatedCount = 0,
   autonomousTargetGoal = 100,
   autonomousBatchCount = 1,
-  billing,
-  onOpenSubscription,
   onStartJob,
   onCancelJob,
   onStopAutonomous,
@@ -64,19 +61,19 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
   const [targetGoalMetric, setTargetGoalMetric] = useState<'tasks' | 'confirmed'>('tasks');
   const [autoCycleUrls, setAutoCycleUrls] = useState<boolean>(true);
 
+  const [showSeoScorecard, setShowSeoScorecard] = useState<boolean>(false);
+
   // Regex check for domain/URL validity
   const URL_REGEX = /^(https?:\/\/)?([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,24}(:\d{1,5})?(\/[^\s]*)?$/i;
 
-  // Helper to extract clean URLs
-  const getCleanedUrls = (): string[] => {
-    return rawInput
+  // Memoize clean unique URLs from raw input
+  const uniqueUrls = useMemo(() => {
+    const cleaned = rawInput
       .split(/[\n,;]+/)
       .map((line) => line.trim())
       .filter((line) => line.length > 0 && !line.startsWith('#') && !line.startsWith('//'));
-  };
-
-  const cleanedUrls = getCleanedUrls();
-  const uniqueUrls = Array.from(new Set(cleanedUrls));
+    return Array.from(new Set(cleaned));
+  }, [rawInput]);
 
   const handleCleanInput = () => {
     let fixedCount = 0;
@@ -179,6 +176,20 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
           <div className="flex items-center gap-2">
             <button
               type="button"
+              onClick={() => setShowSeoScorecard(!showSeoScorecard)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all shadow-sm ${
+                showSeoScorecard
+                  ? 'bg-indigo-600 text-white border-indigo-500'
+                  : 'bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
+              }`}
+              title="Inspect technical SEO elements (canonicals, hreflang, meta, indexability) before submitting"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
+              <span>{showSeoScorecard ? 'Hide SEO Inspector' : 'SEO Readiness Scorecard'}</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setIsBatcherModalOpen(true)}
               className="flex items-center gap-1.5 px-3.5 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 text-xs font-bold rounded-xl border border-cyan-500/30 transition-all shadow-sm"
               title="Launch Smart URL Batcher & Regex Validator"
@@ -224,6 +235,16 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
             )}
           </div>
         </div>
+
+        {/* Technical SEO Readiness Pre-flight Scorecard */}
+        {showSeoScorecard && (
+          <div className="mt-4">
+            <SeoReadinessScorecard
+              targetUrl={uniqueUrls[0] || 'https://example.com'}
+              onClose={() => setShowSeoScorecard(false)}
+            />
+          </div>
+        )}
 
         {/* Pipeline Modules Toggles */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-zinc-950/50 p-4 rounded-xl border border-zinc-800/80">
@@ -462,34 +483,11 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
           )}
         </div>
 
-        {/* Quota Insufficient Alert Banner */}
-        {billing && uniqueUrls.length > billing.credits_remaining && (
-          <div className="bg-amber-950/60 border border-amber-500/40 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-200">
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-amber-400 shrink-0 animate-pulse" />
-              <span>
-                <strong>Quota Warning:</strong> This submission requires <strong>{uniqueUrls.length} Credits</strong>, but you only have <strong>{billing.credits_remaining} Credits</strong> remaining.
-              </span>
-            </div>
-            {onOpenSubscription && (
-              <button
-                type="button"
-                onClick={onOpenSubscription}
-                className="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold rounded-lg text-xs shrink-0 cursor-pointer shadow-md"
-              >
-                Upgrade Plan / Get Credits
-              </button>
-            )}
-          </div>
-        )}
-
         {/* Action Button Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
           <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
-            <Zap className="w-3.5 h-3.5 text-amber-400" />
-            <span>Cost: <strong className="text-amber-300">{uniqueUrls.length} Credits</strong></span>
-            <span className="text-zinc-600">|</span>
-            <span>Available: <strong className="text-zinc-200">{billing?.credits_remaining ?? 15} Credits</strong></span>
+            <Globe className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Selected Targets: <strong className="text-cyan-300">{uniqueUrls.length} URLs</strong></span>
           </div>
 
           {isAutonomousActive && onStopAutonomous && (

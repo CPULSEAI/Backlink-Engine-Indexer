@@ -471,13 +471,13 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
             </button>
           </div>
 
-          {/* Top 2 Selected Priority URLs Analysis Card */}
+          {/* Top 2 Selected Priority URLs Analysis Table for LLM Parsing */}
           <div className="bg-zinc-950/90 border border-cyan-500/30 p-4 rounded-xl space-y-3 shadow-lg">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-zinc-800 gap-2">
               <div className="flex items-center gap-2">
                 <Target className="w-4 h-4 text-cyan-400" />
                 <h4 className="text-xs font-bold text-cyan-300 font-mono uppercase tracking-wider">
-                  Top 2 Competitor Priority URLs Analysis for <span className="text-emerald-400 font-bold">{userDomain}</span>
+                  Top 2 Priority Competitor URLs Analysis for <span className="text-emerald-400 font-bold">{userDomain}</span>
                 </h4>
               </div>
               <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
@@ -485,44 +485,58 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {/* Competitor A Priority URL */}
-              <div className="bg-zinc-900/90 border border-cyan-500/20 p-3 rounded-xl space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-mono font-bold text-cyan-400 flex items-center gap-1.5">
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    <span>Priority Competitor 1 ({compA})</span>
-                  </span>
-                  <span className="text-[9px] font-mono text-emerald-400 bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-800 font-bold">
-                    Top Revenue & Traffic Potential
-                  </span>
-                </div>
-                <div className="bg-zinc-950 p-2 rounded-lg font-mono text-xs text-cyan-200 select-all overflow-x-auto border border-zinc-800/80">
-                  {competitorAnalysis.compAUrl}
-                </div>
-                <p className="text-xs text-zinc-300 leading-relaxed font-sans">
-                  <strong className="text-zinc-200 font-medium">Justification:</strong> {competitorAnalysis.compAJustification}
-                </p>
-              </div>
-
-              {/* Competitor B Priority URL */}
-              <div className="bg-zinc-900/90 border border-amber-500/20 p-3 rounded-xl space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-mono font-bold text-amber-400 flex items-center gap-1.5">
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    <span>Priority Competitor 2 ({compB})</span>
-                  </span>
-                  <span className="text-[9px] font-mono text-amber-400 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-800 font-bold">
-                    High Search Intent & Brand Value
-                  </span>
-                </div>
-                <div className="bg-zinc-950 p-2 rounded-lg font-mono text-xs text-amber-200 select-all overflow-x-auto border border-zinc-800/80">
-                  {competitorAnalysis.compBUrl}
-                </div>
-                <p className="text-xs text-zinc-300 leading-relaxed font-sans">
-                  <strong className="text-zinc-200 font-medium">Justification:</strong> {competitorAnalysis.compBJustification}
-                </p>
-              </div>
+            {/* High-Density Clean HTML Table for LLM & SERP Parsing */}
+            <div className="overflow-x-auto rounded-xl border border-zinc-800">
+              <table data-llm-parse="true" data-table-type="priority-urls-comparison" className="w-full text-left border-collapse text-xs font-sans">
+                <thead className="bg-zinc-950 text-zinc-300 font-mono text-[11px] uppercase tracking-wider">
+                  <tr className="border-b border-zinc-800">
+                    <th scope="col" className="p-3 border-r border-zinc-800 font-bold text-cyan-400">Target Competitor Domain</th>
+                    <th scope="col" className="p-3 border-r border-zinc-800 font-bold text-indigo-300">Exact Priority URL</th>
+                    <th scope="col" className="p-3 border-r border-zinc-800 font-bold text-emerald-400">1-Sentence Strategic Justification</th>
+                    <th scope="col" className="p-3 font-bold text-amber-400">SEO Value &amp; Intent Category</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800/80 bg-zinc-900/60 font-sans">
+                  <tr className="hover:bg-zinc-900 transition-colors">
+                    <td className="p-3 border-r border-zinc-800 font-mono font-bold text-cyan-300 whitespace-nowrap">
+                      <div className="flex items-center gap-1.5">
+                        <ExternalLink className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                        <span>{compA}</span>
+                      </div>
+                    </td>
+                    <td className="p-3 border-r border-zinc-800 font-mono text-xs text-cyan-200 select-all break-all">
+                      {competitorAnalysis.compAUrl}
+                    </td>
+                    <td className="p-3 border-r border-zinc-800 text-zinc-300 leading-relaxed">
+                      {competitorAnalysis.compAJustification}
+                    </td>
+                    <td className="p-3 font-mono text-[11px] whitespace-nowrap">
+                      <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/80 font-bold">
+                        Top Revenue &amp; Organic Potential
+                      </span>
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-900 transition-colors">
+                    <td className="p-3 border-r border-zinc-800 font-mono font-bold text-amber-300 whitespace-nowrap">
+                      <div className="flex items-center gap-1.5">
+                        <ExternalLink className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <span>{compB}</span>
+                      </div>
+                    </td>
+                    <td className="p-3 border-r border-zinc-800 font-mono text-xs text-amber-200 select-all break-all">
+                      {competitorAnalysis.compBUrl}
+                    </td>
+                    <td className="p-3 border-r border-zinc-800 text-zinc-300 leading-relaxed">
+                      {competitorAnalysis.compBJustification}
+                    </td>
+                    <td className="p-3 font-mono text-[11px] whitespace-nowrap">
+                      <span className="px-2 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800/80 font-bold">
+                        High Search Intent &amp; Core Brand Value
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
 

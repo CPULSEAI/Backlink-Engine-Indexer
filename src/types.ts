@@ -71,16 +71,5 @@ export interface AnalyticsData {
   }[];
 }
 
-export interface BillingInfo {
-  id: string;
-  plan: 'TRIAL' | 'PRO' | 'AGENCY';
-  credits_remaining: number;
-  credits_total: number;
-  trial_ends_at: string;
-  trial_days_remaining: number;
-  is_trial_expired: boolean;
-  stripe_customer_id: string | null;
-  stripe_subscription_id: string | null;
-  created_at: string;
-}
+
 

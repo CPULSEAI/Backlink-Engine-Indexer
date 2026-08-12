@@ -26,8 +26,6 @@ import {
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-import { BillingInfo } from '../types';
-
 export interface ScheduledJob {
   id: string;
   name: string;
@@ -58,16 +56,12 @@ interface SmartBatchSchedulerProps {
   onJobStarted?: () => void;
   isOpenModal?: boolean;
   onCloseModal?: () => void;
-  billing?: BillingInfo | null;
-  onOpenSubscription?: () => void;
 }
 
 export const SmartBatchScheduler: React.FC<SmartBatchSchedulerProps> = ({
   onJobStarted,
   isOpenModal = false,
   onCloseModal,
-  billing,
-  onOpenSubscription,
 }) => {
   const [jobs, setJobs] = useState<ScheduledJob[]>([]);
   const [loading, setLoading] = useState(false);
@@ -270,17 +264,6 @@ export const SmartBatchScheduler: React.FC<SmartBatchSchedulerProps> = ({
         </div>
 
         <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-          {billing && (
-            <button
-              onClick={onOpenSubscription}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-950 border border-amber-500/30 rounded-xl text-amber-300 font-mono text-xs font-bold hover:bg-zinc-900 transition-all cursor-pointer"
-              title="View credit quota balance"
-            >
-              <Zap className="w-3.5 h-3.5 text-amber-400" />
-              <span>{billing.credits_remaining} / {billing.credits_total} Credits</span>
-            </button>
-          )}
-
           <button
             onClick={() => setIsCreatingNew(!isCreatingNew)}
             className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-amber-600/20 transition-all cursor-pointer"

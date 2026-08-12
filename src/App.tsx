@@ -18,8 +18,7 @@ import { HelpManualModal } from './components/HelpManualModal';
 import { OnboardingWizardModal } from './components/OnboardingWizardModal';
 import { SeoFunnelTimeline } from './components/SeoFunnelTimeline';
 import { SmartBatchScheduler } from './components/SmartBatchScheduler';
-import { SubscriptionModal } from './components/SubscriptionModal';
-import { DirectoryEntry, LogItem, SubmissionRecord, SystemSettings, AnalyticsData, AutonomousConfig, BillingInfo } from './types';
+import { DirectoryEntry, LogItem, SubmissionRecord, SystemSettings, AnalyticsData, AutonomousConfig } from './types';
 
 export default function App() {
   const [directories, setDirectories] = useState<DirectoryEntry[]>([]);
@@ -73,35 +72,17 @@ export default function App() {
   const [isHelpManualOpen, setIsHelpManualOpen] = useState(false);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isSchedulerOpen, setIsSchedulerOpen] = useState(false);
-  const [isSubscriptionOpen, setIsSubscriptionOpen] = useState(false);
-  const [billing, setBilling] = useState<BillingInfo | null>(null);
   const [profilerDomain, setProfilerDomain] = useState('');
   const [graderUrl, setGraderUrl] = useState('');
   const [graderKeyword, setGraderKeyword] = useState('');
 
-  // Auto-launch Onboarding Wizard for first-time visitors & check Stripe return params
+  // Auto-launch Onboarding Wizard for first-time visitors
   useEffect(() => {
     const hasOnboarded = localStorage.getItem('geo_seo_onboarded');
     if (!hasOnboarded) {
       setIsWizardOpen(true);
     }
-
-    if (window.location.search.includes('checkout=success')) {
-      toast.success('Payment completed! Your indexation credits & subscription plan have been updated.');
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
   }, []);
-
-  const fetchBilling = async () => {
-    try {
-      const res = await axios.get('/api/billing/info');
-      if (res.data && res.data.billing) {
-        setBilling(res.data.billing);
-      }
-    } catch (err) {
-      console.error('Failed to load billing info', err);
-    }
-  };
 
   const handleOpenContentGrader = (url?: string, keyword?: string) => {
     setGraderUrl(url || '');
@@ -123,13 +104,12 @@ export default function App() {
 
   const wsRef = useRef<WebSocket | null>(null);
 
-  // Fetch initial directories, history, settings, analytics, and billing
+  // Fetch initial directories, history, settings, and analytics
   useEffect(() => {
     fetchDirectories();
     fetchHistory();
     fetchSettings();
     fetchAnalytics();
-    fetchBilling();
     connectWebSocket();
 
     return () => {
@@ -250,7 +230,6 @@ export default function App() {
           setProgressPercent(100);
           fetchHistory();
           fetchAnalytics();
-          fetchBilling();
 
           if (isCancelled) {
             toast.error('Submission job was cancelled.');
@@ -374,7 +353,6 @@ export default function App() {
         setActiveSubmissionId(res.data.submissionId);
         setJobStatus('Processing');
         setLogs([]);
-        fetchBilling();
         if (!isInternalLoopPass) {
           toast.success('Submission job started successfully!');
         }
@@ -382,10 +360,6 @@ export default function App() {
     } catch (err: any) {
       const errMsg = err.response?.data?.error || 'Failed to start job.';
       toast.error(errMsg);
-      if (err.response?.status === 402 || err.response?.data?.creditsRemaining !== undefined) {
-        setIsSubscriptionOpen(true);
-        fetchBilling();
-      }
     }
   };
 
@@ -489,8 +463,6 @@ export default function App() {
       <Header
         wsConnected={wsConnected}
         activeJobId={activeSubmissionId}
-        billing={billing}
-        onOpenSubscription={() => setIsSubscriptionOpen(true)}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenHistory={() => setIsHistoryOpen(true)}
         onOpenDirectories={() => setIsDirectoriesOpen(true)}
@@ -513,8 +485,6 @@ export default function App() {
           autonomousAccumulatedCount={autonomousAccumulatedCount}
           autonomousTargetGoal={autonomousTargetGoal}
           autonomousBatchCount={autonomousBatchCount}
-          billing={billing}
-          onOpenSubscription={() => setIsSubscriptionOpen(true)}
           onStartJob={handleStartJob}
           onCancelJob={handleCancelJob}
           onStopAutonomous={handleStopAutonomous}
@@ -655,26 +625,15 @@ export default function App() {
           <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <SmartBatchScheduler
               isOpenModal={true}
-              billing={billing}
-              onOpenSubscription={() => setIsSubscriptionOpen(true)}
               onCloseModal={() => setIsSchedulerOpen(false)}
               onJobStarted={() => {
                 fetchHistory();
-                fetchBilling();
                 setIsSchedulerOpen(false);
               }}
             />
           </div>
         </div>
       )}
-
-      {/* Stripe Subscription & Indexation Quota Modal */}
-      <SubscriptionModal
-        isOpen={isSubscriptionOpen}
-        onClose={() => setIsSubscriptionOpen(false)}
-        billing={billing}
-        onRefreshBilling={fetchBilling}
-      />
     </div>
   );
 }

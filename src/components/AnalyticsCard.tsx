@@ -35,9 +35,12 @@ import {
   ShieldCheck,
   Globe,
   Filter,
-  ArrowRight
+  ArrowRight,
+  Server,
+  Wifi
 } from 'lucide-react';
 import { AnalyticsData } from '../types';
+import { ProxyHealthHeatmap } from './ProxyHealthHeatmap';
 
 interface AnalyticsCardProps {
   data: AnalyticsData | null;
@@ -58,7 +61,7 @@ interface CitationResult {
 }
 
 export const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ data, loading, onRefresh, onOpenContentGrader }) => {
-  const [activeTab, setActiveTab] = useState<'analytics' | 'ai_citations'>('analytics');
+  const [activeTab, setActiveTab] = useState<'analytics' | 'ai_citations' | 'proxy_health'>('analytics');
   const [chartType, setChartType] = useState<'line' | 'area' | 'bar' | 'pie' | 'heatmap'>('line');
   const [selectedTile, setSelectedTile] = useState<any | null>(null);
 
@@ -134,21 +137,25 @@ export const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ data, loading, onR
     },
   ]);
 
-  if (!data) {
+  if (!data || (data as any).error) {
     return (
       <div className="bg-zinc-900/60 backdrop-blur-md border border-zinc-800/80 rounded-2xl p-6 shadow-2xl mb-8 flex items-center justify-center min-h-[220px]">
         <div className="flex items-center gap-2 text-zinc-400 text-sm font-mono">
-          <RefreshCw className="w-4 h-4 animate-spin text-indigo-400" />
-          <span>Loading 30-day submission analytics &amp; peak performance heatmap...</span>
+          <RefreshCw className={`w-4 h-4 text-indigo-400 ${loading ? 'animate-spin' : ''}`} />
+          <span>{loading ? 'Loading 30-day submission analytics & peak performance heatmap...' : 'Analytics data currently unavailable.'}</span>
         </div>
       </div>
     );
   }
 
-  const { summary, dailyTrend, ratioBreakdown } = data;
+  const summary = data.summary || { totalLogs: 0, successCount: 0, failureCount: 0, successRate: 0 };
+  const dailyTrend = Array.isArray(data.dailyTrend) ? data.dailyTrend : [];
+  const ratioBreakdown = Array.isArray(data.ratioBreakdown) ? data.ratioBreakdown : [];
 
   // Calculate Peak Performance Day
-  const peakDay = [...dailyTrend].sort((a, b) => b.success - a.success)[0];
+  const peakDay = dailyTrend.length > 0
+    ? [...dailyTrend].sort((a, b) => (b.success || 0) - (a.success || 0))[0]
+    : { dateStr: 'N/A', date: 'N/A', success: 0, failure: 0, total: 0, rate: 0, fullDate: 'N/A' };
 
   // Heatmap helper for intensity color mapping
   const getHeatmapColor = (successCount: number, total: number) => {
@@ -226,7 +233,7 @@ export const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ data, loading, onR
         </div>
 
         {/* Tab Selector */}
-        <div className="flex items-center bg-zinc-950 border border-zinc-800/90 rounded-xl p-1 shrink-0">
+        <div className="flex items-center bg-zinc-950 border border-zinc-800/90 rounded-xl p-1 shrink-0 gap-1">
           <button
             onClick={() => setActiveTab('analytics')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
@@ -250,8 +257,27 @@ export const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ data, loading, onR
             <Bot className="w-3.5 h-3.5" />
             <span>AI Citation Monitor</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab('proxy_health')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              activeTab === 'proxy_health'
+                ? 'bg-cyan-600 text-white shadow-sm'
+                : 'text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <Server className="w-3.5 h-3.5 text-cyan-200" />
+            <span>Proxy Health Heatmap</span>
+          </button>
         </div>
       </div>
+
+      {/* --- TAB 3: PROXY HEALTH HEATMAP --- */}
+      {activeTab === 'proxy_health' && (
+        <div className="mt-2">
+          <ProxyHealthHeatmap />
+        </div>
+      )}
 
       {/* --- TAB 1: 30-DAY INDEXING MATRIX --- */}
       {activeTab === 'analytics' && (

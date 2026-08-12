@@ -45,18 +45,23 @@ export const CompareSubmissionsModal: React.FC<CompareSubmissionsModalProps> = (
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   // Available history options (excluding active submission if needed)
-  const availableHistory = history.filter((h) => h.id !== currentSubmissionId);
+  const availableHistory = React.useMemo(
+    () => history.filter((h) => h.id !== currentSubmissionId),
+    [history, currentSubmissionId]
+  );
 
   // Initialize selected history ID when modal opens or history changes
   useEffect(() => {
     if (isOpen) {
-      if (availableHistory.length > 0 && !selectedHistoryId) {
-        setSelectedHistoryId(availableHistory[0].id);
-      } else if (history.length > 0 && !selectedHistoryId) {
-        setSelectedHistoryId(history[0].id);
+      if (!selectedHistoryId) {
+        if (availableHistory.length > 0) {
+          setSelectedHistoryId(availableHistory[0].id);
+        } else if (history.length > 0) {
+          setSelectedHistoryId(history[0].id);
+        }
       }
     }
-  }, [isOpen, history, currentSubmissionId]);
+  }, [isOpen, history, currentSubmissionId, selectedHistoryId, availableHistory]);
 
   // Fetch historical logs whenever selectedHistoryId changes
   useEffect(() => {

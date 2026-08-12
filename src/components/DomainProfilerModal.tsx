@@ -46,7 +46,7 @@ export const DomainProfilerModal: React.FC<DomainProfilerModalProps> = ({ isOpen
   const [appliedOpps, setAppliedOpps] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
-    if (initialDomain) {
+    if (initialDomain && initialDomain !== domain) {
       setDomain(initialDomain);
     }
   }, [initialDomain]);
