@@ -22,11 +22,11 @@ export async function getDb(): Promise<Database> {
       // Run quick integrity check
       db.exec('PRAGMA integrity_check;');
     } catch (err: any) {
-      console.error('[DB Error] Corrupted SQLite file detected. Recovering automatically:', err?.message || err);
+      console.warn('[DB Recovery] Notice: Recovered from legacy or corrupted SQLite file:', err?.message || err);
       try {
         const backupPath = `${DB_PATH}.corrupt_${Date.now()}`;
         fs.renameSync(DB_PATH, backupPath);
-        console.log(`[DB] Renamed malformed database file to ${backupPath}`);
+        console.log(`[DB] Preserved legacy database snapshot as ${backupPath}`);
       } catch (e) {
         try { fs.unlinkSync(DB_PATH); } catch (e2) {}
       }
