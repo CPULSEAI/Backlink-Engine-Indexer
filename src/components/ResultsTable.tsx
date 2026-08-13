@@ -22,6 +22,8 @@ import {
 import toast from 'react-hot-toast';
 import { LogItem, SubmissionRecord } from '../types';
 import { CompareSubmissionsModal } from './CompareSubmissionsModal';
+import { HistoricalRankChartWidget } from './HistoricalRankChartWidget';
+import { RankingHistoryChart } from './RankingHistoryChart';
 
 interface ResultsTableProps {
   logs: LogItem[];
@@ -292,6 +294,12 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Ranking History Chart Component (Recharts + Interactive Legend + High-Res PNG Exporter + 30-day Trends) */}
+      <RankingHistoryChart />
+
+      {/* Quick Keyword Rank Overview Widget */}
+      <HistoricalRankChartWidget logs={logs} history={history} />
 
       {/* Filter Toolbar Section */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-zinc-950/60 p-3 rounded-xl border border-zinc-800/80">

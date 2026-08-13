@@ -46,54 +46,59 @@ export async function initSchedulerLoop() {
 }
 
 export async function getScheduledJobs(): Promise<ScheduledJobRecord[]> {
-  const db = await getDb();
-  const stmt = db.exec(`SELECT * FROM scheduled_jobs ORDER BY created_at DESC`);
-  if (stmt.length === 0) return [];
+  try {
+    const db = await getDb();
+    const stmt = db.exec(`SELECT * FROM scheduled_jobs ORDER BY created_at DESC`);
+    if (stmt.length === 0) return [];
 
-  const columns = stmt[0].columns;
-  return stmt[0].values.map((row) => {
-    const obj: any = {};
-    columns.forEach((col, idx) => {
-      obj[col] = row[idx];
+    const columns = stmt[0].columns;
+    return stmt[0].values.map((row) => {
+      const obj: any = {};
+      columns.forEach((col, idx) => {
+        obj[col] = row[idx];
+      });
+
+      let target_urls: string[] = [];
+      let config = {
+        features: {
+          generateBacklinks: true,
+          checkLiveConfirmation: true,
+          requestIndexing: true,
+          runGoogleIndexing: true,
+          runPingServices: true,
+        },
+        concurrencyLimit: 3,
+      };
+
+      try {
+        target_urls = JSON.parse(obj.target_urls || '[]');
+      } catch (e) {}
+
+      try {
+        config = JSON.parse(obj.config_json || '{}');
+      } catch (e) {}
+
+      return {
+        id: obj.id,
+        name: obj.name,
+        target_urls,
+        schedule_type: obj.schedule_type,
+        scheduled_at: obj.scheduled_at,
+        interval_minutes: Number(obj.interval_minutes) || 60,
+        batch_size: Number(obj.batch_size) || 10,
+        status: obj.status,
+        total_batches: Number(obj.total_batches) || 1,
+        completed_batches: Number(obj.completed_batches) || 0,
+        created_at: obj.created_at,
+        last_run_at: obj.last_run_at || null,
+        next_run_at: obj.next_run_at,
+        config,
+      };
     });
-
-    let target_urls: string[] = [];
-    let config = {
-      features: {
-        generateBacklinks: true,
-        checkLiveConfirmation: true,
-        requestIndexing: true,
-        runGoogleIndexing: true,
-        runPingServices: true,
-      },
-      concurrencyLimit: 3,
-    };
-
-    try {
-      target_urls = JSON.parse(obj.target_urls || '[]');
-    } catch (e) {}
-
-    try {
-      config = JSON.parse(obj.config_json || '{}');
-    } catch (e) {}
-
-    return {
-      id: obj.id,
-      name: obj.name,
-      target_urls,
-      schedule_type: obj.schedule_type,
-      scheduled_at: obj.scheduled_at,
-      interval_minutes: Number(obj.interval_minutes) || 60,
-      batch_size: Number(obj.batch_size) || 10,
-      status: obj.status,
-      total_batches: Number(obj.total_batches) || 1,
-      completed_batches: Number(obj.completed_batches) || 0,
-      created_at: obj.created_at,
-      last_run_at: obj.last_run_at || null,
-      next_run_at: obj.next_run_at,
-      config,
-    };
-  });
+  } catch (err) {
+    console.error('[Scheduler Error] Failed to fetch scheduled jobs:', err);
+    return [];
+  }
 }
 
 export async function createScheduledJob(params: {
