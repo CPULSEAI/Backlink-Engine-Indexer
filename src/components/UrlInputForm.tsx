@@ -34,7 +34,7 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
   isProcessing,
   isAutonomousActive = false,
   autonomousAccumulatedCount = 0,
-  autonomousTargetGoal = 100,
+  autonomousTargetGoal = 100000,
   autonomousBatchCount = 1,
   onStartJob,
   onCancelJob,
@@ -57,7 +57,7 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
 
   // Autonomous Continuous Mode States
   const [isAutonomousEnabled, setIsAutonomousEnabled] = useState<boolean>(false);
-  const [targetGoalNumber, setTargetGoalNumber] = useState<number>(250);
+  const [targetGoalNumber, setTargetGoalNumber] = useState<number>(100000);
   const [targetGoalMetric, setTargetGoalMetric] = useState<'tasks' | 'confirmed'>('tasks');
   const [autoCycleUrls, setAutoCycleUrls] = useState<boolean>(true);
 
@@ -398,8 +398,8 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
                   <input
                     type="number"
                     min={10}
-                    max={10000}
-                    step={10}
+                    max={1000000}
+                    step={100}
                     value={targetGoalNumber}
                     onChange={(e) => setTargetGoalNumber(Math.max(1, Number(e.target.value)))}
                     disabled={isProcessing || isAutonomousActive}
@@ -408,7 +408,7 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
                 </div>
                 {/* Quick Presets */}
                 <div className="flex flex-wrap gap-1 mt-1.5">
-                  {[50, 100, 250, 500, 1000, 2500].map((num) => (
+                  {[100, 500, 1000, 5000, 25000, 100000].map((num) => (
                     <button
                       key={num}
                       type="button"
@@ -420,7 +420,7 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
                           : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-400'
                       }`}
                     >
-                      {num}
+                      {num.toLocaleString()}
                     </button>
                   ))}
                 </div>

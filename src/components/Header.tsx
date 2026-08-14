@@ -64,6 +64,16 @@ export const Header: React.FC<HeaderProps> = ({
               <span>{wsConnected ? 'Live WS Connected' : 'Connecting...'}</span>
             </div>
 
+            {/* ConversionWizard CRO Engine Button */}
+            <button
+              onClick={onOpenWizard}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-rose-500/20 hover:from-amber-500/30 hover:to-rose-500/30 text-amber-300 text-xs font-black border border-amber-500/40 transition-all shadow-md shadow-amber-500/10 cursor-pointer animate-pulse"
+              title="Launch ConversionWizard CRO Audit & AI Prompt Generator"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>Conversion Wizard</span>
+            </button>
+
             {/* SEO Domain Profiler Button */}
             <button
               onClick={onOpenDomainProfiler}

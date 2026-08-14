@@ -71,5 +71,80 @@ export interface AnalyticsData {
   }[];
 }
 
+export interface CroGapItem {
+  id: string;
+  category: 'TRUST' | 'FRICTION' | 'CLARITY';
+  title: string;
+  description: string;
+  severity: 'CRITICAL' | 'MODERATE' | 'MINOR';
+  recommendation: string;
+  visualIndicator?: string;
+}
+
+export interface ComparisonMatrixItem {
+  element: string;
+  yourWebsite: string;
+  competitor: string;
+  fixRecommendation: string;
+  status: 'WEAKER' | 'PARITY' | 'BETTER';
+}
+
+export interface RevenueProjection {
+  currentTraffic: number;
+  currentConversionRate: number;
+  targetConversionRate: number;
+  averageOrderValue: number;
+  currentMonthlyRevenue: number;
+  projectedMonthlyRevenue: number;
+  monthlyLift: number;
+  annualLift: number;
+  estimatedOrdersGain: number;
+}
+
+export interface CroTimelinePhase {
+  phase: string;
+  timeFrame: string;
+  title: string;
+  focus: string;
+  expectedOutcome: string;
+  tasks: string[];
+}
+
+export interface CroAiFixes {
+  headlines: string[];
+  ctaRecommendations: Array<{
+    text: string;
+    subtext?: string;
+    color: string;
+    placement: string;
+    codeSnippet: string;
+  }>;
+  codeFixes: string;
+  valuePropRewrite: string;
+  guaranteeCopy: string;
+}
+
+export interface CroAuditResult {
+  id: string;
+  timestamp: string;
+  userUrl: string;
+  userDomain: string;
+  competitorUrl: string;
+  competitorDomain: string;
+  businessType: string;
+  websiteTitle?: string;
+  loadSpeedMs: number;
+  mobileFriendlyScore: number;
+  overallScore: number;
+  trustGaps: CroGapItem[];
+  frictionGaps: CroGapItem[];
+  clarityGaps: CroGapItem[];
+  comparisonMatrix: ComparisonMatrixItem[];
+  revenueProjection: RevenueProjection;
+  timeline: CroTimelinePhase[];
+  masterPrompt: string;
+  aiGeneratedFixes: CroAiFixes;
+}
+
 
 

@@ -25,7 +25,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   status,
   isAutonomousActive = false,
   autonomousAccumulatedCount = 0,
-  autonomousTargetGoal = 100,
+  autonomousTargetGoal = 100000,
   autonomousMetric = 'tasks',
   autonomousBatchCount = 1,
   onStopAutonomous,

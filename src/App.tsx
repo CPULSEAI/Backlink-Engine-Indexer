@@ -18,6 +18,8 @@ import { HelpManualModal } from './components/HelpManualModal';
 import { OnboardingWizardModal } from './components/OnboardingWizardModal';
 import { SeoFunnelTimeline } from './components/SeoFunnelTimeline';
 import { SmartBatchScheduler } from './components/SmartBatchScheduler';
+import { ConversionWizardModal } from './components/ConversionWizardModal';
+import { ConversionWizardBanner } from './components/ConversionWizardBanner';
 import { DirectoryEntry, LogItem, SubmissionRecord, SystemSettings, AnalyticsData, AutonomousConfig } from './types';
 
 export default function App() {
@@ -43,7 +45,7 @@ export default function App() {
   const [isAutonomousActive, setIsAutonomousActive] = useState(false);
   const [autonomousAccumulatedCount, setAutonomousAccumulatedCount] = useState(0);
   const [autonomousBatchCount, setAutonomousBatchCount] = useState(1);
-  const [autonomousTargetGoal, setAutonomousTargetGoal] = useState(100);
+  const [autonomousTargetGoal, setAutonomousTargetGoal] = useState(100000);
   const [autonomousMetric, setAutonomousMetric] = useState<'tasks' | 'confirmed'>('tasks');
 
   const lastJobConfigRef = useRef<any>(null);
@@ -56,7 +58,7 @@ export default function App() {
   }>({
     active: false,
     accumulated: 0,
-    target: 100,
+    target: 100000,
     metric: 'tasks',
     batchCount: 1,
   });
@@ -71,6 +73,8 @@ export default function App() {
   const [isDomainProfilerOpen, setIsDomainProfilerOpen] = useState(false);
   const [isHelpManualOpen, setIsHelpManualOpen] = useState(false);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [isConversionWizardOpen, setIsConversionWizardOpen] = useState(false);
+  const [wizardInitialUrl, setWizardInitialUrl] = useState('');
   const [isSchedulerOpen, setIsSchedulerOpen] = useState(false);
   const [profilerDomain, setProfilerDomain] = useState('');
   const [graderUrl, setGraderUrl] = useState('');
@@ -470,13 +474,24 @@ export default function App() {
         onOpenGeoBlueprint={() => setIsGeoBlueprintOpen(true)}
         onOpenDomainProfiler={() => handleOpenDomainProfiler()}
         onOpenHelpManual={() => setIsHelpManualOpen(true)}
-        onOpenWizard={() => setIsWizardOpen(true)}
+        onOpenWizard={() => {
+          setWizardInitialUrl('');
+          setIsConversionWizardOpen(true);
+        }}
         onOpenScheduler={() => setIsSchedulerOpen(true)}
         totalDirectoriesCount={directories.length}
       />
 
       {/* Main Dashboard Body */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        {/* ConversionWizard CRO Engine & AI Prompt Generator Banner */}
+        <ConversionWizardBanner
+          onOpenWizardWithUrl={(url) => {
+            setWizardInitialUrl(url || '');
+            setIsConversionWizardOpen(true);
+          }}
+        />
+
         {/* Module A & Configuration Form */}
         <UrlInputForm
           directories={directories}
@@ -634,6 +649,12 @@ export default function App() {
           </div>
         </div>
       )}
+      {/* ConversionWizard CRO Audit & AI Prompt Generator Modal */}
+      <ConversionWizardModal
+        isOpen={isConversionWizardOpen}
+        onClose={() => setIsConversionWizardOpen(false)}
+        initialUrl={wizardInitialUrl}
+      />
     </div>
   );
 }

@@ -18,6 +18,7 @@ import {
   deleteScheduledJob,
   runScheduledJobNow,
 } from './server/scheduler.js';
+import { runConversionAudit } from './server/conversionWizard.js';
 
 async function startServer() {
   const app = express();
@@ -1581,6 +1582,30 @@ Respond ONLY with a valid JSON object strictly matching this schema:
       res.json({ success: true, message: `Scheduled job ${id} deleted.` });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
+    }
+  });
+
+  // --- CONVERSION WIZARD CRO AUDIT & PROMPT GENERATOR API ---
+  app.post('/api/cro/audit', async (req, res) => {
+    try {
+      const { userUrl, businessType, competitorUrl, traffic, conversionRate, averageOrderValue } = req.body;
+      if (!userUrl || typeof userUrl !== 'string' || !userUrl.trim()) {
+        return res.status(400).json({ error: 'Please enter a valid website link.' });
+      }
+
+      const result = await runConversionAudit({
+        userUrl: userUrl.trim(),
+        businessType: businessType || 'E-commerce products',
+        competitorUrl: competitorUrl ? String(competitorUrl).trim() : undefined,
+        traffic: traffic ? Number(traffic) : undefined,
+        conversionRate: conversionRate ? Number(conversionRate) : undefined,
+        averageOrderValue: averageOrderValue ? Number(averageOrderValue) : undefined,
+      });
+
+      res.json({ success: true, audit: result });
+    } catch (err: any) {
+      console.error('[API Error] /api/cro/audit:', err);
+      res.status(500).json({ error: err.message || 'Failed to complete ConversionWizard audit.' });
     }
   });
 
