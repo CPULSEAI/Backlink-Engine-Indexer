@@ -20,8 +20,11 @@ import {
   ChevronRight,
   ChevronDown,
   Layers,
-  PlayCircle
+  PlayCircle,
+  Download,
+  Check
 } from 'lucide-react';
+import { generateUserManualPdf } from '../utils/generateManualPdf';
 
 interface HelpManualModalProps {
   isOpen: boolean;
@@ -57,6 +60,32 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
 
   const [searchQuery, setSearchQuery] = useState('');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [pdfDownloaded, setPdfDownloaded] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    try {
+      setIsGeneratingPdf(true);
+      // Brief timeout to yield thread and render state
+      await new Promise(r => setTimeout(r, 100));
+      const doc = generateUserManualPdf({
+        version: 'v2.4',
+        generatedDate: new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        }),
+        author: 'CareerPulse AI Systems & SEO Engineering',
+      });
+      doc.save('SEO_GEO_Indexing_Engine_User_Manual_v2.4.pdf');
+      setPdfDownloaded(true);
+      setTimeout(() => setPdfDownloaded(false), 3000);
+    } catch (err) {
+      console.error('Failed to generate User Manual PDF:', err);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -158,11 +187,35 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
 
           <div className="flex items-center space-x-3">
             <button
+              onClick={handleDownloadPdf}
+              disabled={isGeneratingPdf}
+              className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md shadow-indigo-600/20 transition-all cursor-pointer disabled:opacity-50"
+              title="Download full printable PDF manual with 22 troubleshooting diagnostics & architecture guide"
+            >
+              {pdfDownloaded ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-300" />
+                  <span>PDF Downloaded</span>
+                </>
+              ) : isGeneratingPdf ? (
+                <>
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Generating PDF...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download PDF Manual</span>
+                </>
+              )}
+            </button>
+
+            <button
               onClick={() => {
                 onClose();
                 onOpenWizard();
               }}
-              className="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all"
+              className="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>Launch Guided Onboarding Wizard</span>
@@ -170,7 +223,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
 
             <button
               onClick={onClose}
-              className="p-2 text-zinc-400 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-xl transition-all"
+              className="p-2 text-zinc-400 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-xl transition-all cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -206,6 +259,15 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
             })}
 
             <div className="pt-4 border-t border-zinc-800/80 mt-auto space-y-2">
+              <button
+                onClick={handleDownloadPdf}
+                disabled={isGeneratingPdf}
+                className="w-full text-center py-2 px-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+              >
+                <Download className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Export PDF Doc</span>
+              </button>
+
               <div className="p-3 bg-zinc-900/80 border border-zinc-800 rounded-xl space-y-2">
                 <p className="text-[11px] text-zinc-300 font-sans font-medium">Need immediate onboarding?</p>
                 <button
@@ -213,7 +275,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
                     onClose();
                     onOpenWizard();
                   }}
-                  className="w-full text-center py-1.5 bg-indigo-950 hover:bg-indigo-900 text-indigo-300 border border-indigo-700/50 rounded-lg text-xs font-bold transition-all"
+                  className="w-full text-center py-1.5 bg-indigo-950 hover:bg-indigo-900 text-indigo-300 border border-indigo-700/50 rounded-lg text-xs font-bold transition-all cursor-pointer"
                 >
                   Restart Tour
                 </button>

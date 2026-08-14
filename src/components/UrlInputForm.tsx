@@ -159,76 +159,80 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
   };
 
   return (
-    <div className="bg-zinc-900/60 backdrop-blur-md border border-zinc-800/80 rounded-2xl p-5 sm:p-6 shadow-2xl mb-8">
+    <div className="bg-white border-4 border-black p-6 sm:p-8 shadow-[6px_6px_0_#000] space-y-6 mb-8">
       <form onSubmit={handleStart} className="space-y-6">
         {/* Top Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-zinc-800/80">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b-4 border-black">
           <div>
-            <h2 className="text-base font-bold text-zinc-100 flex items-center gap-2">
-              <Zap className="w-4 h-4 text-cyan-400" />
-              <span>Bulk Target URLs &amp; Pipeline Configuration</span>
+            <div className="flex items-center space-x-2">
+              <span className="px-2 py-0.5 bg-black text-white font-mono-brutal text-xs font-bold uppercase">
+                [01] BATCH HANDLER
+              </span>
+              <span className="font-mono-brutal text-xs text-[#ff4d00] font-bold">
+                // TARGET_BUFFER_HEX
+              </span>
+            </div>
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-black uppercase tracking-tight mt-1">
+              BULK TARGET URLS &amp; PIPELINE
             </h2>
-            <p className="text-xs text-zinc-400 mt-0.5">
-              Input website URLs to generate dynamic profile backlinks, verify live rendering, and trigger ping/indexing.
-            </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center flex-wrap gap-2">
             <button
               type="button"
               onClick={() => setShowSeoScorecard(!showSeoScorecard)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all shadow-sm ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono-brutal font-bold uppercase border-2 border-black transition-all shadow-[2px_2px_0_#000] ${
                 showSeoScorecard
-                  ? 'bg-indigo-600 text-white border-indigo-500'
-                  : 'bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
+                  ? 'bg-black text-white'
+                  : 'bg-white hover:bg-[#f2efeb] text-black'
               }`}
-              title="Inspect technical SEO elements (canonicals, hreflang, meta, indexability) before submitting"
+              title="Inspect technical SEO elements before submitting"
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
-              <span>{showSeoScorecard ? 'Hide SEO Inspector' : 'SEO Readiness Scorecard'}</span>
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>{showSeoScorecard ? 'HIDE_SCORECARD' : 'SEO_SCORECARD'}</span>
             </button>
 
             <button
               type="button"
               onClick={() => setIsBatcherModalOpen(true)}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 text-xs font-bold rounded-xl border border-cyan-500/30 transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#f2efeb] hover:bg-zinc-200 text-black text-xs font-mono-brutal font-bold uppercase border-2 border-black shadow-[2px_2px_0_#000] transition-all"
               title="Launch Smart URL Batcher & Regex Validator"
             >
-              <Zap className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Smart URL Batcher</span>
+              <Zap className="w-3.5 h-3.5 text-[#ff4d00]" />
+              <span>SMART_BATCHER</span>
             </button>
 
             <button
               type="button"
               onClick={handleCleanInput}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-200 text-xs font-medium rounded-xl border border-zinc-700/60 transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white hover:bg-[#f2efeb] text-black text-xs font-mono-brutal font-bold uppercase border-2 border-black shadow-[2px_2px_0_#000] transition-all"
               title="Strip whitespace, remove duplicates, format protocol"
             >
-              <RefreshCw className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Quick Clean ({uniqueUrls.length})</span>
+              <RefreshCw className="w-3.5 h-3.5 text-black" />
+              <span>CLEAN ({uniqueUrls.length})</span>
             </button>
           </div>
         </div>
 
         {/* Textarea Input */}
         <div>
-          <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-2">
-            Target Websites List <span className="text-zinc-500 font-normal">(One URL per line)</span>
+          <label className="block text-xs font-mono-brutal font-bold text-black uppercase tracking-wider mb-2">
+            TARGET_WEBSITES_LIST <span className="text-zinc-600 font-normal">[ONE_PER_LINE]</span>
           </label>
           <textarea
-            rows={5}
+            rows={4}
             value={rawInput}
             onChange={(e) => setRawInput(e.target.value)}
             disabled={isProcessing}
             placeholder="https://example.com&#10;https://mybrand.org&#10;https://techstartup.io"
-            className="w-full bg-zinc-950/80 border border-zinc-800/90 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 font-mono transition-all disabled:opacity-50"
+            className="w-full bg-white border-4 border-black px-4 py-3 text-xs sm:text-sm text-black placeholder-zinc-400 focus:outline-none focus:border-black font-mono-brutal font-bold shadow-[4px_4px_0_#000] transition-all disabled:opacity-50"
           />
-          <div className="flex items-center justify-between mt-2 text-xs text-zinc-400">
-            <span>
-              Total URLs: <strong className="text-indigo-400">{uniqueUrls.length}</strong> unique lines
+          <div className="flex items-center justify-between mt-2 text-xs font-mono-brutal font-bold">
+            <span className="text-black">
+              PARSED_TARGETS: <strong className="text-[#ff4d00]">{uniqueUrls.length}</strong> UNIQUE
             </span>
             {validationMsg && (
-              <span className="text-emerald-400 font-medium flex items-center gap-1">
+              <span className="text-emerald-700 font-bold flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 {validationMsg}
               </span>
@@ -238,7 +242,7 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
 
         {/* Technical SEO Readiness Pre-flight Scorecard */}
         {showSeoScorecard && (
-          <div className="mt-4">
+          <div className="border-4 border-black p-4 bg-[#f2efeb] shadow-[4px_4px_0_#000]">
             <SeoReadinessScorecard
               targetUrl={uniqueUrls[0] || 'https://example.com'}
               onClose={() => setShowSeoScorecard(false)}
@@ -247,63 +251,63 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
         )}
 
         {/* Pipeline Modules Toggles */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-zinc-950/50 p-4 rounded-xl border border-zinc-800/80">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-[#f2efeb] p-4 border-4 border-black shadow-[4px_4px_0_#000]">
           {/* Module A/B: Generate Backlinks */}
-          <div className="flex items-start gap-3 p-2">
+          <div className="flex items-start gap-3 p-2 bg-white border-2 border-black shadow-[2px_2px_0_#000]">
             <input
               type="checkbox"
               id="feature_backlinks"
               checked={features.generateBacklinks}
               onChange={(e) => setFeatures({ ...features, generateBacklinks: e.target.checked })}
               disabled={isProcessing}
-              className="mt-1 w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-indigo-500 focus:ring-indigo-500/50"
+              className="mt-1 w-4 h-4 rounded-none border-2 border-black accent-[#ff4d00]"
             />
             <div>
-              <label htmlFor="feature_backlinks" className="text-xs font-bold text-zinc-200 cursor-pointer block">
-                Module B: Automated Backlink Generator
+              <label htmlFor="feature_backlinks" className="text-xs font-mono-brutal font-bold text-black cursor-pointer block uppercase">
+                [MOD_B] BACKLINK GENERATOR
               </label>
-              <p className="text-[11px] text-zinc-400 leading-snug mt-0.5">
+              <p className="text-[11px] text-zinc-700 font-sans leading-snug mt-0.5">
                 Submit to 55+ high-authority WHOIS, SEO analysis &amp; directory platforms.
               </p>
             </div>
           </div>
 
           {/* Module C: Live Confirmation */}
-          <div className="flex items-start gap-3 p-2">
+          <div className="flex items-start gap-3 p-2 bg-white border-2 border-black shadow-[2px_2px_0_#000]">
             <input
               type="checkbox"
               id="feature_confirm"
               checked={features.checkLiveConfirmation}
               onChange={(e) => setFeatures({ ...features, checkLiveConfirmation: e.target.checked })}
               disabled={isProcessing}
-              className="mt-1 w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-indigo-500 focus:ring-indigo-500/50"
+              className="mt-1 w-4 h-4 rounded-none border-2 border-black accent-[#ff4d00]"
             />
             <div>
-              <label htmlFor="feature_confirm" className="text-xs font-bold text-zinc-200 cursor-pointer block">
-                Module C: Live Confirmation Engine
+              <label htmlFor="feature_confirm" className="text-xs font-mono-brutal font-bold text-black cursor-pointer block uppercase">
+                [MOD_C] LIVE CONFIRMATION
               </label>
-              <p className="text-[11px] text-zinc-400 leading-snug mt-0.5">
+              <p className="text-[11px] text-zinc-700 font-sans leading-snug mt-0.5">
                 Perform follow-up HTTP GET to verify status code 200 &amp; page creation.
               </p>
             </div>
           </div>
 
           {/* Module D: Indexing Request */}
-          <div className="flex items-start gap-3 p-2">
+          <div className="flex items-start gap-3 p-2 bg-white border-2 border-black shadow-[2px_2px_0_#000]">
             <input
               type="checkbox"
               id="feature_indexing"
               checked={features.requestIndexing}
               onChange={(e) => setFeatures({ ...features, requestIndexing: e.target.checked })}
               disabled={isProcessing}
-              className="mt-1 w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-indigo-500 focus:ring-indigo-500/50"
+              className="mt-1 w-4 h-4 rounded-none border-2 border-black accent-[#ff4d00]"
             />
             <div>
-              <label htmlFor="feature_indexing" className="text-xs font-bold text-zinc-200 cursor-pointer block">
-                Module D: Indexing Request Engine
+              <label htmlFor="feature_indexing" className="text-xs font-mono-brutal font-bold text-black cursor-pointer block uppercase">
+                [MOD_D] GOOGLE &amp; INDEXNOW
               </label>
-              <p className="text-[11px] text-zinc-400 leading-snug mt-0.5">
-                Submit to Google Indexing API &amp; ping XML-RPC services (Ping-O-Matic, FeedBurner).
+              <p className="text-[11px] text-zinc-700 font-sans leading-snug mt-0.5">
+                Submit to Google Indexing API &amp; ping XML-RPC services.
               </p>
             </div>
           </div>
@@ -311,27 +315,27 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
 
         {/* Directory Categories & Concurrency Slider */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-2">
-              Directory Network Category
+          <div className="border-4 border-black p-4 bg-white shadow-[4px_4px_0_#000]">
+            <label className="block text-xs font-mono-brutal font-bold text-black uppercase tracking-wider mb-2">
+              DIRECTORY_NETWORK_SCOPE
             </label>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               disabled={isProcessing}
-              className="w-full bg-zinc-950/80 border border-zinc-800/90 rounded-xl px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[#f2efeb] border-2 border-black px-3 py-2 text-xs font-mono-brutal font-bold text-black focus:outline-none shadow-[2px_2px_0_#000]"
             >
-              <option value="ALL">All Networks (55+ High-DA Directories)</option>
-              <option value="WHOIS">WHOIS Lookup Platforms Only</option>
-              <option value="SEO">SEO Audit &amp; Performance Analyzers</option>
-              <option value="SITE">Site Traffic &amp; Valuation Stats</option>
-              <option value="PING">Ping Platforms &amp; Indexers</option>
+              <option value="ALL">ALL_NETWORKS (55+ High-DA Directories)</option>
+              <option value="WHOIS">WHOIS_PLATFORMS_ONLY</option>
+              <option value="SEO">SEO_AUDIT_ANALYZERS</option>
+              <option value="SITE">SITE_TRAFFIC_VALUATION</option>
+              <option value="PING">PING_SERP_INDEXERS</option>
             </select>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-2">
-              Async Concurrency Threads: <span className="text-cyan-400 font-bold">{concurrency} Worker Threads</span>
+          <div className="border-4 border-black p-4 bg-white shadow-[4px_4px_0_#000]">
+            <label className="block text-xs font-mono-brutal font-bold text-black uppercase tracking-wider mb-2">
+              THREAD_CONCURRENCY: <span className="text-[#ff4d00]">{concurrency} WORKERS</span>
             </label>
             <input
               type="range"
@@ -340,48 +344,42 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
               value={concurrency}
               onChange={(e) => setConcurrency(Number(e.target.value))}
               disabled={isProcessing}
-              className="w-full accent-indigo-500 bg-zinc-950 rounded-lg cursor-pointer h-2 mt-2"
+              className="w-full accent-[#ff4d00] bg-black h-3 border border-black cursor-pointer mt-1"
             />
-            <div className="flex justify-between text-[10px] text-zinc-500 mt-1">
-              <span>1 Thread (Safe / Delays)</span>
-              <span>5 Threads (Recommended)</span>
-              <span>10 Threads (High Speed)</span>
+            <div className="flex justify-between text-[10px] font-mono-brutal font-bold text-zinc-600 mt-1">
+              <span>01_SAFE</span>
+              <span>05_OPTIMAL</span>
+              <span>10_TURBO</span>
             </div>
           </div>
         </div>
 
         {/* Autonomous Continuous Submission Mode Panel */}
-        <div className="bg-gradient-to-r from-indigo-950/40 via-purple-950/30 to-zinc-950/60 border border-indigo-500/30 rounded-xl p-4 shadow-lg relative overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-indigo-500/20">
+        <div className="bg-[#f2efeb] border-4 border-black p-4 sm:p-5 shadow-[4px_4px_0_#000]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b-2 border-black">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 bg-indigo-500/20 border border-indigo-500/40 rounded-lg text-indigo-400">
-                <Bot className="w-5 h-5 animate-pulse" />
+              <div className="p-2 bg-black text-[#ff4d00] border-2 border-black">
+                <Bot className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-xs font-bold text-indigo-200 flex items-center gap-2 uppercase tracking-wide">
-                  Autonomous Continuous Submission Engine
-                  <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30 font-mono">
-                    Auto-Loop
-                  </span>
+                <h3 className="text-xs font-mono-brutal font-bold text-black uppercase tracking-wider">
+                  AUTONOMOUS_CONTINUOUS_LOOP
                 </h3>
-                <p className="text-[11px] text-zinc-400 mt-0.5">
-                  Continuously submits and cycles batches until real-time progress reaches your target goal.
+                <p className="text-[11px] text-zinc-700 font-sans mt-0.5">
+                  Continuously submit and cycle URL passes until reaching your target indexation goal.
                 </p>
               </div>
             </div>
 
-            <label className="relative inline-flex items-center cursor-pointer shrink-0">
+            <label className="flex items-center gap-2 cursor-pointer shrink-0 font-mono-brutal text-xs font-bold uppercase">
               <input
                 type="checkbox"
                 checked={isAutonomousEnabled}
                 onChange={(e) => setIsAutonomousEnabled(e.target.checked)}
                 disabled={isProcessing || isAutonomousActive}
-                className="sr-only peer"
+                className="w-4 h-4 accent-[#ff4d00] border-2 border-black"
               />
-              <div className="w-11 h-6 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-              <span className="ml-2 text-xs font-bold text-zinc-200">
-                {isAutonomousEnabled ? 'Autonomous ON' : 'Enable Autonomous Mode'}
-              </span>
+              <span>{isAutonomousEnabled ? '[ AUTONOMOUS: ACTIVE ]' : '[ ENABLE AUTO-LOOP ]'}</span>
             </label>
           </div>
 
@@ -390,23 +388,20 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
             <div className="mt-3 pt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Target Milestone Number */}
               <div>
-                <label className="block text-[11px] font-bold text-zinc-300 uppercase tracking-wider mb-1 flex items-center gap-1">
-                  <Target className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>Target Milestone Goal:</span>
+                <label className="block text-[11px] font-mono-brutal font-bold text-black uppercase tracking-wider mb-1 flex items-center gap-1">
+                  <Target className="w-3.5 h-3.5 text-[#ff4d00]" />
+                  <span>TARGET_GOAL_METRIC:</span>
                 </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    min={10}
-                    max={1000000}
-                    step={100}
-                    value={targetGoalNumber}
-                    onChange={(e) => setTargetGoalNumber(Math.max(1, Number(e.target.value)))}
-                    disabled={isProcessing || isAutonomousActive}
-                    className="w-full bg-zinc-950 border border-indigo-500/40 rounded-lg px-3 py-1.5 text-xs text-indigo-200 font-mono font-bold focus:outline-none focus:border-indigo-400"
-                  />
-                </div>
-                {/* Quick Presets */}
+                <input
+                  type="number"
+                  min={10}
+                  max={1000000}
+                  step={100}
+                  value={targetGoalNumber}
+                  onChange={(e) => setTargetGoalNumber(Math.max(1, Number(e.target.value)))}
+                  disabled={isProcessing || isAutonomousActive}
+                  className="w-full bg-white border-2 border-black px-3 py-1.5 text-xs text-black font-mono-brutal font-bold focus:outline-none shadow-[2px_2px_0_#000]"
+                />
                 <div className="flex flex-wrap gap-1 mt-1.5">
                   {[100, 500, 1000, 5000, 25000, 100000].map((num) => (
                     <button
@@ -414,10 +409,10 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
                       type="button"
                       onClick={() => setTargetGoalNumber(num)}
                       disabled={isProcessing || isAutonomousActive}
-                      className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-all ${
+                      className={`px-2 py-0.5 text-[10px] font-mono-brutal font-bold border border-black uppercase transition-all ${
                         targetGoalNumber === num
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-400'
+                          ? 'bg-black text-white'
+                          : 'bg-white hover:bg-zinc-200 text-black'
                       }`}
                     >
                       {num.toLocaleString()}
@@ -428,29 +423,29 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
 
               {/* Target Goal Metric */}
               <div>
-                <label className="block text-[11px] font-bold text-zinc-300 uppercase tracking-wider mb-1">
-                  Progress Metric to Track:
+                <label className="block text-[11px] font-mono-brutal font-bold text-black uppercase tracking-wider mb-1">
+                  METRIC_TARGET:
                 </label>
                 <select
                   value={targetGoalMetric}
                   onChange={(e) => setTargetGoalMetric(e.target.value as 'tasks' | 'confirmed')}
                   disabled={isProcessing || isAutonomousActive}
-                  className="w-full bg-zinc-950 border border-indigo-500/40 rounded-lg px-3 py-1.5 text-xs text-indigo-200 focus:outline-none focus:border-indigo-400"
+                  className="w-full bg-white border-2 border-black px-3 py-1.5 text-xs font-mono-brutal font-bold text-black focus:outline-none shadow-[2px_2px_0_#000]"
                 >
-                  <option value="tasks">Total Tasks Completed (Every submission)</option>
-                  <option value="confirmed">Live Confirmed Backlinks Only (Verified 200 OK)</option>
+                  <option value="tasks">TOTAL TASKS COMPLETED</option>
+                  <option value="confirmed">LIVE CONFIRMED (200 OK)</option>
                 </select>
-                <p className="text-[10px] text-zinc-500 mt-1">
-                  App auto-loops submissions until this exact number is reached.
+                <p className="text-[10px] font-mono-brutal text-zinc-600 mt-1">
+                  Auto-loops until milestone threshold is hit.
                 </p>
               </div>
 
               {/* Auto Cycle URLs & Status */}
               <div className="flex flex-col justify-between">
                 <div>
-                  <label className="block text-[11px] font-bold text-zinc-300 uppercase tracking-wider mb-1 flex items-center gap-1">
-                    <Repeat className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>Auto-Cycle Options:</span>
+                  <label className="block text-[11px] font-mono-brutal font-bold text-black uppercase tracking-wider mb-1 flex items-center gap-1">
+                    <Repeat className="w-3.5 h-3.5 text-black" />
+                    <span>ROTATION_RULE:</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer mt-1">
                     <input
@@ -458,23 +453,23 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
                       checked={autoCycleUrls}
                       onChange={(e) => setAutoCycleUrls(e.target.checked)}
                       disabled={isProcessing || isAutonomousActive}
-                      className="w-3.5 h-3.5 rounded border-zinc-700 bg-zinc-950 text-indigo-500"
+                      className="w-3.5 h-3.5 border-2 border-black accent-[#ff4d00]"
                     />
-                    <span className="text-xs text-zinc-300">Continuous URL rotation across batch passes</span>
+                    <span className="text-xs font-mono-brutal font-bold text-black">CONTINUOUS URL ROTATION</span>
                   </label>
                 </div>
 
                 {isAutonomousActive && (
-                  <div className="mt-2 p-2 bg-indigo-500/10 border border-indigo-500/30 rounded-lg text-xs text-indigo-300 font-mono flex items-center justify-between">
+                  <div className="mt-2 p-2 bg-white border-2 border-black text-xs font-mono-brutal font-bold text-black flex items-center justify-between shadow-[2px_2px_0_#000]">
                     <span>
-                      Pass #{autonomousBatchCount}: {autonomousAccumulatedCount} / {autonomousTargetGoal} ({Math.round(Math.min(100, (autonomousAccumulatedCount / Math.max(1, autonomousTargetGoal)) * 100))}%)
+                      PASS #{autonomousBatchCount}: {autonomousAccumulatedCount}/{autonomousTargetGoal}
                     </span>
                     <button
                       type="button"
                       onClick={onStopAutonomous}
-                      className="ml-2 text-rose-400 hover:text-rose-300 font-bold underline text-[10px]"
+                      className="ml-2 text-[#ff4d00] hover:underline uppercase text-[10px]"
                     >
-                      Stop Auto-Loop
+                      STOP
                     </button>
                   </div>
                 )}
@@ -484,20 +479,20 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
         </div>
 
         {/* Action Button Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
-            <Globe className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Selected Targets: <strong className="text-cyan-300">{uniqueUrls.length} URLs</strong></span>
+        <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+          <div className="flex items-center gap-2 text-xs font-mono-brutal font-bold text-black">
+            <Globe className="w-4 h-4 text-black" />
+            <span>SELECTED_BUFFER: <strong className="text-[#ff4d00]">{uniqueUrls.length} TARGETS</strong></span>
           </div>
 
           {isAutonomousActive && onStopAutonomous && (
             <button
               type="button"
               onClick={onStopAutonomous}
-              className="px-4 py-2.5 bg-rose-950/80 hover:bg-rose-900/90 text-rose-200 text-xs font-bold rounded-xl border border-rose-800 transition-all flex items-center gap-2"
+              className="px-5 py-3 bg-black hover:bg-zinc-800 text-white font-mono-brutal font-bold text-xs uppercase border-4 border-black shadow-[4px_4px_0_#ff4d00] transition-all flex items-center gap-2 cursor-pointer"
             >
-              <StopCircle className="w-4 h-4 text-rose-400" />
-              <span>Disengage Autonomous Mode</span>
+              <StopCircle className="w-4 h-4 text-[#ff4d00]" />
+              <span>DISENGAGE_AUTONOMOUS</span>
             </button>
           )}
 
@@ -506,29 +501,25 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
               <button
                 type="button"
                 onClick={onCancelJob}
-                className="px-6 py-2.5 bg-rose-600/90 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-rose-600/20 flex items-center gap-2"
+                className="px-6 py-3 bg-black hover:bg-zinc-800 text-[#ff4d00] font-mono-brutal font-bold text-xs uppercase border-4 border-black shadow-[4px_4px_0_#000] flex items-center gap-2 cursor-pointer"
               >
-                <AlertCircle className="w-4 h-4 animate-bounce" />
-                <span>Cancel Active Job</span>
+                <AlertCircle className="w-4 h-4 text-[#ff4d00]" />
+                <span>CANCEL_ACTIVE_JOB</span>
               </button>
             ) : (
               <button
                 type="submit"
-                className={`px-8 py-3 text-white text-sm font-bold rounded-xl transition-all shadow-lg flex items-center gap-2 transform active:scale-95 ${
-                  isAutonomousEnabled
-                    ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 shadow-purple-600/30 ring-2 ring-purple-500/50'
-                    : 'bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 shadow-indigo-600/25'
-                }`}
+                className="px-8 py-3.5 bg-[#ff4d00] hover:bg-[#ff5c14] text-black font-mono-brutal font-bold text-sm uppercase border-4 border-black shadow-[4px_4px_0_#000] flex items-center gap-2 transition-all cursor-pointer active:translate-x-1 active:translate-y-1 active:shadow-[1px_1px_0_#000]"
               >
                 {isAutonomousEnabled ? (
                   <>
-                    <Bot className="w-4 h-4 text-cyan-300 animate-bounce" />
-                    <span>Launch Autonomous Loop (Target: {targetGoalNumber})</span>
+                    <Bot className="w-4 h-4 text-black" />
+                    <span>LAUNCH_AUTONOMOUS_LOOP (GOAL: {targetGoalNumber})</span>
                   </>
                 ) : (
                   <>
-                    <Play className="w-4 h-4 fill-white" />
-                    <span>Launch Multi-Site Backlink &amp; Indexing Job</span>
+                    <Play className="w-4 h-4 fill-black text-black" />
+                    <span>RUN_BATCH_INDEX_JOB</span>
                   </>
                 )}
               </button>

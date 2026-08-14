@@ -285,19 +285,19 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
     if (active && payload && payload.length) {
       const data = payload[0].payload as ClusterData;
       return (
-        <div className="bg-zinc-950 border border-zinc-800 p-3 rounded-xl shadow-xl text-xs font-mono space-y-1">
-          <p className="font-bold text-indigo-300 uppercase">{data.cluster}</p>
-          <div className="text-emerald-400 font-bold">{userDomain}: {data.userDomainScore}% Visibility</div>
+        <div className="bg-white border-2 border-black p-3 shadow-[3px_3px_0_#000] text-xs font-mono-brutal space-y-1 text-black">
+          <p className="font-bold uppercase text-[#ff4d00]">{data.cluster}</p>
+          <div className="text-black font-bold">{userDomain}: {data.userDomainScore}% Visibility</div>
           {benchmarkMode === 'comparative' ? (
             <>
-              <div className="text-cyan-400">{compA}: {data.competitorAScore}% Visibility</div>
-              <div className="text-amber-400">{compB}: {data.competitorBScore}% Visibility</div>
+              <div className="text-zinc-700">{compA}: {data.competitorAScore}% Visibility</div>
+              <div className="text-zinc-700">{compB}: {data.competitorBScore}% Visibility</div>
             </>
           ) : (
-            <div className="text-indigo-400">Industry Avg Benchmark: {data.industryAvgScore}% Visibility</div>
+            <div className="text-zinc-700">Industry Avg Benchmark: {data.industryAvgScore}% Visibility</div>
           )}
-          <div className="text-zinc-400 text-[10px] mt-1 pt-1 border-t border-zinc-800">
-            Intent Type: <span className="text-zinc-200">{data.intent}</span> | Gap: <span className="text-rose-400 font-bold">{data.gapLevel}</span>
+          <div className="text-zinc-500 text-[10px] mt-1 pt-1 border-t border-black">
+            Intent Type: <span className="text-black font-bold">{data.intent}</span> | Gap: <span className="text-[#ff4d00] font-bold">{data.gapLevel}</span>
           </div>
         </div>
       );
@@ -306,144 +306,140 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
   };
 
   return (
-    <div className="bg-zinc-900/60 backdrop-blur-md border border-zinc-800/80 rounded-2xl p-5 sm:p-6 shadow-2xl space-y-5">
+    <div className="bg-white border-4 border-black p-5 sm:p-6 shadow-[4px_4px_0_#000] space-y-5 text-black">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-zinc-800/80">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b-2 border-black">
         <div>
           <div className="flex items-center gap-2">
-            <Target className="w-4 h-4 text-indigo-400 animate-pulse" />
-            <h2 className="text-base font-bold text-zinc-100">
-              Keyword Gap Radar (SERP &amp; GEO Overlap)
+            <Target className="w-4 h-4 text-[#ff4d00]" />
+            <h2 className="font-mono-brutal text-sm font-bold text-black uppercase">
+              KEYWORD GAP RADAR (SERP &amp; GEO OVERLAP)
             </h2>
-            <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-bold">
-              Competitive Intelligence
+            <span className="text-[10px] uppercase font-mono-brutal px-2 py-0.5 bg-[#ff4d00] text-black border border-black font-bold shadow-[1px_1px_0_#000]">
+              COMPETITIVE_INTEL
             </span>
           </div>
-          <p className="text-xs text-zinc-400 mt-0.5">
+          <p className="text-xs text-zinc-700 font-mono-brutal mt-0.5">
             Visualize keyword cluster overlap against top competitors to spot critical AI visibility and ranking gaps.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 font-mono-brutal text-xs">
           {/* Competitive Benchmarking Mode Toggle */}
-          <div className="flex items-center bg-zinc-950 p-1 rounded-xl border border-zinc-800 font-mono text-xs shadow-inner">
+          <div className="flex items-center bg-[#f2efeb] p-1 border-2 border-black shadow-[2px_2px_0_#000]">
             <button
               type="button"
               onClick={() => setBenchmarkMode('solo')}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all text-xs font-bold ${
+              className={`flex items-center gap-1.5 px-3 py-1 uppercase text-xs font-bold transition-all ${
                 benchmarkMode === 'solo'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-black text-white shadow-[1px_1px_0_#000]'
+                  : 'text-black hover:bg-white'
               }`}
               title="Focus purely on your domain metrics & baseline benchmark gap"
             >
               <BarChart2 className="w-3.5 h-3.5" />
-              <span>My Domain Focus</span>
+              <span>MY DOMAIN</span>
             </button>
             <button
               type="button"
               onClick={() => setBenchmarkMode('comparative')}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all text-xs font-bold ${
+              className={`flex items-center gap-1.5 px-3 py-1 uppercase text-xs font-bold transition-all ${
                 benchmarkMode === 'comparative'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-[#ff4d00] text-black shadow-[1px_1px_0_#000]'
+                  : 'text-black hover:bg-white'
               }`}
               title="Compare side-by-side against Top 3 Direct Competitors"
             >
               <Users className="w-3.5 h-3.5" />
-              <span>3-Way Competitor Benchmark</span>
+              <span>3-WAY BENCHMARK</span>
             </button>
           </div>
 
           <button
             onClick={() => setIsCompetitorAnalysisOpen(!isCompetitorAnalysisOpen)}
-            className="px-3 py-1.5 bg-gradient-to-r from-cyan-950 to-indigo-950 hover:from-cyan-900 hover:to-indigo-900 border border-cyan-500/40 text-cyan-300 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 shadow-sm"
+            className="px-3 py-1.5 bg-[#ff4d00] hover:bg-[#ff5c14] border-2 border-black text-black text-xs font-bold uppercase transition-all flex items-center gap-1.5 shrink-0 shadow-[2px_2px_0_#000] cursor-pointer"
           >
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            <span>AI Competitor Strategy</span>
+            <Sparkles className="w-3.5 h-3.5 text-black" />
+            <span>AI STRATEGY</span>
           </button>
 
           <button
             onClick={handleRecalculate}
-            className="px-3 py-1.5 bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-800/80 text-indigo-300 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0"
+            className="px-3 py-1.5 bg-[#f2efeb] hover:bg-white border-2 border-black text-black text-xs font-bold uppercase transition-all flex items-center gap-1.5 shrink-0 shadow-[2px_2px_0_#000] cursor-pointer"
           >
-            <RefreshCw className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Recalculate Overlap</span>
+            <RefreshCw className="w-3.5 h-3.5 text-black" />
+            <span>RECALCULATE</span>
           </button>
         </div>
       </div>
 
       {/* Domain Configuration Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono-brutal">
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="block text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Your Domain</label>
+            <label className="block text-[10px] uppercase font-bold text-black tracking-wider">YOUR DOMAIN</label>
             <button
               type="button"
               onClick={handleSyncCompetitors}
-              className="text-[9px] font-mono text-cyan-400 hover:text-cyan-300 underline cursor-pointer"
+              className="text-[9px] text-[#ff4d00] font-bold hover:underline cursor-pointer uppercase"
               title="Auto-detect top 2 competitors based on your domain"
             >
-              Auto-Detect Top 2
+              [AUTO-DETECT]
             </button>
           </div>
           <input
             type="text"
             value={userDomain}
             onChange={(e) => handleUserDomainChange(e.target.value)}
-            className="w-full bg-zinc-950/90 border border-emerald-500/40 rounded-xl px-3.5 py-2 text-xs font-mono text-emerald-300 font-bold focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 transition-all shadow-inner hover:border-emerald-500/60"
+            className="w-full bg-[#f2efeb] border-2 border-black px-3 py-1.5 text-xs text-black font-bold focus:outline-none focus:bg-white shadow-[2px_2px_0_#000]"
             placeholder="organic-skincare.com"
           />
         </div>
 
         <div>
-          <label className="block text-[10px] uppercase font-bold text-cyan-400 mb-1 tracking-wider">Competitor A</label>
+          <label className="block text-[10px] uppercase font-bold text-black mb-1 tracking-wider">COMPETITOR A</label>
           <input
             type="text"
             value={compA}
             onChange={(e) => setCompA(e.target.value)}
-            className="w-full bg-zinc-950/90 border border-cyan-500/40 rounded-xl px-3.5 py-2 text-xs font-mono text-cyan-300 font-medium focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all shadow-inner hover:border-cyan-500/60"
+            className="w-full bg-[#f2efeb] border-2 border-black px-3 py-1.5 text-xs text-black font-bold focus:outline-none focus:bg-white shadow-[2px_2px_0_#000]"
             placeholder="gloworganics.com"
           />
         </div>
 
         <div>
-          <label className="block text-[10px] uppercase font-bold text-amber-400 mb-1 tracking-wider">Competitor B</label>
+          <label className="block text-[10px] uppercase font-bold text-black mb-1 tracking-wider">COMPETITOR B</label>
           <input
             type="text"
             value={compB}
             onChange={(e) => setCompB(e.target.value)}
-            className="w-full bg-zinc-950/90 border border-amber-500/40 rounded-xl px-3.5 py-2 text-xs font-mono text-amber-300 font-medium focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition-all shadow-inner hover:border-amber-500/60"
+            className="w-full bg-[#f2efeb] border-2 border-black px-3 py-1.5 text-xs text-black font-bold focus:outline-none focus:bg-white shadow-[2px_2px_0_#000]"
             placeholder="purebotanicals.com"
           />
         </div>
       </div>
 
       {/* Mode Indicator & Summary KPIs */}
-      <div className="bg-zinc-950/80 border border-zinc-800 p-3 rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+      <div className="bg-[#f2efeb] border-2 border-black p-3 flex flex-wrap items-center justify-between gap-3 text-xs font-mono-brutal shadow-[2px_2px_0_#000]">
         <div className="flex items-center gap-2">
-          <span className="text-zinc-500">Active Benchmark View:</span>
-          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-            benchmarkMode === 'solo'
-              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-              : 'bg-indigo-500/10 text-indigo-300 border border-indigo-500/30'
-          }`}>
-            {benchmarkMode === 'solo' ? 'My Domain Metrics Focus' : '3-Way Comparative Benchmark'}
+          <span className="text-zinc-600 uppercase">ACTIVE BENCHMARK VIEW:</span>
+          <span className="px-2 py-0.5 bg-black text-white text-[11px] font-bold uppercase">
+            {benchmarkMode === 'solo' ? 'MY DOMAIN METRICS' : '3-WAY COMPARATIVE'}
           </span>
         </div>
 
         <div className="flex items-center gap-4 text-[11px]">
           <div>
-            <span className="text-zinc-500">Avg Visibility:</span>{' '}
-            <strong className="text-emerald-400">{avgUserScore}%</strong>
+            <span className="text-zinc-600 uppercase">AVG VISIBILITY:</span>{' '}
+            <strong className="text-black font-bold">{avgUserScore}%</strong>
           </div>
           <div>
-            <span className="text-zinc-500">{benchmarkMode === 'solo' ? 'Benchmark Target:' : 'Top Competitor Avg:'}</span>{' '}
-            <strong className="text-cyan-400">{avgCompetitorScore}%</strong>
+            <span className="text-zinc-600 uppercase">{benchmarkMode === 'solo' ? 'BENCHMARK:' : 'TOP RIVAL AVG:'}</span>{' '}
+            <strong className="text-black font-bold">{avgCompetitorScore}%</strong>
           </div>
           <div>
-            <span className="text-zinc-500">Gap Delta:</span>{' '}
-            <strong className={avgUserScore < avgCompetitorScore ? 'text-rose-400' : 'text-emerald-400'}>
+            <span className="text-zinc-600 uppercase">GAP DELTA:</span>{' '}
+            <strong className={avgUserScore < avgCompetitorScore ? 'text-[#ff4d00]' : 'text-black'}>
               {avgUserScore >= avgCompetitorScore ? '+' : ''}{avgUserScore - avgCompetitorScore}%
             </strong>
           </div>
@@ -452,86 +448,86 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
 
       {/* Collapsible AI Competitor & Market Research Panel */}
       {isCompetitorAnalysisOpen && (
-        <div className="bg-gradient-to-br from-zinc-950 via-zinc-900 to-indigo-950/40 border border-indigo-500/30 rounded-xl p-4 sm:p-5 space-y-4 animate-in fade-in duration-300 shadow-xl">
-          <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+        <div className="bg-[#f2efeb] border-2 border-black p-4 sm:p-5 space-y-4 shadow-[3px_3px_0_#000]">
+          <div className="flex items-center justify-between pb-3 border-b-2 border-black">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-cyan-400" />
-              <h3 className="text-xs font-bold text-zinc-100 uppercase tracking-wider font-mono">
-                AI Market Research &amp; Enterprise SEO Competitor Strategy
+              <Sparkles className="w-4 h-4 text-[#ff4d00]" />
+              <h3 className="text-xs font-bold text-black uppercase font-mono-brutal">
+                AI MARKET RESEARCH &amp; COMPETITOR STRATEGY
               </h3>
-              <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold">
-                Target: {userDomain || 'mybrand.com'}
+              <span className="px-2 py-0.5 bg-black text-white text-[10px] font-mono-brutal font-bold">
+                TARGET: {userDomain || 'MYBRAND.COM'}
               </span>
             </div>
             <button
               onClick={() => setIsCompetitorAnalysisOpen(false)}
-              className="text-xs text-zinc-500 hover:text-zinc-300 font-mono"
+              className="text-xs text-black font-bold uppercase underline font-mono-brutal cursor-pointer"
             >
-              Hide Strategy
+              [HIDE_STRATEGY]
             </button>
           </div>
 
-          {/* Top 2 Selected Priority URLs Analysis Table for LLM Parsing */}
-          <div className="bg-zinc-950/90 border border-cyan-500/30 p-4 rounded-xl space-y-3 shadow-lg">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-zinc-800 gap-2">
+          {/* Top 2 Selected Priority URLs Analysis Table */}
+          <div className="bg-white border-2 border-black p-4 space-y-3 shadow-[2px_2px_0_#000]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b-2 border-black gap-2">
               <div className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-cyan-400" />
-                <h4 className="text-xs font-bold text-cyan-300 font-mono uppercase tracking-wider">
-                  Top 2 Priority Competitor URLs Analysis for <span className="text-emerald-400 font-bold">{userDomain}</span>
+                <Target className="w-4 h-4 text-[#ff4d00]" />
+                <h4 className="text-xs font-bold text-black font-mono-brutal uppercase">
+                  TOP 2 PRIORITY COMPETITOR URLS FOR <span className="text-[#ff4d00]">{userDomain}</span>
                 </h4>
               </div>
-              <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
-                Industry Niche: <span className="text-indigo-300 font-bold">{competitorAnalysis.nicheLabel}</span>
+              <span className="text-[10px] font-mono-brutal text-black bg-[#f2efeb] px-2 py-0.5 border border-black font-bold uppercase">
+                NICHE: {competitorAnalysis.nicheLabel}
               </span>
             </div>
 
             {/* High-Density Clean HTML Table for LLM & SERP Parsing */}
-            <div className="overflow-x-auto rounded-xl border border-zinc-800">
-              <table data-llm-parse="true" data-table-type="priority-urls-comparison" className="w-full text-left border-collapse text-xs font-sans">
-                <thead className="bg-zinc-950 text-zinc-300 font-mono text-[11px] uppercase tracking-wider">
-                  <tr className="border-b border-zinc-800">
-                    <th scope="col" className="p-3 border-r border-zinc-800 font-bold text-cyan-400">Target Competitor Domain</th>
-                    <th scope="col" className="p-3 border-r border-zinc-800 font-bold text-indigo-300">Exact Priority URL</th>
-                    <th scope="col" className="p-3 border-r border-zinc-800 font-bold text-emerald-400">1-Sentence Strategic Justification</th>
-                    <th scope="col" className="p-3 font-bold text-amber-400">SEO Value &amp; Intent Category</th>
+            <div className="overflow-x-auto border-2 border-black">
+              <table data-llm-parse="true" data-table-type="priority-urls-comparison" className="w-full text-left border-collapse text-xs font-mono-brutal">
+                <thead className="bg-black text-white font-mono-brutal text-[11px] uppercase">
+                  <tr className="border-b-2 border-black">
+                    <th scope="col" className="p-2.5 border-r border-zinc-700 font-bold">COMPETITOR</th>
+                    <th scope="col" className="p-2.5 border-r border-zinc-700 font-bold">EXACT PRIORITY URL</th>
+                    <th scope="col" className="p-2.5 border-r border-zinc-700 font-bold">STRATEGIC JUSTIFICATION</th>
+                    <th scope="col" className="p-2.5 font-bold">CATEGORY</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-800/80 bg-zinc-900/60 font-sans">
-                  <tr className="hover:bg-zinc-900 transition-colors">
-                    <td className="p-3 border-r border-zinc-800 font-mono font-bold text-cyan-300 whitespace-nowrap">
+                <tbody className="divide-y-2 divide-black bg-white">
+                  <tr className="hover:bg-[#f2efeb] transition-colors">
+                    <td className="p-2.5 border-r-2 border-black font-bold whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
-                        <ExternalLink className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                        <ExternalLink className="w-3.5 h-3.5 text-[#ff4d00] shrink-0" />
                         <span>{compA}</span>
                       </div>
                     </td>
-                    <td className="p-3 border-r border-zinc-800 font-mono text-xs text-cyan-200 select-all break-all">
+                    <td className="p-2.5 border-r-2 border-black text-xs select-all break-all text-zinc-800">
                       {competitorAnalysis.compAUrl}
                     </td>
-                    <td className="p-3 border-r border-zinc-800 text-zinc-300 leading-relaxed">
+                    <td className="p-2.5 border-r-2 border-black text-zinc-800 leading-relaxed font-sans text-xs">
                       {competitorAnalysis.compAJustification}
                     </td>
-                    <td className="p-3 font-mono text-[11px] whitespace-nowrap">
-                      <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/80 font-bold">
-                        Top Revenue &amp; Organic Potential
+                    <td className="p-2.5 whitespace-nowrap">
+                      <span className="px-2 py-0.5 bg-[#ff4d00] text-black font-bold text-[10px] uppercase border border-black">
+                        TOP ORGANIC POTENTIAL
                       </span>
                     </td>
                   </tr>
-                  <tr className="hover:bg-zinc-900 transition-colors">
-                    <td className="p-3 border-r border-zinc-800 font-mono font-bold text-amber-300 whitespace-nowrap">
+                  <tr className="hover:bg-[#f2efeb] transition-colors">
+                    <td className="p-2.5 border-r-2 border-black font-bold whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
-                        <ExternalLink className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <ExternalLink className="w-3.5 h-3.5 text-[#ff4d00] shrink-0" />
                         <span>{compB}</span>
                       </div>
                     </td>
-                    <td className="p-3 border-r border-zinc-800 font-mono text-xs text-amber-200 select-all break-all">
+                    <td className="p-2.5 border-r-2 border-black text-xs select-all break-all text-zinc-800">
                       {competitorAnalysis.compBUrl}
                     </td>
-                    <td className="p-3 border-r border-zinc-800 text-zinc-300 leading-relaxed">
+                    <td className="p-2.5 border-r-2 border-black text-zinc-800 leading-relaxed font-sans text-xs">
                       {competitorAnalysis.compBJustification}
                     </td>
-                    <td className="p-3 font-mono text-[11px] whitespace-nowrap">
-                      <span className="px-2 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800/80 font-bold">
-                        High Search Intent &amp; Core Brand Value
+                    <td className="p-2.5 whitespace-nowrap">
+                      <span className="px-2 py-0.5 bg-black text-white font-bold text-[10px] uppercase border border-black">
+                        HIGH INTENT VALUE
                       </span>
                     </td>
                   </tr>
@@ -540,274 +536,44 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans">
-            
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono-brutal">
             {/* Section 1: Top 3 Direct Competitors */}
-            <div className="bg-zinc-900/80 border border-zinc-800/90 p-3.5 rounded-xl space-y-2">
-              <div className="flex items-center justify-between text-indigo-300 font-bold font-mono text-[11px] uppercase">
+            <div className="bg-white border-2 border-black p-3.5 shadow-[2px_2px_0_#000] space-y-2">
+              <div className="flex items-center justify-between text-black font-bold text-[11px] uppercase border-b border-black pb-1">
                 <span className="flex items-center gap-1.5">
-                  <Target className="w-3.5 h-3.5 text-indigo-400" />
-                  1. Top 3 Direct Competitors
+                  <Target className="w-3.5 h-3.5 text-[#ff4d00]" />
+                  1. DIRECT COMPETITORS
                 </span>
-                <span className="text-[10px] text-zinc-500">Same Core Solution</span>
+                <span className="text-[10px] text-zinc-600 font-bold">SAME SOLUTION</span>
               </div>
-              <ul className="space-y-2 text-zinc-300 text-[11px] leading-relaxed">
-                <li className="bg-zinc-950/60 p-2 rounded-lg border border-zinc-800/60">
-                  <strong className="text-indigo-300 font-mono">Ahrefs / Semrush (SaaS Analytics Ensembles):</strong> High threat due to massive historical backlink indexes (30B+ pages) and established brand search trust.
+              <ul className="space-y-2 text-zinc-800 text-[11px] leading-relaxed font-sans">
+                <li className="bg-[#f2efeb] p-2 border border-black">
+                  <strong className="font-mono-brutal text-black">Ahrefs / Semrush:</strong> High historical backlink index depth (30B+ pages) and established domain trust.
                 </li>
-                <li className="bg-zinc-950/60 p-2 rounded-lg border border-zinc-800/60">
-                  <strong className="text-cyan-300 font-mono">Serpstat / Indexification Platforms ({compA}):</strong> Direct threat in directory submission velocity and automated link indexing guarantees.
-                </li>
-                <li className="bg-zinc-950/60 p-2 rounded-lg border border-zinc-800/60">
-                  <strong className="text-amber-300 font-mono">RankMath / Yoast Enterprise ({compB}):</strong> Direct threat for CMS site owners capturing early search intent with automated schema markup.
+                <li className="bg-[#f2efeb] p-2 border border-black">
+                  <strong className="font-mono-brutal text-black">Serpstat / {compA}:</strong> Direct rival in directory submission velocity and automated link indexing.
                 </li>
               </ul>
             </div>
 
             {/* Section 2: Top 2 Indirect Competitors */}
-            <div className="bg-zinc-900/80 border border-zinc-800/90 p-3.5 rounded-xl space-y-2">
-              <div className="flex items-center justify-between text-cyan-300 font-bold font-mono text-[11px] uppercase">
+            <div className="bg-white border-2 border-black p-3.5 shadow-[2px_2px_0_#000] space-y-2">
+              <div className="flex items-center justify-between text-black font-bold text-[11px] uppercase border-b border-black pb-1">
                 <span className="flex items-center gap-1.5">
-                  <TrendingUp className="w-3.5 h-3.5 text-cyan-400" />
-                  2. Top 2 Indirect Competitors
+                  <TrendingUp className="w-3.5 h-3.5 text-[#ff4d00]" />
+                  2. INDIRECT COMPETITORS
                 </span>
-                <span className="text-[10px] text-zinc-500">Alternate Solutions</span>
+                <span className="text-[10px] text-zinc-600 font-bold">ALTERNATE</span>
               </div>
-              <ul className="space-y-2 text-zinc-300 text-[11px] leading-relaxed">
-                <li className="bg-zinc-950/60 p-2 rounded-lg border border-zinc-800/60">
-                  <strong className="text-cyan-300 font-mono">Custom In-House Growth Agencies:</strong> Solve the problem via manual PR outreach &amp; white-glove directory submissions instead of automated SaaS tooling.
+              <ul className="space-y-2 text-zinc-800 text-[11px] leading-relaxed font-sans">
+                <li className="bg-[#f2efeb] p-2 border border-black">
+                  <strong className="font-mono-brutal text-black">Manual PR Growth Agencies:</strong> Manual outreach and white-glove directory submissions.
                 </li>
-                <li className="bg-zinc-950/60 p-2 rounded-lg border border-zinc-800/60">
-                  <strong className="text-emerald-300 font-mono">Programmatic SEO Frameworks (Next.js / Astro):</strong> Developers building custom static pages locally to capture long-tail keywords without third-party indexing services.
+                <li className="bg-[#f2efeb] p-2 border border-black">
+                  <strong className="font-mono-brutal text-black">Programmatic SEO Frameworks:</strong> Static generated pages to capture long-tail search traffic.
                 </li>
               </ul>
             </div>
-
-            {/* Section 3: Organic Search & AI Publishers */}
-            <div className="bg-zinc-900/80 border border-zinc-800/90 p-3.5 rounded-xl space-y-2">
-              <div className="flex items-center justify-between text-amber-300 font-bold font-mono text-[11px] uppercase">
-                <span className="flex items-center gap-1.5">
-                  <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
-                  3. Organic &amp; AI Search Publishers
-                </span>
-                <span className="text-[10px] text-zinc-500">LLM &amp; SERP Citation</span>
-              </div>
-              <p className="text-[11px] text-zinc-300 leading-relaxed">
-                Search engines and LLM engines (ChatGPT, Perplexity, Gemini) heavily cite <strong>G2, Capterra, ProductHunt, GitHub repositories</strong>, and technical engineering blogs (Dev.to, Medium) over vendor sales pages for high-intent keywords.
-              </p>
-            </div>
-
-            {/* Section 4: Competitive Gap & Content Moat */}
-            <div className="bg-zinc-900/80 border border-zinc-800/90 p-3.5 rounded-xl space-y-2">
-              <div className="flex items-center justify-between text-emerald-300 font-bold font-mono text-[11px] uppercase">
-                <span className="flex items-center gap-1.5">
-                  <ShieldAlert className="w-3.5 h-3.5 text-emerald-400" />
-                  4. Competitive Gap &amp; Content Moat
-                </span>
-                <span className="text-[10px] text-zinc-500">Growth Playbook</span>
-              </div>
-              <p className="text-[11px] text-zinc-300 leading-relaxed">
-                <strong className="text-emerald-300 font-mono">The Biggest Advantage Rivals Have:</strong> Established domain age and backlink depth.
-                <br />
-                <strong className="text-indigo-300 font-mono">Your Recommended Content Moat:</strong> Build "Answer-First" structured data blocks with live benchmark calculators, JSON-LD FAQ schema, and direct GEO entity tables to bypass legacy SERP competitors in AI summaries.
-              </p>
-            </div>
-
-            {/* Section 5: Recommended Fixes to Gain Competitive Advantages */}
-            <div className="md:col-span-2 bg-zinc-950/90 border border-indigo-500/40 p-4 rounded-xl space-y-3 shadow-inner">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-zinc-800 gap-2">
-                <div className="flex items-center gap-2 text-indigo-300 font-bold font-mono text-[12px] uppercase">
-                  <Zap className="w-4 h-4 text-emerald-400 fill-emerald-400/20" />
-                  <span>5. Recommended Fixes for Immediate Competitive Advantage</span>
-                </div>
-                <span className="text-[10px] font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded font-bold">
-                  5 High-Impact Actions Available
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {/* Recommended Fix 1 */}
-                <div className="p-3 bg-zinc-900/90 border border-zinc-800 rounded-xl space-y-2 flex flex-col justify-between hover:border-indigo-500/50 transition-all">
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <strong className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
-                        <span>GEO JSON-LD Schema Fix</span>
-                      </strong>
-                      <span className="text-[9px] font-mono text-emerald-400 bg-emerald-950 px-1.5 py-0.5 rounded font-bold border border-emerald-800">
-                        +35% Citation
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-zinc-400 leading-normal">
-                      Deploy Organization, FAQ &amp; Dataset schemas. Forces ChatGPT &amp; Perplexity to cite your brand over legacy directories.
-                    </p>
-                  </div>
-                  <div className="pt-2 flex items-center justify-between border-t border-zinc-800/80">
-                    <button
-                      onClick={() => {
-                        const code = `<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [{
-    "@type": "Question",
-    "name": "How does ${userDomain} compare to legacy competitors?",
-    "acceptedAnswer": {
-      "@type": "Answer",
-      "text": "${userDomain} provides zero-latency IndexNow submission and AI Content Grading."
-    }
-  }]
-}
-</script>`;
-                        navigator.clipboard.writeText(code);
-                        setAppliedFixes((prev) => ({ ...prev, fix1: true }));
-                        toast.success('GEO Schema code copied to clipboard!');
-                      }}
-                      className="px-2.5 py-1 bg-indigo-950 hover:bg-indigo-900 text-indigo-300 border border-indigo-700/50 rounded-lg text-[10px] font-bold flex items-center gap-1 font-mono transition-all"
-                    >
-                      {appliedFixes.fix1 ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-indigo-400" />}
-                      <span>{appliedFixes.fix1 ? 'Schema Copied' : 'Copy GEO Schema'}</span>
-                    </button>
-                    {onOpenContentGrader && (
-                      <button
-                        onClick={() => onOpenContentGrader(`https://${cleanUserDomain}`, 'GEO Schema')}
-                        className="text-emerald-400 hover:text-emerald-300 text-[10px] font-mono font-bold flex items-center gap-1"
-                      >
-                        <span>Grade Page</span>
-                        <ArrowRight className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Recommended Fix 2 */}
-                <div className="p-3 bg-zinc-900/90 border border-zinc-800 rounded-xl space-y-2 flex flex-col justify-between hover:border-indigo-500/50 transition-all">
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <strong className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                        <span>Answer-First 150-Word Hook</span>
-                      </strong>
-                      <span className="text-[9px] font-mono text-cyan-400 bg-cyan-950 px-1.5 py-0.5 rounded font-bold border border-cyan-800">
-                        Gemini AI Overview
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-zinc-400 leading-normal">
-                      Reformat top 150 words into quantitative summary tables &amp; direct factual definitions to dominate Gemini AI Overviews.
-                    </p>
-                  </div>
-                  <div className="pt-2 flex items-center justify-between border-t border-zinc-800/80">
-                    <button
-                      onClick={() => {
-                        setAppliedFixes((prev) => ({ ...prev, fix2: true }));
-                        toast.success('Answer-First Hook strategy marked as active!');
-                        if (onOpenContentGrader) {
-                          onOpenContentGrader(`https://${cleanUserDomain}`, 'AI Overview Hook');
-                        }
-                      }}
-                      className="px-2.5 py-1 bg-cyan-950 hover:bg-cyan-900 text-cyan-300 border border-cyan-700/50 rounded-lg text-[10px] font-bold flex items-center gap-1 font-mono transition-all"
-                    >
-                      <Zap className="w-3 h-3 text-cyan-400" />
-                      <span>Optimize Page Hook</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Recommended Fix 3 */}
-                <div className="p-3 bg-zinc-900/90 border border-zinc-800 rounded-xl space-y-2 flex flex-col justify-between hover:border-indigo-500/50 transition-all">
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <strong className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <Zap className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>Zero-Latency IndexNow Ping</span>
-                      </strong>
-                      <span className="text-[9px] font-mono text-indigo-400 bg-indigo-950 px-1.5 py-0.5 rounded font-bold border border-indigo-800">
-                        &lt; 3s Crawl Moat
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-zinc-400 leading-normal">
-                      Automate IndexNow protocol pings upon page publication. Outpace slow rivals relying on traditional 14-day bot crawls.
-                    </p>
-                  </div>
-                  <div className="pt-2 flex items-center justify-between border-t border-zinc-800/80">
-                    <button
-                      onClick={() => {
-                        setAppliedFixes((prev) => ({ ...prev, fix3: true }));
-                        toast.success('Zero-Latency IndexNow ping strategy activated!');
-                      }}
-                      className="px-2.5 py-1 bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-700/50 rounded-lg text-[10px] font-bold flex items-center gap-1 font-mono transition-all"
-                    >
-                      {appliedFixes.fix3 ? <Check className="w-3 h-3 text-emerald-400" /> : <CheckCircle2 className="w-3 h-3 text-emerald-400" />}
-                      <span>{appliedFixes.fix3 ? 'Ping Active' : 'Enable Auto-Ping'}</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Recommended Fix 4 */}
-                <div className="p-3 bg-zinc-900/90 border border-zinc-800 rounded-xl space-y-2 flex flex-col justify-between hover:border-indigo-500/50 transition-all">
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <strong className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <Target className="w-3.5 h-3.5 text-rose-400" />
-                        <span>Competitor Alternative Pages</span>
-                      </strong>
-                      <span className="text-[9px] font-mono text-rose-400 bg-rose-950 px-1.5 py-0.5 rounded font-bold border border-rose-800">
-                        +28% Conversion
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-zinc-400 leading-normal">
-                      Deploy programmatic "vs {compA || 'Competitor'}" landing pages with live benchmark tables and pricing calculators.
-                    </p>
-                  </div>
-                  <div className="pt-2 flex items-center justify-between border-t border-zinc-800/80">
-                    <button
-                      onClick={() => {
-                        setAppliedFixes((prev) => ({ ...prev, fix4: true }));
-                        toast.success(`Competitor interception page for vs ${compA} generated!`);
-                      }}
-                      className="px-2.5 py-1 bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-700/50 rounded-lg text-[10px] font-bold flex items-center gap-1 font-mono transition-all"
-                    >
-                      <Target className="w-3 h-3 text-rose-400" />
-                      <span>Intercept vs {compA || 'Rival'}</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Recommended Fix 5 */}
-                <div className="p-3 bg-zinc-900/90 border border-zinc-800 rounded-xl space-y-2 flex flex-col justify-between hover:border-indigo-500/50 transition-all md:col-span-2 lg:col-span-2">
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <strong className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <Users className="w-3.5 h-3.5 text-purple-400" />
-                        <span>Tier-1 Directory &amp; Co-Citation Moat</span>
-                      </strong>
-                      <span className="text-[9px] font-mono text-purple-400 bg-purple-950 px-1.5 py-0.5 rounded font-bold border border-purple-800">
-                        LLM Training Weight
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-zinc-400 leading-normal">
-                      Distribute brand entity profile across ProductHunt, GitHub Repos, G2 Badges, and High-DA Directories to elevate entity weighting in AI training corpuses.
-                    </p>
-                  </div>
-                  <div className="pt-2 flex items-center justify-between border-t border-zinc-800/80">
-                    <span className="text-[10px] font-mono text-zinc-400">
-                      Network Target: <strong className="text-purple-300">High-DA Authority Hubs</strong>
-                    </span>
-                    <button
-                      onClick={() => {
-                        setAppliedFixes((prev) => ({ ...prev, fix5: true }));
-                        toast.success('Directory co-citation distribution task queued!');
-                      }}
-                      className="px-2.5 py-1 bg-purple-950 hover:bg-purple-900 text-purple-300 border border-purple-700/50 rounded-lg text-[10px] font-bold flex items-center gap-1 font-mono transition-all"
-                    >
-                      {appliedFixes.fix5 ? <Check className="w-3 h-3 text-purple-400" /> : <BarChart2 className="w-3 h-3 text-purple-400" />}
-                      <span>{appliedFixes.fix5 ? 'Queued for Submission' : 'Queue Directory Batch'}</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
           </div>
         </div>
       )}
@@ -815,23 +581,23 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
       {/* Grid Layout: Radar Chart + Gap Action Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
         {/* Radar Chart Column */}
-        <div className="lg:col-span-7 bg-zinc-950/70 border border-zinc-800/80 rounded-xl p-3 h-72 sm:h-80 relative flex items-center justify-center">
+        <div className="lg:col-span-7 bg-[#f2efeb] border-2 border-black p-3 h-72 sm:h-80 relative flex items-center justify-center shadow-[3px_3px_0_#000]">
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart cx="50%" cy="50%" outerRadius="70%" data={clusterData}>
-              <PolarGrid stroke="#27272a" />
-              <PolarAngleAxis dataKey="cluster" stroke="#a1a1aa" fontSize={10} tickLine={false} />
-              <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#52525b" fontSize={9} />
+              <PolarGrid stroke="#000000" strokeWidth={1} />
+              <PolarAngleAxis dataKey="cluster" stroke="#000000" fontSize={10} tickLine={false} fontFamily="'Space Mono', monospace" />
+              <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#000000" fontSize={9} />
               <Tooltip content={<CustomTooltip />} />
               <Legend
-                wrapperStyle={{ fontSize: '11px', paddingTop: '5px' }}
-                formatter={(value) => <span className="text-zinc-300 font-medium">{value}</span>}
+                wrapperStyle={{ fontSize: '11px', paddingTop: '5px', fontFamily: "'Space Mono', monospace" }}
+                formatter={(value) => <span className="text-black font-bold">{value}</span>}
               />
               <Radar
                 name={userDomain}
                 dataKey="userDomainScore"
-                stroke="#10b981"
-                fill="#10b981"
-                fillOpacity={0.4}
+                stroke="#ff4d00"
+                fill="#ff4d00"
+                fillOpacity={0.5}
                 strokeWidth={2.5}
               />
               {benchmarkMode === 'comparative' ? (
@@ -839,17 +605,17 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
                   <Radar
                     name={compA}
                     dataKey="competitorAScore"
-                    stroke="#06b6d4"
-                    fill="#06b6d4"
-                    fillOpacity={0.15}
+                    stroke="#000000"
+                    fill="#000000"
+                    fillOpacity={0.2}
                     strokeWidth={1.5}
                   />
                   <Radar
                     name={compB}
                     dataKey="competitorBScore"
-                    stroke="#f59e0b"
-                    fill="#f59e0b"
-                    fillOpacity={0.15}
+                    stroke="#71717a"
+                    fill="#71717a"
+                    fillOpacity={0.2}
                     strokeWidth={1.5}
                   />
                 </>
@@ -857,8 +623,8 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
                 <Radar
                   name="Industry Benchmark Target"
                   dataKey="industryAvgScore"
-                  stroke="#6366f1"
-                  fill="#6366f1"
+                  stroke="#000000"
+                  fill="#000000"
                   fillOpacity={0.15}
                   strokeWidth={1.5}
                   strokeDasharray="4 4"
@@ -869,14 +635,14 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
         </div>
 
         {/* High-Intent Gap Alerts & Action Items */}
-        <div className="lg:col-span-5 space-y-3">
+        <div className="lg:col-span-5 space-y-3 font-mono-brutal">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
-              <ShieldAlert className="w-4 h-4 text-rose-400" />
-              <span>{benchmarkMode === 'solo' ? 'Your Critical Visibility Gaps' : '3-Way Competitive Gaps'}</span>
+            <h3 className="text-xs font-bold text-black uppercase tracking-wider flex items-center gap-1.5">
+              <ShieldAlert className="w-4 h-4 text-[#ff4d00]" />
+              <span>{benchmarkMode === 'solo' ? 'VISIBILITY GAPS' : 'COMPETITIVE GAPS'}</span>
             </h3>
-            <span className="text-[10px] font-mono text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20 font-bold">
-              {highGapClusters.length} Gaps Detected
+            <span className="text-[10px] text-black bg-[#ff4d00] px-2 py-0.5 font-bold uppercase border border-black">
+              {highGapClusters.length} GAPS DETECTED
             </span>
           </div>
 
@@ -888,44 +654,44 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
                 <div
                   key={idx}
                   onClick={() => setSelectedCluster(cluster)}
-                  className={`p-3 rounded-xl border text-xs cursor-pointer transition-all ${
+                  className={`p-3 border-2 border-black text-xs cursor-pointer transition-all shadow-[2px_2px_0_#000] ${
                     cluster.gapLevel === 'High Gap'
-                      ? 'bg-rose-950/20 border-rose-500/40 hover:border-rose-400'
+                      ? 'bg-[#ffe8dd] hover:bg-white'
                       : cluster.gapLevel === 'Moderate'
-                      ? 'bg-amber-950/20 border-amber-500/40 hover:border-amber-400'
-                      : 'bg-emerald-950/20 border-emerald-500/30 hover:border-emerald-400'
+                      ? 'bg-[#fff5eb] hover:bg-white'
+                      : 'bg-[#f2efeb] hover:bg-white'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-zinc-100 flex items-center gap-1.5">
+                    <span className="font-bold text-black flex items-center gap-1.5 uppercase">
                       {cluster.cluster}
-                      <span className="text-[9px] px-1.5 py-0.2 rounded font-mono bg-zinc-900 text-zinc-400 border border-zinc-800">
+                      <span className="text-[9px] px-1.5 py-0.2 bg-black text-white font-bold">
                         {cluster.intent}
                       </span>
                     </span>
                     <span
-                      className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
+                      className={`text-[10px] font-bold px-2 py-0.5 uppercase border border-black ${
                         cluster.gapLevel === 'High Gap'
-                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                          ? 'bg-[#ff4d00] text-black'
                           : cluster.gapLevel === 'Moderate'
-                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                          : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                          ? 'bg-black text-white'
+                          : 'bg-white text-black'
                       }`}
                     >
                       {benchmarkMode === 'solo'
-                        ? `${cluster.userDomainScore}% vs ${cluster.industryAvgScore}% Target`
-                        : (cluster.gapLevel === 'Lead' ? 'Leading (+)' : `${cluster.userDomainScore}% vs ${topRivalScore}%`)}
+                        ? `${cluster.userDomainScore}% vs ${cluster.industryAvgScore}%`
+                        : (cluster.gapLevel === 'Lead' ? 'LEADING (+)' : `${cluster.userDomainScore}% vs ${topRivalScore}%`)}
                     </span>
                   </div>
 
-                  <div className="mt-1.5 flex items-center justify-between text-[11px] text-zinc-400 font-mono">
+                  <div className="mt-1.5 flex items-center justify-between text-[11px] text-zinc-700">
                     {benchmarkMode === 'comparative' ? (
                       <span>
-                        Rivals: <span className="text-cyan-300">{cluster.competitorAScore}%</span> | <span className="text-amber-300">{cluster.competitorBScore}%</span>
+                        RIVALS: <span className="font-bold text-black">{cluster.competitorAScore}%</span> | <span className="font-bold text-black">{cluster.competitorBScore}%</span>
                       </span>
                     ) : (
                       <span>
-                        Delta: <strong className={cluster.userDomainScore >= cluster.industryAvgScore ? 'text-emerald-400' : 'text-rose-400'}>
+                        DELTA: <strong className="text-black">
                           {cluster.userDomainScore >= cluster.industryAvgScore ? '+' : ''}{cluster.userDomainScore - cluster.industryAvgScore}%
                         </strong>
                       </span>
@@ -938,9 +704,9 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
                           onOpenContentGrader(`https://${userDomain}`, cluster.cluster);
                         }
                       }}
-                      className="text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1 text-[10px]"
+                      className="text-[#ff4d00] hover:text-black font-bold flex items-center gap-1 text-[10px] uppercase underline cursor-pointer"
                     >
-                      <span>Grade &amp; Optimize</span>
+                      <span>OPTIMIZE</span>
                       <ArrowRight className="w-3 h-3" />
                     </button>
                   </div>

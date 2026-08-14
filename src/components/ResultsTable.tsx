@@ -247,50 +247,55 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
   };
 
   return (
-    <div className="bg-zinc-900/60 backdrop-blur-md border border-zinc-800/80 rounded-2xl p-5 shadow-2xl space-y-4">
+    <div className="bg-white border-4 border-black p-6 shadow-[6px_6px_0_#000] space-y-6">
       {/* Table Top Header & Title */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-zinc-800/80">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b-4 border-black">
         <div>
-          <h3 className="text-base font-bold text-zinc-100 flex items-center gap-2">
-            <span>Real-time Multi-Site Backlink Stream</span>
-            <span className="text-xs bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2.5 py-0.5 rounded-md font-mono">
-              {filteredLogs.length} of {logs.length} Records
+          <div className="flex items-center space-x-2">
+            <span className="px-2 py-0.5 bg-black text-white font-mono-brutal text-xs font-bold uppercase">
+              [02] LOG_STREAM
+            </span>
+            <span className="font-mono-brutal text-xs text-[#ff4d00] font-bold">
+              // AUDIT_RECORDS_HEX
+            </span>
+          </div>
+          <h3 className="font-display text-2xl sm:text-3xl font-bold text-black uppercase tracking-tight mt-1 flex items-center gap-3">
+            <span>REAL-TIME BACKLINK STREAM &amp; AUDIT</span>
+            <span className="text-xs font-mono-brutal font-bold bg-[#f2efeb] text-black border-2 border-black px-2.5 py-0.5 shadow-[2px_2px_0_#000]">
+              {filteredLogs.length} / {logs.length} RECORDS
             </span>
           </h3>
-          <p className="text-xs text-zinc-400 mt-0.5">
-            Audit live HTTP verification, Google Indexing pings, and expanded row diagnostic notes.
-          </p>
         </div>
 
         {/* Global Export & Compare Buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center flex-wrap gap-2">
           <button
             onClick={() => setIsCompareModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/20 transition-all cursor-pointer border border-indigo-400/30"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#f2efeb] hover:bg-zinc-200 text-black font-mono-brutal font-bold text-xs uppercase border-2 border-black shadow-[2px_2px_0_#000] transition-all cursor-pointer"
             title="Compare current submission results side-by-side with a previous historical record"
           >
-            <GitCompare className="w-3.5 h-3.5" />
-            <span>Compare Runs</span>
+            <GitCompare className="w-3.5 h-3.5 text-[#ff4d00]" />
+            <span>COMPARE_RUNS</span>
           </button>
 
           <button
             onClick={onExportCsv}
             disabled={logs.length === 0}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 text-zinc-200 text-xs font-bold rounded-xl border border-zinc-700 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-[#f2efeb] disabled:opacity-40 text-black text-xs font-mono-brutal font-bold uppercase border-2 border-black shadow-[2px_2px_0_#000] transition-all cursor-pointer"
             title="Download CSV report for all submission logs"
           >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Export CSV ({logs.length})</span>
+            <FileSpreadsheet className="w-3.5 h-3.5 text-black" />
+            <span>EXPORT_CSV ({logs.length})</span>
           </button>
 
           <button
             onClick={handleExportAllJson}
             disabled={logs.length === 0}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-950 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-200 text-xs font-bold rounded-xl shadow-sm transition-all cursor-pointer disabled:opacity-40"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#ff4d00] hover:bg-[#ff5c14] border-2 border-black text-black text-xs font-mono-brutal font-bold uppercase shadow-[2px_2px_0_#000] transition-all cursor-pointer disabled:opacity-40"
             title="Download structured JSON payload for BI dashboard integration & webhooks"
           >
-            <Download className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Export JSON</span>
+            <Download className="w-3.5 h-3.5 text-black" />
+            <span>EXPORT_JSON</span>
           </button>
         </div>
       </div>
@@ -302,114 +307,114 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
       <HistoricalRankChartWidget logs={logs} history={history} />
 
       {/* Filter Toolbar Section */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-zinc-950/60 p-3 rounded-xl border border-zinc-800/80">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-[#f2efeb] p-4 border-4 border-black shadow-[4px_4px_0_#000]">
         {/* Search Bar */}
         <div className="relative flex-1 max-w-md">
-          <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-black absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search target URL, directory, backlink, or notes..."
+            placeholder="FILTER BY DOMAIN, DIRECTORY, OR STATUS..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-indigo-500"
+            className="w-full bg-white border-2 border-black pl-9 pr-3 py-2 text-xs font-mono-brutal font-bold text-black placeholder-zinc-500 focus:outline-none shadow-[2px_2px_0_#000]"
           />
         </div>
 
         {/* Status & Audit Specific Filter Toggles */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Live Verification Toggle */}
-          <div className="flex items-center gap-1 bg-zinc-900 p-1 rounded-xl border border-zinc-800">
-            <span className="text-[10px] uppercase font-bold text-zinc-400 px-2 flex items-center gap-1">
-              <Filter className="w-3 h-3 text-emerald-400" />
-              <span>Verification:</span>
+          <div className="flex items-center gap-1 bg-white p-1 border-2 border-black shadow-[2px_2px_0_#000]">
+            <span className="text-[10px] font-mono-brutal font-bold text-black px-2 flex items-center gap-1 uppercase">
+              <Filter className="w-3 h-3 text-[#ff4d00]" />
+              <span>VERIFY:</span>
             </span>
             <button
               onClick={() => setLiveVerificationFilter('ALL')}
-              className={`px-2 py-0.5 text-[11px] font-bold rounded-lg transition-all ${
+              className={`px-2 py-0.5 text-[10px] font-mono-brutal font-bold uppercase transition-all ${
                 liveVerificationFilter === 'ALL'
-                  ? 'bg-zinc-800 text-zinc-100 shadow'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-black text-white'
+                  : 'text-black hover:bg-zinc-200'
               }`}
             >
-              All
+              ALL
             </button>
             <button
               onClick={() => setLiveVerificationFilter('CONFIRMED')}
-              className={`px-2 py-0.5 text-[11px] font-bold rounded-lg transition-all ${
+              className={`px-2 py-0.5 text-[10px] font-mono-brutal font-bold uppercase transition-all ${
                 liveVerificationFilter === 'CONFIRMED'
-                  ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40 shadow'
-                  : 'text-zinc-400 hover:text-emerald-400'
+                  ? 'bg-[#ff4d00] text-black border border-black'
+                  : 'text-black hover:bg-zinc-200'
               }`}
             >
-              Confirmed (200 OK)
+              200_OK
             </button>
             <button
               onClick={() => setLiveVerificationFilter('FAILED')}
-              className={`px-2 py-0.5 text-[11px] font-bold rounded-lg transition-all ${
+              className={`px-2 py-0.5 text-[10px] font-mono-brutal font-bold uppercase transition-all ${
                 liveVerificationFilter === 'FAILED'
-                  ? 'bg-rose-950 text-rose-300 border border-rose-500/40 shadow'
-                  : 'text-zinc-400 hover:text-rose-400'
+                  ? 'bg-black text-[#ff4d00] border border-black'
+                  : 'text-black hover:bg-zinc-200'
               }`}
             >
-              Failed
+              FAILED
             </button>
             <button
               onClick={() => setLiveVerificationFilter('PENDING')}
-              className={`px-2 py-0.5 text-[11px] font-bold rounded-lg transition-all ${
+              className={`px-2 py-0.5 text-[10px] font-mono-brutal font-bold uppercase transition-all ${
                 liveVerificationFilter === 'PENDING'
-                  ? 'bg-amber-950 text-amber-300 border border-amber-500/40 shadow'
-                  : 'text-zinc-400 hover:text-amber-400'
+                  ? 'bg-zinc-300 text-black border border-black'
+                  : 'text-black hover:bg-zinc-200'
               }`}
             >
-              Pending
+              PENDING
             </button>
           </div>
 
           {/* Google Indexing / Ping Toggle */}
-          <div className="flex items-center gap-1 bg-zinc-900 p-1 rounded-xl border border-zinc-800">
-            <span className="text-[10px] uppercase font-bold text-zinc-400 px-2 flex items-center gap-1">
-              <Send className="w-3 h-3 text-purple-400" />
-              <span>Indexing:</span>
+          <div className="flex items-center gap-1 bg-white p-1 border-2 border-black shadow-[2px_2px_0_#000]">
+            <span className="text-[10px] font-mono-brutal font-bold text-black px-2 flex items-center gap-1 uppercase">
+              <Send className="w-3 h-3 text-black" />
+              <span>INDEX:</span>
             </span>
             <button
               onClick={() => setIndexingFilter('ALL')}
-              className={`px-2 py-0.5 text-[11px] font-bold rounded-lg transition-all ${
+              className={`px-2 py-0.5 text-[10px] font-mono-brutal font-bold uppercase transition-all ${
                 indexingFilter === 'ALL'
-                  ? 'bg-zinc-800 text-zinc-100 shadow'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-black text-white'
+                  : 'text-black hover:bg-zinc-200'
               }`}
             >
-              All
+              ALL
             </button>
             <button
               onClick={() => setIndexingFilter('SUBMITTED')}
-              className={`px-2 py-0.5 text-[11px] font-bold rounded-lg transition-all ${
+              className={`px-2 py-0.5 text-[10px] font-mono-brutal font-bold uppercase transition-all ${
                 indexingFilter === 'SUBMITTED'
-                  ? 'bg-purple-950 text-purple-300 border border-purple-500/40 shadow'
-                  : 'text-zinc-400 hover:text-purple-400'
+                  ? 'bg-black text-white'
+                  : 'text-black hover:bg-zinc-200'
               }`}
             >
-              Indexed
+              INDEXED
             </button>
             <button
               onClick={() => setIndexingFilter('PINGED')}
-              className={`px-2 py-0.5 text-[11px] font-bold rounded-lg transition-all ${
+              className={`px-2 py-0.5 text-[10px] font-mono-brutal font-bold uppercase transition-all ${
                 indexingFilter === 'PINGED'
-                  ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/40 shadow'
-                  : 'text-zinc-400 hover:text-cyan-400'
+                  ? 'bg-[#ff4d00] text-black border border-black'
+                  : 'text-black hover:bg-zinc-200'
               }`}
             >
-              Pinged
+              PINGED
             </button>
             <button
               onClick={() => setIndexingFilter('PENDING')}
-              className={`px-2 py-0.5 text-[11px] font-bold rounded-lg transition-all ${
+              className={`px-2 py-0.5 text-[10px] font-mono-brutal font-bold uppercase transition-all ${
                 indexingFilter === 'PENDING'
-                  ? 'bg-zinc-800 text-zinc-300 shadow'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-zinc-300 text-black'
+                  : 'text-black hover:bg-zinc-200'
               }`}
             >
-              Pending
+              PENDING
             </button>
           </div>
         </div>
@@ -417,50 +422,50 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
 
       {/* Bulk Action Header Bar (when rows are selected) */}
       {selectedLogIds.size > 0 && (
-        <div className="flex items-center justify-between bg-gradient-to-r from-indigo-950/80 via-purple-950/70 to-zinc-950 border border-indigo-500/40 p-3 rounded-xl shadow-lg animate-fadeIn">
+        <div className="flex items-center justify-between bg-black text-white border-4 border-black p-3.5 shadow-[4px_4px_0_#ff4d00]">
           <div className="flex items-center gap-3">
-            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-500 text-white text-xs font-bold font-mono">
+            <span className="flex items-center justify-center px-2 py-0.5 bg-[#ff4d00] text-black text-xs font-mono-brutal font-bold">
               {selectedLogIds.size}
             </span>
-            <span className="text-xs font-bold text-indigo-200">
-              {selectedLogIds.size} backlink {selectedLogIds.size === 1 ? 'record' : 'records'} selected for bulk export
+            <span className="text-xs font-mono-brutal font-bold uppercase tracking-wider text-white">
+              {selectedLogIds.size} RECORDS SELECTED FOR BATCH EXPORT
             </span>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={handleExportSelectedCsv}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-black text-xs font-mono-brutal font-bold uppercase border-2 border-white shadow-[2px_2px_0_#ff4d00] transition-all cursor-pointer"
             >
               <FileSpreadsheet className="w-3.5 h-3.5" />
-              <span>Export CSV ({selectedLogIds.size})</span>
+              <span>CSV ({selectedLogIds.size})</span>
             </button>
 
             <button
               onClick={handleExportSelectedJson}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl shadow-md shadow-cyan-600/20 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#ff4d00] text-black text-xs font-mono-brutal font-bold uppercase border-2 border-black shadow-[2px_2px_0_#fff] transition-all cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Export JSON ({selectedLogIds.size})</span>
+              <span>JSON ({selectedLogIds.size})</span>
             </button>
 
             <button
               onClick={() => setSelectedLogIds(new Set())}
-              className="px-2.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium rounded-xl transition-all cursor-pointer"
+              className="px-2.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-mono-brutal font-bold uppercase transition-all cursor-pointer"
             >
-              Clear
+              CLEAR
             </button>
           </div>
         </div>
       )}
 
       {/* Table Container */}
-      <div className="overflow-x-auto rounded-xl border border-zinc-800/80 bg-zinc-950/40">
+      <div className="overflow-x-auto border-4 border-black bg-white shadow-[4px_4px_0_#000]">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="bg-zinc-950 text-zinc-400 font-semibold uppercase tracking-wider border-b border-zinc-800/80">
+            <tr className="bg-black text-white font-mono-brutal font-bold uppercase tracking-wider border-b-4 border-black">
               {/* Checkbox Column */}
-              <th className="py-3 px-3 w-10 text-center">
+              <th className="py-3 px-3 w-10 text-center border-r-2 border-zinc-800">
                 <input
                   type="checkbox"
                   checked={allFilteredSelected}
@@ -468,25 +473,25 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                     if (input) input.indeterminate = someFilteredSelected;
                   }}
                   onChange={handleToggleSelectAll}
-                  className="w-4 h-4 rounded bg-zinc-900 border-zinc-700 text-indigo-600 focus:ring-indigo-500 accent-indigo-500 cursor-pointer"
+                  className="w-4 h-4 rounded-none accent-[#ff4d00] cursor-pointer"
                   title="Select all filtered backlink records"
                 />
               </th>
-              <th className="py-3 px-2 w-8"></th>
-              <th className="py-3 px-4">Target Website</th>
-              <th className="py-3 px-4">Directory Network &amp; Category</th>
-              <th className="py-3 px-4">Generated Profile Backlink</th>
-              <th className="py-3 px-4">Submission</th>
-              <th className="py-3 px-4">Live Verification</th>
-              <th className="py-3 px-4">Google Indexing</th>
-              <th className="py-3 px-4">Ping Status</th>
+              <th className="py-3 px-2 w-8 border-r-2 border-zinc-800"></th>
+              <th className="py-3 px-4 border-r-2 border-zinc-800">TARGET DOMAIN</th>
+              <th className="py-3 px-4 border-r-2 border-zinc-800">DIRECTORY NETWORK</th>
+              <th className="py-3 px-4 border-r-2 border-zinc-800">PROFILE BACKLINK</th>
+              <th className="py-3 px-4 border-r-2 border-zinc-800">SUBMISSION</th>
+              <th className="py-3 px-4 border-r-2 border-zinc-800">LIVE VERIFY</th>
+              <th className="py-3 px-4 border-r-2 border-zinc-800">GOOGLE SERP</th>
+              <th className="py-3 px-4">PING STATUS</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-800/50 font-mono text-zinc-300">
+          <tbody className="divide-y-2 divide-black font-mono-brutal text-black">
             {filteredLogs.length === 0 ? (
               <tr>
-                <td colSpan={9} className="text-center py-12 text-zinc-500 font-sans">
-                  No backlink log records match your current search or status filter. Try clearing filters above.
+                <td colSpan={9} className="text-center py-12 text-zinc-600 font-mono-brutal font-bold uppercase">
+                  NO BACKLINK LOG RECORDS MATCH CURRENT FILTERS.
                 </td>
               </tr>
             ) : (
@@ -509,70 +514,70 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                       onClick={() => toggleRowExpanded(log.id)}
                       className={`cursor-pointer transition-colors ${
                         isSelected
-                          ? 'bg-indigo-950/30 hover:bg-indigo-950/50'
+                          ? 'bg-[#ffe8dd]'
                           : isExpanded
-                          ? 'bg-zinc-800/40'
-                          : 'hover:bg-zinc-800/30'
+                          ? 'bg-[#f2efeb]'
+                          : 'hover:bg-[#f2efeb]'
                       }`}
                     >
                       {/* Checkbox Column */}
-                      <td className="py-3 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+                      <td className="py-3 px-3 text-center border-r-2 border-black" onClick={(e) => e.stopPropagation()}>
                         <input
                           type="checkbox"
                           checked={isSelected}
                           onChange={(e) => handleToggleSelectRow(log.id, e as any)}
-                          className="w-4 h-4 rounded bg-zinc-900 border-zinc-700 text-indigo-600 focus:ring-indigo-500 accent-indigo-500 cursor-pointer"
+                          className="w-4 h-4 rounded-none accent-[#ff4d00] cursor-pointer"
                         />
                       </td>
 
                       {/* Expand Chevron Icon */}
-                      <td className="py-3 px-2 text-zinc-500">
+                      <td className="py-3 px-2 text-black border-r-2 border-black text-center">
                         {isExpanded ? (
-                          <ChevronDown className="w-4 h-4 text-indigo-400" />
+                          <ChevronDown className="w-4 h-4 text-[#ff4d00] inline" />
                         ) : (
-                          <ChevronRight className="w-4 h-4 hover:text-zinc-300" />
+                          <ChevronRight className="w-4 h-4 inline" />
                         )}
                       </td>
 
                       {/* Target URL */}
                       <td
-                        className="py-3 px-4 max-w-[160px] truncate font-sans font-semibold text-zinc-100"
+                        className="py-3 px-4 max-w-[160px] truncate font-bold text-black border-r-2 border-black"
                         title={log.targetUrl}
                       >
                         {log.targetUrl}
                       </td>
 
                       {/* Directory Name & Category */}
-                      <td className="py-3 px-4">
-                        <div className="font-sans font-medium text-zinc-200">{log.directoryName}</div>
-                        <span className="text-[10px] text-zinc-500 uppercase font-mono">
+                      <td className="py-3 px-4 border-r-2 border-black">
+                        <div className="font-bold text-black">{log.directoryName}</div>
+                        <span className="text-[10px] text-zinc-600 uppercase font-mono-brutal">
                           {log.directoryType}
                         </span>
                       </td>
 
                       {/* Generated Backlink Link */}
-                      <td className="py-3 px-4 max-w-[220px]" onClick={(e) => e.stopPropagation()}>
+                      <td className="py-3 px-4 max-w-[220px] border-r-2 border-black" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center gap-1.5">
                           <a
                             href={log.generatedBacklink}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1 truncate"
+                            className="text-black hover:text-[#ff4d00] hover:underline font-bold flex items-center gap-1 truncate"
                             title={log.generatedBacklink}
                           >
                             <span className="truncate">{log.generatedBacklink}</span>
-                            <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                            <ExternalLink className="w-3 h-3 flex-shrink-0 text-black" />
                           </a>
                         </div>
                       </td>
 
                       {/* Submission Status */}
-                      <td className="py-3 px-4 font-sans">
+                      <td className="py-3 px-4 border-r-2 border-black">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium ${
+                          className={`inline-flex items-center px-2 py-0.5 text-[10px] font-mono-brutal font-bold uppercase border border-black ${
                             log.submissionStatus.toLowerCase().includes('submitted')
-                              ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                              : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                              ? 'bg-[#f2efeb] text-black'
+                              : 'bg-black text-[#ff4d00]'
                           }`}
                         >
                           {log.submissionStatus}
@@ -580,29 +585,29 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                       </td>
 
                       {/* Live Verification (Pass/Fail) */}
-                      <td className="py-3 px-4 font-sans">
+                      <td className="py-3 px-4 border-r-2 border-black">
                         {isConfirmed ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shadow-sm shadow-emerald-500/20 transition-all hover:scale-105">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300 animate-pulse" />
-                            <span>Confirmed (200 OK)</span>
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-mono-brutal font-bold bg-[#ff4d00] text-black border border-black shadow-[1px_1px_0_#000]">
+                            <CheckCircle2 className="w-3 h-3" />
+                            <span>200_OK</span>
                           </span>
                         ) : isFailed ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                            <XCircle className="w-3.5 h-3.5" />
-                            <span>Failed</span>
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-mono-brutal font-bold bg-black text-[#ff4d00] border border-black">
+                            <XCircle className="w-3 h-3" />
+                            <span>FAILED</span>
                           </span>
                         ) : (
-                          <span className="text-zinc-500 text-[11px]">Skipped</span>
+                          <span className="text-zinc-600 text-[10px] font-mono-brutal">SKIPPED</span>
                         )}
                       </td>
 
                       {/* Google Indexing */}
-                      <td className="py-3 px-4 font-sans">
+                      <td className="py-3 px-4 border-r-2 border-black">
                         <span
-                          className={`text-[11px] font-medium px-2 py-0.5 rounded-md ${
+                          className={`text-[10px] font-mono-brutal font-bold px-2 py-0.5 uppercase border border-black ${
                             log.googleIndexing === 'Submitted' || log.googleIndexing === 'Indexed'
-                              ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                              : 'text-zinc-500'
+                              ? 'bg-black text-white'
+                              : 'bg-white text-zinc-500'
                           }`}
                         >
                           {log.googleIndexing}
@@ -610,12 +615,12 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                       </td>
 
                       {/* Ping Status */}
-                      <td className="py-3 px-4 font-sans">
+                      <td className="py-3 px-4">
                         <span
-                          className={`text-[11px] font-medium px-2 py-0.5 rounded-md ${
+                          className={`text-[10px] font-mono-brutal font-bold px-2 py-0.5 uppercase border border-black ${
                             log.pingStatus === 'Success'
-                              ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
-                              : 'text-zinc-500'
+                              ? 'bg-[#f2efeb] text-black'
+                              : 'bg-white text-zinc-500'
                           }`}
                         >
                           {log.pingStatus}
@@ -625,45 +630,45 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
 
                     {/* Expanded Detail Panel */}
                     {isExpanded && (
-                      <tr className="bg-zinc-950/90 border-b border-zinc-800">
+                      <tr className="bg-[#f2efeb] border-b-4 border-black">
                         <td colSpan={9} className="p-4">
-                          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3 font-sans">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-800 pb-3">
+                          <div className="bg-white border-2 border-black p-4 space-y-3 shadow-[3px_3px_0_#000]">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b-2 border-black pb-2">
                               <div className="flex items-center gap-2">
-                                <Sparkles className="w-4 h-4 text-indigo-400" />
-                                <span className="text-xs font-bold text-zinc-100 uppercase tracking-wider">
-                                  Backlink Record Diagnostic Metadata
+                                <Sparkles className="w-4 h-4 text-[#ff4d00]" />
+                                <span className="text-xs font-mono-brutal font-bold text-black uppercase tracking-wider">
+                                  DIAGNOSTIC_METADATA_HEX
                                 </span>
                               </div>
-                              <div className="flex items-center gap-2 text-xs text-zinc-400 font-mono">
-                                <Clock className="w-3.5 h-3.5 text-zinc-500" />
-                                <span>Logged at: {log.createdAt ? new Date(log.createdAt).toLocaleString() : 'Just now'}</span>
+                              <div className="flex items-center gap-2 text-xs text-zinc-600 font-mono-brutal font-bold">
+                                <Clock className="w-3.5 h-3.5 text-black" />
+                                <span>TIMESTAMP: {log.createdAt ? new Date(log.createdAt).toLocaleString() : 'JUST NOW'}</span>
                               </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                               {/* Full Generated Backlink with One-Click Copy */}
-                              <div className="bg-zinc-950 p-3 rounded-xl border border-zinc-800 space-y-1.5">
-                                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block">
-                                  Full Generated Backlink URL
+                              <div className="bg-[#f2efeb] p-3 border-2 border-black space-y-1.5">
+                                <span className="text-[11px] font-mono-brutal font-bold text-black uppercase tracking-wider block">
+                                  FULL GENERATED BACKLINK URL:
                                 </span>
-                                <div className="flex items-center justify-between gap-2 bg-zinc-900 px-3 py-2 rounded-lg border border-zinc-800">
+                                <div className="flex items-center justify-between gap-2 bg-white px-3 py-2 border-2 border-black">
                                   <a
                                     href={log.generatedBacklink}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="text-cyan-300 hover:underline font-mono text-xs break-all"
+                                    className="text-black hover:text-[#ff4d00] hover:underline font-mono-brutal font-bold text-xs break-all"
                                   >
                                     {log.generatedBacklink}
                                   </a>
                                   <div className="flex items-center gap-1 flex-shrink-0">
                                     <button
                                       onClick={(e) => handleCopyBacklink(e, log.generatedBacklink, log.id)}
-                                      className="p-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-md transition-all"
-                                      title="Copy backlink URL to clipboard"
+                                      className="p-1.5 bg-black hover:bg-zinc-800 text-white transition-all cursor-pointer"
+                                      title="Copy backlink URL"
                                     >
                                       {copiedBacklinkId === log.id ? (
-                                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                                        <Check className="w-3.5 h-3.5 text-[#ff4d00]" />
                                       ) : (
                                         <Copy className="w-3.5 h-3.5" />
                                       )}
@@ -672,34 +677,34 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                                       href={log.generatedBacklink}
                                       target="_blank"
                                       rel="noreferrer"
-                                      className="p-1.5 bg-indigo-950 hover:bg-indigo-900 text-indigo-300 rounded-md transition-all"
+                                      className="p-1.5 bg-[#ff4d00] text-black transition-all"
                                       title="Open in new window"
                                     >
-                                      <ExternalLink className="w-3.5 h-3.5" />
+                                      <ExternalLink className="w-3.5 h-3.5 text-black" />
                                     </a>
                                   </div>
                                 </div>
                               </div>
 
                               {/* Target Website & Directory Details */}
-                              <div className="bg-zinc-950 p-3 rounded-xl border border-zinc-800 space-y-2">
+                              <div className="bg-[#f2efeb] p-3 border-2 border-black space-y-2">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-                                    Target Domain
+                                  <span className="text-[11px] font-mono-brutal font-bold text-black uppercase tracking-wider">
+                                    TARGET DOMAIN:
                                   </span>
-                                  <span className="font-mono text-zinc-200 font-bold">{log.targetUrl}</span>
+                                  <span className="font-mono-brutal text-black font-bold">{log.targetUrl}</span>
                                 </div>
-                                <div className="flex items-center justify-between border-t border-zinc-800/80 pt-1.5">
-                                  <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-                                    Directory Network
+                                <div className="flex items-center justify-between border-t-2 border-black pt-1.5">
+                                  <span className="text-[11px] font-mono-brutal font-bold text-black uppercase tracking-wider">
+                                    DIRECTORY NETWORK:
                                   </span>
-                                  <span className="font-mono text-zinc-300">{log.directoryName} ({log.directoryType})</span>
+                                  <span className="font-mono-brutal text-zinc-700 font-bold">{log.directoryName} ({log.directoryType})</span>
                                 </div>
-                                <div className="flex items-center justify-between border-t border-zinc-800/80 pt-1.5">
-                                  <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-                                    HTTP Response Code
+                                <div className="flex items-center justify-between border-t-2 border-black pt-1.5">
+                                  <span className="text-[11px] font-mono-brutal font-bold text-black uppercase tracking-wider">
+                                    HTTP RESPONSE CODE:
                                   </span>
-                                  <span className="font-mono font-bold text-emerald-400">
+                                  <span className="font-mono-brutal font-bold text-[#ff4d00]">
                                     {log.httpStatus || 200} OK
                                   </span>
                                 </div>
@@ -707,12 +712,12 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                             </div>
 
                             {/* Additional Diagnostic Notes Field */}
-                            <div className="bg-zinc-950 p-3 rounded-xl border border-zinc-800 space-y-1">
-                              <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block flex items-center gap-1">
-                                <Info className="w-3.5 h-3.5 text-cyan-400" />
-                                <span>Verification &amp; Crawl Diagnostic Notes</span>
+                            <div className="bg-[#f2efeb] p-3 border-2 border-black space-y-1">
+                              <span className="text-[11px] font-mono-brutal font-bold text-black uppercase tracking-wider block flex items-center gap-1">
+                                <Info className="w-3.5 h-3.5 text-black" />
+                                <span>VERIFICATION &amp; CRAWL DIAGNOSTIC TELEMETRY:</span>
                               </span>
-                              <p className="text-xs text-zinc-300 font-mono bg-zinc-900/80 p-2.5 rounded-lg border border-zinc-800/80">
+                              <p className="text-xs text-black font-mono-brutal bg-white p-2.5 border-2 border-black">
                                 {log.notes ||
                                   `Verified link placement via GET response. Server returned HTTP ${
                                     log.httpStatus || 200

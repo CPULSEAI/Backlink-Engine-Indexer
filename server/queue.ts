@@ -2,7 +2,7 @@ import axios from 'axios';
 import { WebSocket } from 'ws';
 import { getDb, saveDb } from './db.js';
 import { DIRECTORY_LIST, USER_AGENTS, extractUrlDetails, formatDirectoryUrl } from './directories.js';
-import { verifyLiveBacklink, triggerIndexingWorkflow } from './indexer.js';
+import { verifyLiveBacklink, triggerIndexingWorkflow, parseProxyString } from './indexer.js';
 
 export interface TaskJobConfig {
   submissionId: string;
@@ -18,11 +18,24 @@ export interface TaskJobConfig {
   concurrencyLimit: number; // 1 to 10
   proxyList: string[];
   googleServiceAccountJson?: string;
+  autoRotateProxies?: boolean;
+  autoRotatePatterns?: string[];
+  maxRetriesPerProxy?: number;
+  proxyCooldownSeconds?: number;
+}
+
+export interface DisabledProxyEntry {
+  proxy: string;
+  disabledUntil: number; // ms timestamp
+  reason: string;
+  disabledAt: number;
 }
 
 export class SubmissionJobManager {
   private activeJobs = new Map<string, boolean>();
   private wsClients = new Set<WebSocket>();
+  private consecutive403Counts = new Map<string, number>();
+  private disabledProxies = new Map<string, DisabledProxyEntry>();
 
   public registerClient(ws: WebSocket) {
     this.wsClients.add(ws);
@@ -42,6 +55,105 @@ export class SubmissionJobManager {
     this.activeJobs.set(submissionId, false);
   }
 
+  public getDisabledProxies(): DisabledProxyEntry[] {
+    const now = Date.now();
+    const list: DisabledProxyEntry[] = [];
+    for (const [proxy, entry] of this.disabledProxies.entries()) {
+      if (entry.disabledUntil > now) {
+        list.push(entry);
+      } else {
+        this.disabledProxies.delete(proxy);
+        this.consecutive403Counts.delete(proxy);
+      }
+    }
+    return list;
+  }
+
+  public reinstateProxy(proxy: string) {
+    this.disabledProxies.delete(proxy);
+    this.consecutive403Counts.delete(proxy);
+    this.broadcast('proxy_reinstated', { proxy, timestamp: new Date().toISOString() });
+  }
+
+  public recordProxyResult(proxy: string | undefined, statusCode: number) {
+    if (!proxy) return;
+    if (statusCode === 403) {
+      const count = (this.consecutive403Counts.get(proxy) || 0) + 1;
+      this.consecutive403Counts.set(proxy, count);
+      if (count >= 3) {
+        const disabledUntil = Date.now() + 10 * 60 * 1000; // 10 minutes
+        const entry: DisabledProxyEntry = {
+          proxy,
+          disabledUntil,
+          disabledAt: Date.now(),
+          reason: '3 consecutive 403 Forbidden errors detected (Cloudflare/WAF block)'
+        };
+        this.disabledProxies.set(proxy, entry);
+        this.broadcast('proxy_auto_disabled', {
+          proxy,
+          disabledUntil: new Date(disabledUntil).toISOString(),
+          reason: entry.reason,
+          durationMinutes: 10
+        });
+      }
+    } else if (statusCode >= 200 && statusCode < 400) {
+      this.consecutive403Counts.set(proxy, 0);
+    }
+  }
+
+  public getAvailableProxies(proxyList: string[]): string[] {
+    const now = Date.now();
+    return proxyList.filter(p => {
+      const entry = this.disabledProxies.get(p);
+      if (entry && entry.disabledUntil > now) {
+        return false;
+      }
+      if (entry && entry.disabledUntil <= now) {
+        this.disabledProxies.delete(p);
+        this.consecutive403Counts.delete(p);
+      }
+      return true;
+    });
+  }
+
+  /**
+   * Evaluates if HTTP response or error message matches configured error triggers for rotation
+   */
+  private matchErrorPattern(
+    status: number,
+    errorMsg: string,
+    patterns: string[]
+  ): string | null {
+    const defaultPatterns = ['429', '403', '503', 'rate limit', 'forbidden', 'blocked', 'timeout', 'econnreset'];
+    const activePatterns = patterns && patterns.length > 0 ? patterns : defaultPatterns;
+
+    const lowerMsg = (errorMsg || '').toLowerCase();
+    const strStatus = status.toString();
+
+    for (const pat of activePatterns) {
+      const cleanPat = pat.trim().toLowerCase();
+      if (!cleanPat) continue;
+
+      if (cleanPat === '429' && status === 429) {
+        return '429 Rate Limited / Too Many Requests';
+      }
+      if (cleanPat === '403' && status === 403) {
+        return '403 Forbidden / WAF Protection Blocked';
+      }
+      if (cleanPat === '503' && status === 503) {
+        return '503 Service Unavailable';
+      }
+      if (cleanPat === strStatus) {
+        return `HTTP ${status} Detected`;
+      }
+      if (lowerMsg.includes(cleanPat)) {
+        return `Pattern match: "${pat}" (${errorMsg || `HTTP ${status}`})`;
+      }
+    }
+
+    return null;
+  }
+
   public async startJob(config: TaskJobConfig) {
     const db = await getDb();
     const {
@@ -51,7 +163,10 @@ export class SubmissionJobManager {
       selectedDirectoryIds,
       concurrencyLimit,
       proxyList,
-      googleServiceAccountJson
+      googleServiceAccountJson,
+      autoRotateProxies = true,
+      autoRotatePatterns = ['429', '403', '503', 'rate limit', 'timeout', 'blocked', 'forbidden'],
+      maxRetriesPerProxy = 2
     } = config;
 
     this.activeJobs.set(submissionId, true);
@@ -75,7 +190,8 @@ export class SubmissionJobManager {
       submissionId,
       totalTasks,
       targetUrlsCount: targetUrls.length,
-      directoriesCount: directoriesToRun.length
+      directoriesCount: directoriesToRun.length,
+      autoRotateEnabled: autoRotateProxies && proxyList.length > 1
     });
 
     // Generate queue of individual directory submissions
@@ -95,8 +211,10 @@ export class SubmissionJobManager {
     let totalConfirmed = 0;
     let totalIndexed = 0;
 
-    // Concurrency worker implementation
-    const worker = async (proxyIndex: number) => {
+    // Concurrency worker implementation with Auto-Rotate Shield
+    const worker = async (workerId: number) => {
+      let currentProxyIndex = workerId % Math.max(proxyList.length, 1);
+
       while (workQueue.length > 0) {
         if (this.activeJobs.get(submissionId) === false) {
           break; // Job cancelled
@@ -109,12 +227,12 @@ export class SubmissionJobManager {
         const generatedBacklink = formatDirectoryUrl(directory, targetUrl);
         const { domain } = extractUrlDetails(targetUrl);
 
-        // Pick user agent & optional proxy
-        const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-        const currentProxy = proxyList.length > 0 ? proxyList[proxyIndex % proxyList.length] : undefined;
+        let userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+        const availableProxies = this.getAvailableProxies(proxyList);
+        let currentProxy = availableProxies.length > 0 ? availableProxies[currentProxyIndex % availableProxies.length] : (proxyList[0] || undefined);
 
-        // Random delay (1 to 2.5 seconds) to prevent rate-limiting
-        const randomDelay = Math.floor(1000 + Math.random() * 1500);
+        // Random jitter delay (800ms - 2000ms)
+        const randomDelay = Math.floor(800 + Math.random() * 1200);
         await new Promise(resolve => setTimeout(resolve, randomDelay));
 
         let submissionStatus = 'Generated';
@@ -124,20 +242,98 @@ export class SubmissionJobManager {
         let pingStatus = 'Pending';
         let notes = '';
 
-        // Step 1: Submit / Trigger directory page
-        try {
-          const configAxios: any = {
-            timeout: 7000,
-            headers: { 'User-Agent': userAgent },
-            validateStatus: () => true
-          };
-          const res = await axios.get(generatedBacklink, configAxios);
-          httpStatus = res.status;
-          submissionStatus = res.status < 400 ? 'Submitted' : `Failed (${res.status})`;
-        } catch (err: any) {
-          submissionStatus = 'Submission Error';
-          httpStatus = err.response?.status || 0;
-          notes = err.message || 'Timeout / Connection failed';
+        let attempt = 0;
+        let success = false;
+
+        // Step 1: Submit / Trigger directory page with auto-rotate retry loop
+        while (attempt <= (autoRotateProxies && proxyList.length > 1 ? maxRetriesPerProxy : 0) && !success) {
+          attempt++;
+          const livePool = this.getAvailableProxies(proxyList);
+          currentProxy = livePool.length > 0 ? livePool[currentProxyIndex % livePool.length] : undefined;
+          userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+
+          try {
+            const configAxios: any = {
+              timeout: 7000,
+              headers: { 'User-Agent': userAgent },
+              validateStatus: () => true
+            };
+            if (currentProxy) {
+              const parsedP = parseProxyString(currentProxy);
+              if (parsedP) configAxios.proxy = parsedP;
+            }
+
+            const res = await axios.get(generatedBacklink, configAxios);
+            httpStatus = res.status;
+
+            // Track proxy consecutive status (auto-disables on 3 consecutive 403s)
+            this.recordProxyResult(currentProxy, res.status);
+
+            // Check for rotation triggers (429, 403, 503, or pattern matches)
+            const matchedPattern = this.matchErrorPattern(res.status, res.statusText || '', autoRotatePatterns);
+
+            if (matchedPattern && autoRotateProxies && proxyList.length > 1) {
+              const oldProxy = currentProxy || 'Direct Gateway';
+              const nextPool = this.getAvailableProxies(proxyList);
+              currentProxyIndex = (currentProxyIndex + 1) % Math.max(nextPool.length, 1);
+              const newProxy = nextPool[currentProxyIndex] || 'Direct Gateway';
+
+              const rotationPayload = {
+                id: `rot_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+                submissionId,
+                oldProxy,
+                newProxy,
+                triggerPattern: matchedPattern,
+                statusCode: res.status,
+                reason: `Auto-Rotate Shield triggered on ${directory.name}: ${matchedPattern}`,
+                timestamp: new Date().toISOString()
+              };
+
+              this.broadcast('proxy_rotated', rotationPayload);
+              notes = `[Auto-Rotated to ${newProxy.split('@')[0]} due to ${matchedPattern}]`;
+
+              // Brief backoff before retry with new proxy
+              await new Promise(r => setTimeout(r, 600));
+              continue;
+            }
+
+            httpStatus = res.status;
+            submissionStatus = res.status < 400 ? 'Submitted' : `Failed (${res.status})`;
+            success = res.status < 400;
+          } catch (err: any) {
+            httpStatus = err.response?.status || 0;
+            this.recordProxyResult(currentProxy, httpStatus);
+
+            const matchedPattern = this.matchErrorPattern(httpStatus, err.message || '', autoRotatePatterns);
+
+            if (matchedPattern && autoRotateProxies && proxyList.length > 1 && attempt <= maxRetriesPerProxy) {
+              const oldProxy = currentProxy || 'Direct Gateway';
+              const nextPool = this.getAvailableProxies(proxyList);
+              currentProxyIndex = (currentProxyIndex + 1) % Math.max(nextPool.length, 1);
+              const newProxy = nextPool[currentProxyIndex] || 'Direct Gateway';
+
+              const rotationPayload = {
+                id: `rot_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+                submissionId,
+                oldProxy,
+                newProxy,
+                triggerPattern: matchedPattern,
+                statusCode: httpStatus,
+                reason: `Auto-Rotate Shield triggered on ${directory.name}: ${matchedPattern}`,
+                timestamp: new Date().toISOString()
+              };
+
+              this.broadcast('proxy_rotated', rotationPayload);
+              notes = `[Auto-Rotated to ${newProxy.split('@')[0]} due to ${matchedPattern}]`;
+
+              await new Promise(r => setTimeout(r, 600));
+              continue;
+            }
+
+            submissionStatus = 'Submission Error';
+            notes = err.message || 'Timeout / Connection failed';
+            break;
+          }
         }
 
         // Step 2: Live Confirmation Verification

@@ -1,81 +1,273 @@
 @import "tailwindcss";
 
 @layer base {
+  :root {
+    --bg: #f8f7f4;
+    --ink: #111113;
+    --accent: #ff4d00;
+    --accent-hover: #e04400;
+    --panel-bg: #ffffff;
+    --border: #111113;
+    --ink-faint: rgba(17, 17, 19, 0.1);
+    --sidebar-width: 260px;
+  }
+
   body {
-    background-color: #09090b;
-    color: #e4e4e7;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: #ff4d00;
+    color: #ffffff;
   }
 }
 
-/* Custom dark scrollbars for Bento Grid feel */
+/* Typography Hierarchy */
+h1, h2, h3, .display, .font-display {
+  font-family: 'Syne', 'Oswald', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+
+.label, .mono, .font-mono-brutal {
+  font-family: 'JetBrains Mono', 'Space Mono', monospace;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+}
+
+/* Status Pills & Badges */
+.status-pill {
+  padding: 2px 8px;
+  background: var(--ink);
+  color: var(--panel-bg);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  font-weight: 700;
+  border-radius: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Design Variation Button Styles */
+.btn {
+  background: var(--ink);
+  color: var(--panel-bg);
+  border: 1px solid var(--ink);
+  padding: 8px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.btn:hover {
+  background: #252528;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  border: 1px solid var(--accent);
+}
+
+.btn-primary:hover {
+  background: #ff5c14;
+}
+
+.btn-ghost {
+  background: var(--ink-faint);
+  color: var(--ink);
+  border: 1px solid transparent;
+}
+
+.btn-ghost:hover {
+  background: rgba(17, 17, 19, 0.18);
+}
+
+/* Card & Container Utilities */
+.card {
+  background: var(--panel-bg);
+  border: 1px solid var(--ink-faint);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--ink-faint);
+  padding-bottom: 8px;
+  margin-bottom: 4px;
+}
+
+.stat-val {
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1;
+  font-family: 'Syne', sans-serif;
+  letter-spacing: -0.03em;
+}
+
+.alert-bar {
+  background: var(--ink);
+  color: white;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--border);
+}
+
+/* Brutalist Hard Shadows & Borders */
+.brutal-border {
+  border: 3px solid #000000;
+}
+
+.brutal-border-thick {
+  border: 4px solid #000000;
+}
+
+.brutal-border-heavy {
+  border: 6px solid #000000;
+}
+
+.brutal-shadow {
+  box-shadow: 4px 4px 0 #000000;
+}
+
+.brutal-shadow-sm {
+  box-shadow: 2px 2px 0 #000000;
+}
+
+.brutal-shadow-lg {
+  box-shadow: 6px 6px 0 #000000;
+}
+
+.brutal-shadow-accent {
+  box-shadow: 4px 4px 0 #ff4d00;
+}
+
+.brutal-shadow-accent-lg {
+  box-shadow: 6px 6px 0 #ff4d00;
+}
+
+.brutal-btn {
+  font-family: 'Space Mono', monospace;
+  text-transform: uppercase;
+  font-weight: 700;
+  border: 2px solid #000000;
+  box-shadow: 3px 3px 0 #000000;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.brutal-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 #000000;
+}
+
+.brutal-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #000000;
+}
+
+.brutal-btn-primary {
+  background-color: #ff4d00;
+  color: #000000;
+  border: 3px solid #000000;
+  box-shadow: 4px 4px 0 #000000;
+  font-family: 'Space Mono', monospace;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.brutal-btn-primary:hover {
+  background-color: #ff5c14;
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 #000000;
+}
+
+.brutal-btn-primary:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000000;
+}
+
+.brutal-card {
+  background-color: #ffffff;
+  border: 3px solid #000000;
+  box-shadow: 4px 4px 0 #000000;
+}
+
+.brutal-input {
+  border: 3px solid #000000;
+  background-color: #ffffff;
+  color: #000000;
+  font-family: 'Space Mono', monospace;
+  box-shadow: 3px 3px 0 #000000;
+  outline: none;
+}
+
+.brutal-input:focus {
+  border-color: #000000;
+  box-shadow: 4px 4px 0 #ff4d00;
+}
+
+/* Custom Brutalist scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #09090b;
+  background: #f2efeb;
+  border-left: 2px solid #000000;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
-  border-radius: 9999px;
+  background: #000000;
+  border: 1px solid #f2efeb;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
+  background: #ff4d00;
 }
 
 /* Subtle CSS Keyframe Animations for Live Verification & Progress Feedback */
 @keyframes countPop {
-  0% {
-    transform: scale(1);
-  }
-  40% {
-    transform: scale(1.22);
-  }
-  70% {
-    transform: scale(0.95);
-  }
-  100% {
-    transform: scale(1);
-  }
+  0% { transform: scale(1); }
+  40% { transform: scale(1.15); }
+  70% { transform: scale(0.98); }
+  100% { transform: scale(1); }
 }
 
 @keyframes liveGlowFlash {
-  0% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
-    border-color: rgba(52, 211, 153, 0.9);
-  }
-  50% {
-    box-shadow: 0 0 18px 4px rgba(16, 185, 129, 0.4);
-    border-color: rgba(52, 211, 153, 1);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-  }
+  0% { box-shadow: 0 0 0 0 rgba(255, 77, 0, 0.6); }
+  50% { box-shadow: 0 0 0 4px rgba(255, 77, 0, 0.4); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 77, 0, 0); }
 }
 
 @keyframes progressShimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-@keyframes pingRing {
-  0% {
-    transform: scale(0.95);
-    opacity: 0.8;
-  }
-  100% {
-    transform: scale(1.4);
-    opacity: 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 .animate-count-pop {
@@ -84,20 +276,5 @@
 
 .animate-live-glow {
   animation: liveGlowFlash 0.75s ease-out;
-}
-
-.animate-progress-shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.25) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  background-size: 200% 100%;
-  animation: progressShimmer 2s infinite linear;
-}
-
-.animate-ping-ring {
-  animation: pingRing 1s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 

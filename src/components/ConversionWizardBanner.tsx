@@ -26,93 +26,82 @@ export const ConversionWizardBanner: React.FC<ConversionWizardBannerProps> = ({
   };
 
   return (
-    <div className="bg-gradient-to-br from-zinc-950 via-zinc-900 to-amber-950/20 border border-amber-500/30 rounded-3xl p-5 sm:p-6 shadow-2xl relative overflow-hidden">
-      {/* Decorative ambient background blur */}
-      <div className="absolute -right-16 -top-16 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -left-16 -bottom-16 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="relative z-10 space-y-5">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="space-y-1.5 max-w-2xl">
+    <div className="bg-white border-4 border-black p-6 sm:p-8 shadow-[6px_6px_0_#000000] relative">
+      <div className="space-y-6">
+        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+          <div className="space-y-3 max-w-3xl">
             <div className="flex items-center space-x-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-mono font-bold uppercase tracking-wider flex items-center space-x-1">
-                <Sparkles className="w-3 h-3 text-amber-400" />
-                <span>4-Step Guided CRO Flow</span>
+              <span className="px-2.5 py-1 bg-black text-white font-mono-brutal text-xs font-bold uppercase tracking-wider">
+                [ CONVERSIONWIZARD ]
               </span>
-              <span className="text-zinc-500 text-xs hidden sm:inline">•</span>
-              <span className="text-xs text-zinc-400 font-mono hidden sm:inline">
-                Automated Audit &bull; Competitor Benchmark &bull; ChatGPT Prompt Generator
+              <span className="font-mono-brutal text-xs text-[#ff4d00] font-bold">
+                // SYSTEM_PROTOCOL: OPTIMIZE_AI_STRATEGY
               </span>
             </div>
 
-            <h3 className="text-lg sm:text-xl font-black text-zinc-100 tracking-tight flex items-center space-x-2">
-              <span>ConversionWizard: Why Visitors Leave Without Buying</span>
-            </h3>
+            <h2 className="font-display text-4xl sm:text-6xl font-black text-black leading-[0.9] tracking-tight uppercase">
+              OPTIMIZE AI STRATEGY
+            </h2>
 
-            <p className="text-xs text-zinc-300 leading-relaxed">
-              Identify <strong className="text-amber-400">Trust Gaps</strong> (missing reviews &amp; guarantees), <strong className="text-orange-400">Friction Gaps</strong> (confusing checkout &amp; passive buttons), and <strong className="text-rose-400">Clarity Gaps</strong> (vague headlines). Compare side-by-side with top competitors and copy production-ready AI fix-it prompts.
+            <p className="text-sm sm:text-base text-zinc-800 leading-relaxed font-sans border-t-2 border-black pt-4">
+              Identify trust gaps and friction points. Advanced indexing protocol to outperform competition using precise algorithmic feedback, structured JSON-LD schemas, and AI search engine prompt optimization.
             </p>
           </div>
 
           {/* Quick Launch Form */}
           <form
             onSubmit={handleLaunch}
-            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 lg:w-[420px]"
+            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 lg:w-[420px]"
           >
             <input
               type="text"
               value={quickUrl}
               onChange={(e) => setQuickUrl(e.target.value)}
-              placeholder="Enter website link (e.g. mybrand.com)"
-              className="flex-1 bg-zinc-950/90 border border-zinc-700/80 rounded-2xl px-4 py-2.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500 font-mono shadow-inner"
+              placeholder="DOMAIN_QUERY_HEX:"
+              className="flex-1 bg-white border-4 border-black px-4 py-3 text-xs font-mono-brutal font-bold text-black placeholder-zinc-500 focus:outline-none focus:border-black shadow-[4px_4px_0_#000]"
             />
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 hover:from-amber-400 hover:to-rose-400 text-zinc-950 font-black text-xs tracking-wide shadow-lg shadow-amber-500/20 flex items-center justify-center space-x-1.5 transition-all cursor-pointer shrink-0 active:scale-95"
+              className="px-6 py-3 bg-[#ff4d00] hover:bg-[#ff5c14] text-black font-mono-brutal font-bold text-xs uppercase border-4 border-black shadow-[4px_4px_0_#000] flex items-center justify-center space-x-2 transition-all cursor-pointer shrink-0 active:translate-x-1 active:translate-y-1 active:shadow-[1px_1px_0_#000]"
             >
-              <Wand2 className="w-4 h-4" />
-              <span>Launch Wizard</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <Wand2 className="w-4 h-4 text-black" />
+              <span>RUN_ANALYSIS</span>
             </button>
           </form>
         </div>
 
-        {/* 4 Guided Steps Visual Pipeline */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2 border-t border-zinc-800/80">
-          <div className="p-3 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 space-y-1">
-            <div className="text-[10px] font-mono font-bold text-amber-400 flex items-center space-x-1">
-              <span>Step 1</span>
-              <span className="text-zinc-600">&rarr;</span>
+        {/* 4 Brutalist Pipeline Steps */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t-4 border-black">
+          <div className="p-3.5 bg-[#f2efeb] border-2 border-black shadow-[2px_2px_0_#000] space-y-1">
+            <div className="font-mono-brutal text-[10px] font-bold text-black uppercase tracking-wider">
+              [01] INPUT &amp; GOALS
             </div>
-            <div className="text-xs font-bold text-zinc-200">Input &amp; Goals</div>
-            <div className="text-[10px] text-zinc-400">URL &amp; Niche (Ecom, SaaS, Local)</div>
+            <div className="font-display text-sm font-bold text-black uppercase">Domain &amp; Niche</div>
+            <div className="font-mono-brutal text-[10px] text-zinc-700">Target URL, Ecom/SaaS</div>
           </div>
 
-          <div className="p-3 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 space-y-1">
-            <div className="text-[10px] font-mono font-bold text-orange-400 flex items-center space-x-1">
-              <span>Step 2</span>
-              <span className="text-zinc-600">&rarr;</span>
+          <div className="p-3.5 bg-[#f2efeb] border-2 border-black shadow-[2px_2px_0_#000] space-y-1">
+            <div className="font-mono-brutal text-[10px] font-bold text-[#ff4d00] uppercase tracking-wider">
+              [02] AUTOMATED AUDIT
             </div>
-            <div className="text-xs font-bold text-zinc-200">Automated Audit</div>
-            <div className="text-[10px] text-zinc-400">Speed, Buttons, Clarity &amp; Trust</div>
+            <div className="font-display text-sm font-bold text-black uppercase">Speed &amp; Friction</div>
+            <div className="font-mono-brutal text-[10px] text-zinc-700">Clarity &amp; Trust Gaps</div>
           </div>
 
-          <div className="p-3 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 space-y-1">
-            <div className="text-[10px] font-mono font-bold text-rose-400 flex items-center space-x-1">
-              <span>Step 3</span>
-              <span className="text-zinc-600">&rarr;</span>
+          <div className="p-3.5 bg-[#f2efeb] border-2 border-black shadow-[2px_2px_0_#000] space-y-1">
+            <div className="font-mono-brutal text-[10px] font-bold text-black uppercase tracking-wider">
+              [03] COMPETITOR MATRIX
             </div>
-            <div className="text-xs font-bold text-zinc-200">Competitor Matrix</div>
-            <div className="text-[10px] text-zinc-400">Side-by-side Pricing &amp; CTA fixes</div>
+            <div className="font-display text-sm font-bold text-black uppercase">Market Radar</div>
+            <div className="font-mono-brutal text-[10px] text-zinc-700">Side-by-side pricing &amp; CTAs</div>
           </div>
 
-          <div className="p-3 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 space-y-1">
-            <div className="text-[10px] font-mono font-bold text-emerald-400 flex items-center space-x-1">
-              <span>Step 4</span>
-              <span>✓</span>
+          <div className="p-3.5 bg-black text-white border-2 border-black shadow-[2px_2px_0_#ff4d00] space-y-1">
+            <div className="font-mono-brutal text-[10px] font-bold text-[#ff4d00] uppercase tracking-wider">
+              [04] AI PROMPTS
             </div>
-            <div className="text-xs font-bold text-zinc-200">Dashboard &amp; Prompts</div>
-            <div className="text-[10px] text-zinc-400">Master Prompt + Timeline ROI</div>
+            <div className="font-display text-sm font-bold text-white uppercase">Master Prompt</div>
+            <div className="font-mono-brutal text-[10px] text-zinc-300">Copyable LLM Fixes</div>
           </div>
         </div>
       </div>

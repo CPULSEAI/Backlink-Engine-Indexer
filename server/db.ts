@@ -66,6 +66,24 @@ export async function getDb(): Promise<Database> {
         notes TEXT
       );
 
+      CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        username TEXT UNIQUE NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        role TEXT DEFAULT 'admin',
+        created_at TEXT NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS password_resets (
+        id TEXT PRIMARY KEY,
+        email TEXT NOT NULL,
+        token TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        expires_at INTEGER NOT NULL
+      );
+
       CREATE TABLE IF NOT EXISTS settings (
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL
@@ -86,6 +104,29 @@ export async function getDb(): Promise<Database> {
         last_run_at TEXT,
         next_run_at TEXT,
         config_json TEXT NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS active_sessions (
+        id TEXT PRIMARY KEY,
+        user_email TEXT NOT NULL,
+        token TEXT NOT NULL,
+        device TEXT NOT NULL,
+        ip_address TEXT NOT NULL,
+        location TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        last_active_at TEXT NOT NULL,
+        is_current INTEGER DEFAULT 0
+      );
+
+      CREATE TABLE IF NOT EXISTS login_history (
+        id TEXT PRIMARY KEY,
+        user_email TEXT NOT NULL,
+        login_time TEXT NOT NULL,
+        device TEXT NOT NULL,
+        ip_address TEXT NOT NULL,
+        location TEXT NOT NULL,
+        status TEXT NOT NULL,
+        mfa_used INTEGER DEFAULT 0
       );
     `);
   } catch (schemaErr) {

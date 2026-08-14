@@ -1,6 +1,6 @@
 {
-  "name": "Backlink Engine & Indexer",
-  "description": "Automated URL multi-site backlink generator, live confirmation verifier, and SEO indexing dashboard.",
+  "name": "SEO & GEO Indexing Engine",
+  "description": "Enterprise-grade SEO and Generative Engine Optimization (GEO) indexing platform, AI copilot, real-time submission verification, competitor gap radar, and executive analytics.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

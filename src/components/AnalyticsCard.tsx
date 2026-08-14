@@ -139,10 +139,10 @@ export const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ data, loading, onR
 
   if (!data || (data as any).error) {
     return (
-      <div className="bg-zinc-900/60 backdrop-blur-md border border-zinc-800/80 rounded-2xl p-6 shadow-2xl mb-8 flex items-center justify-center min-h-[220px]">
-        <div className="flex items-center gap-2 text-zinc-400 text-sm font-mono">
-          <RefreshCw className={`w-4 h-4 text-indigo-400 ${loading ? 'animate-spin' : ''}`} />
-          <span>{loading ? 'Loading 30-day submission analytics & peak performance heatmap...' : 'Analytics data currently unavailable.'}</span>
+      <div className="bg-white border-4 border-black p-6 shadow-[6px_6px_0_#000] mb-8 flex items-center justify-center min-h-[220px]">
+        <div className="flex items-center gap-2 text-black text-xs font-mono-brutal font-bold uppercase">
+          <RefreshCw className={`w-4 h-4 text-[#ff4d00] ${loading ? 'animate-spin' : ''}`} />
+          <span>{loading ? 'LOADING 30-DAY INDEXING AUDIT & PERFORMANCE MATRIX...' : 'ANALYTICS DATA CURRENTLY UNAVAILABLE.'}</span>
         </div>
       </div>
     );
@@ -159,12 +159,12 @@ export const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ data, loading, onR
 
   // Heatmap helper for intensity color mapping
   const getHeatmapColor = (successCount: number, total: number) => {
-    if (total === 0 || successCount === 0) return 'bg-zinc-950 border-zinc-800 text-zinc-600';
+    if (total === 0 || successCount === 0) return 'bg-white border-black text-zinc-500';
     const rate = (successCount / total) * 100;
-    if (successCount >= 10 && rate >= 85) return 'bg-emerald-500 text-zinc-950 font-bold border-emerald-400 shadow-sm shadow-emerald-500/30';
-    if (successCount >= 5 || rate >= 70) return 'bg-emerald-600/80 text-white border-emerald-500/80';
-    if (successCount >= 1 || rate >= 50) return 'bg-emerald-800/60 text-emerald-200 border-emerald-700/60';
-    return 'bg-amber-900/40 text-amber-300 border-amber-700/50';
+    if (successCount >= 10 && rate >= 85) return 'bg-[#ff4d00] text-black font-bold border-black shadow-[2px_2px_0_#000]';
+    if (successCount >= 5 || rate >= 70) return 'bg-black text-white font-bold border-black';
+    if (successCount >= 1 || rate >= 50) return 'bg-[#ffe8dd] text-black font-bold border-black';
+    return 'bg-[#f2efeb] text-black border-black';
   };
 
   const handleRunCitationCrawl = () => {
@@ -197,15 +197,15 @@ export const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ data, loading, onR
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-zinc-950/90 border border-zinc-800 p-3 rounded-xl shadow-2xl font-mono text-xs text-zinc-200">
-          <div className="font-bold text-zinc-100 border-b border-zinc-800 pb-1 mb-2">{label}</div>
+        <div className="bg-white border-2 border-black p-3 shadow-[4px_4px_0_#000] font-mono-brutal text-xs text-black">
+          <div className="font-bold border-b-2 border-black pb-1 mb-2 uppercase">{label}</div>
           {payload.map((entry: any, index: number) => (
             <div key={`item-${index}`} className="flex items-center justify-between gap-4 py-0.5">
-              <span className="flex items-center gap-1.5" style={{ color: entry.color }}>
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+              <span className="flex items-center gap-1.5 font-bold uppercase">
+                <span className="w-2 h-2 border border-black" style={{ backgroundColor: entry.color }} />
                 <span>{entry.name}:</span>
               </span>
-              <strong className="text-zinc-100">
+              <strong className="text-black">
                 {entry.value}{entry.dataKey === 'rate' || entry.name?.includes('%') ? '%' : ''}
               </strong>
             </div>
@@ -217,57 +217,59 @@ export const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ data, loading, onR
   };
 
   return (
-    <div className="bg-zinc-900/60 backdrop-blur-md border border-zinc-800/80 rounded-2xl p-5 sm:p-6 shadow-2xl mb-8 space-y-6">
+    <div className="bg-white border-4 border-black p-6 shadow-[6px_6px_0_#000] mb-8 space-y-6">
       {/* Top Header & Main Section Tab Toggle */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-zinc-800/80">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b-4 border-black">
         <div>
-          <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4 text-emerald-400 animate-pulse" />
-            <h2 className="text-base font-bold text-zinc-100">
-              Intelligence &amp; Performance Control Center
-            </h2>
+          <div className="flex items-center space-x-2">
+            <span className="px-2 py-0.5 bg-black text-white font-mono-brutal text-xs font-bold uppercase">
+              [03] METRIC_NODE
+            </span>
+            <span className="font-mono-brutal text-xs text-[#ff4d00] font-bold">
+              // TELEMETRY_MATRIX
+            </span>
           </div>
-          <p className="text-xs text-zinc-400 mt-0.5">
-            Monitor 30-day indexing metrics and track brand citation frequency across ChatGPT &amp; Perplexity AI.
-          </p>
+          <h2 className="font-display text-2xl sm:text-3xl font-bold text-black uppercase tracking-tight mt-1">
+            INTELLIGENCE &amp; PERFORMANCE CONTROL CENTER
+          </h2>
         </div>
 
         {/* Tab Selector */}
-        <div className="flex items-center bg-zinc-950 border border-zinc-800/90 rounded-xl p-1 shrink-0 gap-1">
+        <div className="flex items-center bg-[#f2efeb] border-2 border-black p-1 shrink-0 gap-1 shadow-[2px_2px_0_#000]">
           <button
             onClick={() => setActiveTab('analytics')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono-brutal font-bold uppercase transition-all ${
               activeTab === 'analytics'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-black text-white shadow-[2px_2px_0_#ff4d00]'
+                : 'text-black hover:bg-zinc-200'
             }`}
           >
             <Calendar className="w-3.5 h-3.5" />
-            <span>30-Day Indexing Matrix</span>
+            <span>30-DAY_INDEXING</span>
           </button>
 
           <button
             onClick={() => setActiveTab('ai_citations')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono-brutal font-bold uppercase transition-all ${
               activeTab === 'ai_citations'
-                ? 'bg-purple-600 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-[#ff4d00] text-black shadow-[2px_2px_0_#000]'
+                : 'text-black hover:bg-zinc-200'
             }`}
           >
             <Bot className="w-3.5 h-3.5" />
-            <span>AI Citation Monitor</span>
+            <span>AI_CITATIONS</span>
           </button>
 
           <button
             onClick={() => setActiveTab('proxy_health')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono-brutal font-bold uppercase transition-all ${
               activeTab === 'proxy_health'
-                ? 'bg-cyan-600 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-black text-[#ff4d00] shadow-[2px_2px_0_#000]'
+                : 'text-black hover:bg-zinc-200'
             }`}
           >
-            <Server className="w-3.5 h-3.5 text-cyan-200" />
-            <span>Proxy Health Heatmap</span>
+            <Server className="w-3.5 h-3.5" />
+            <span>PROXY_HEALTH</span>
           </button>
         </div>
       </div>
@@ -283,69 +285,69 @@ export const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ data, loading, onR
       {activeTab === 'analytics' && (
         <div className="space-y-6 animate-fadeIn">
           {/* Controls Bar for Charts */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#f2efeb] p-3 border-2 border-black shadow-[2px_2px_0_#000]">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-zinc-300">View Mode:</span>
-              <div className="flex items-center bg-zinc-950 border border-zinc-800/90 rounded-xl p-1">
+              <span className="text-xs font-mono-brutal font-bold text-black uppercase">VIEW_MODE:</span>
+              <div className="flex items-center bg-white border-2 border-black p-0.5 gap-1">
                 <button
                   onClick={() => setChartType('line')}
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                  className={`flex items-center gap-1 px-2.5 py-1 text-xs font-mono-brutal font-bold uppercase transition-all ${
                     chartType === 'line'
-                      ? 'bg-emerald-600 text-white shadow-sm'
-                      : 'text-zinc-400 hover:text-zinc-200'
+                      ? 'bg-black text-white'
+                      : 'text-black hover:bg-zinc-200'
                   }`}
                   title="30-Day Confirmed Backlinks Success Rate Line Chart"
                 >
-                  <TrendingUp className="w-3.5 h-3.5 text-emerald-300" />
-                  <span className="hidden md:inline">Success Line</span>
+                  <TrendingUp className="w-3.5 h-3.5 text-[#ff4d00]" />
+                  <span className="hidden md:inline">LINE</span>
                 </button>
                 <button
                   onClick={() => setChartType('heatmap')}
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                  className={`flex items-center gap-1 px-2.5 py-1 text-xs font-mono-brutal font-bold uppercase transition-all ${
                     chartType === 'heatmap'
-                      ? 'bg-emerald-600 text-white shadow-sm'
-                      : 'text-zinc-400 hover:text-zinc-200'
+                      ? 'bg-[#ff4d00] text-black'
+                      : 'text-black hover:bg-zinc-200'
                   }`}
                   title="30-Day Success Matrix Heatmap"
                 >
                   <Calendar className="w-3.5 h-3.5" />
-                  <span className="hidden md:inline">Heatmap</span>
+                  <span className="hidden md:inline">HEATMAP</span>
                 </button>
                 <button
                   onClick={() => setChartType('area')}
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                  className={`flex items-center gap-1 px-2.5 py-1 text-xs font-mono-brutal font-bold uppercase transition-all ${
                     chartType === 'area'
-                      ? 'bg-indigo-600 text-white shadow-sm'
-                      : 'text-zinc-400 hover:text-zinc-200'
+                      ? 'bg-black text-white'
+                      : 'text-black hover:bg-zinc-200'
                   }`}
                   title="30-Day Stacked Area Trend"
                 >
                   <TrendingUp className="w-3.5 h-3.5" />
-                  <span className="hidden md:inline">Area</span>
+                  <span className="hidden md:inline">AREA</span>
                 </button>
                 <button
                   onClick={() => setChartType('bar')}
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                  className={`flex items-center gap-1 px-2.5 py-1 text-xs font-mono-brutal font-bold uppercase transition-all ${
                     chartType === 'bar'
-                      ? 'bg-indigo-600 text-white shadow-sm'
-                      : 'text-zinc-400 hover:text-zinc-200'
+                      ? 'bg-black text-white'
+                      : 'text-black hover:bg-zinc-200'
                   }`}
                   title="Daily Bar Comparison"
                 >
                   <BarChart3 className="w-3.5 h-3.5" />
-                  <span className="hidden md:inline">Bar</span>
+                  <span className="hidden md:inline">BAR</span>
                 </button>
                 <button
                   onClick={() => setChartType('pie')}
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                  className={`flex items-center gap-1 px-2.5 py-1 text-xs font-mono-brutal font-bold uppercase transition-all ${
                     chartType === 'pie'
-                      ? 'bg-indigo-600 text-white shadow-sm'
-                      : 'text-zinc-400 hover:text-zinc-200'
+                      ? 'bg-black text-white'
+                      : 'text-black hover:bg-zinc-200'
                   }`}
                   title="Overall Ratio Donut"
                 >
                   <PieChartIcon className="w-3.5 h-3.5" />
-                  <span className="hidden md:inline">Ratio</span>
+                  <span className="hidden md:inline">RATIO</span>
                 </button>
               </div>
             </div>
@@ -353,54 +355,54 @@ export const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ data, loading, onR
             <button
               onClick={onRefresh}
               disabled={loading}
-              className="p-2 bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-300 rounded-xl border border-zinc-700/60 transition-all shadow-sm active:scale-95"
+              className="p-2 bg-white hover:bg-zinc-100 text-black border-2 border-black shadow-[2px_2px_0_#000] transition-all cursor-pointer"
               title="Refresh 30-Day Analytics"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-indigo-400' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#ff4d00]' : ''}`} />
             </button>
           </div>
 
           {/* Metric Cards Row */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="bg-zinc-950/80 border border-zinc-800/80 rounded-xl p-3.5">
-              <span className="block text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Total Submissions</span>
+            <div className="bg-[#f2efeb] border-2 border-black p-4 shadow-[3px_3px_0_#000]">
+              <span className="block text-[10px] font-mono-brutal font-bold uppercase text-zinc-700">TOTAL SUBMISSIONS</span>
               <div className="flex items-baseline justify-between mt-1">
-                <span className="text-lg font-extrabold text-zinc-100 font-mono">{summary.totalLogs.toLocaleString()}</span>
-                <span className="text-xs font-mono text-zinc-400">30 Days</span>
+                <span className="text-2xl font-mono-brutal font-bold text-black">{summary.totalLogs.toLocaleString()}</span>
+                <span className="text-xs font-mono-brutal text-zinc-600">30 DAYS</span>
               </div>
             </div>
 
-            <div className="bg-zinc-950/80 border border-zinc-800/80 rounded-xl p-3.5">
-              <span className="block text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Overall Success Rate</span>
+            <div className="bg-[#f2efeb] border-2 border-black p-4 shadow-[3px_3px_0_#000]">
+              <span className="block text-[10px] font-mono-brutal font-bold uppercase text-zinc-700">SUCCESS RATE</span>
               <div className="flex items-baseline justify-between mt-1">
-                <span className="text-lg font-extrabold text-emerald-400 font-mono">{summary.successRate}%</span>
-                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-                  Verified
+                <span className="text-2xl font-mono-brutal font-bold text-[#ff4d00]">{summary.successRate}%</span>
+                <span className="text-[10px] font-mono-brutal font-bold px-1.5 py-0.5 bg-black text-white uppercase">
+                  VERIFIED
                 </span>
               </div>
             </div>
 
-            <div className="bg-zinc-950/80 border border-zinc-800/80 rounded-xl p-3.5">
-              <span className="block text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Successful Backlinks</span>
+            <div className="bg-[#f2efeb] border-2 border-black p-4 shadow-[3px_3px_0_#000]">
+              <span className="block text-[10px] font-mono-brutal font-bold uppercase text-zinc-700">LIVE 200 OK BACKLINKS</span>
               <div className="flex items-center justify-between mt-1">
-                <span className="text-lg font-extrabold text-emerald-400 font-mono flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span className="text-2xl font-mono-brutal font-bold text-black flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-[#ff4d00]" />
                   {summary.successCount.toLocaleString()}
                 </span>
-                <span className="text-xs text-zinc-500 font-mono">
+                <span className="text-xs text-zinc-600 font-mono-brutal font-bold">
                   {((summary.successCount / (summary.totalLogs || 1)) * 100).toFixed(0)}%
                 </span>
               </div>
             </div>
 
-            <div className="bg-zinc-950/80 border border-zinc-800/80 rounded-xl p-3.5">
-              <span className="block text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Peak Indexing Day</span>
+            <div className="bg-[#f2efeb] border-2 border-black p-4 shadow-[3px_3px_0_#000]">
+              <span className="block text-[10px] font-mono-brutal font-bold uppercase text-zinc-700">PEAK DAY</span>
               <div className="flex items-center justify-between mt-1">
-                <span className="text-xs font-bold text-cyan-300 font-mono flex items-center gap-1">
-                  <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-xs font-mono-brutal font-bold text-black flex items-center gap-1">
+                  <Trophy className="w-3.5 h-3.5 text-[#ff4d00]" />
                   {peakDay ? peakDay.date : 'N/A'}
                 </span>
-                <span className="text-xs font-extrabold text-emerald-400 font-mono">
+                <span className="text-xs font-mono-brutal font-bold text-[#ff4d00]">
                   {peakDay ? `${peakDay.success} OK` : '0'}
                 </span>
               </div>
@@ -409,19 +411,19 @@ export const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ data, loading, onR
 
           {/* Render Heatmap or Recharts */}
           {chartType === 'heatmap' ? (
-            <div className="bg-zinc-950/80 border border-zinc-800/90 rounded-2xl p-4 sm:p-5 space-y-4">
-              <div className="flex items-center justify-between text-xs font-mono">
-                <span className="text-zinc-300 font-bold flex items-center gap-1.5">
-                  <Flame className="w-4 h-4 text-amber-400" />
-                  30-Day Indexing Velocity Heatmap Matrix
+            <div className="bg-white border-4 border-black p-5 space-y-4 shadow-[4px_4px_0_#000]">
+              <div className="flex items-center justify-between text-xs font-mono-brutal font-bold text-black border-b-2 border-black pb-2">
+                <span className="flex items-center gap-1.5">
+                  <Flame className="w-4 h-4 text-[#ff4d00]" />
+                  30-DAY INDEXING VELOCITY MATRIX
                 </span>
-                <div className="flex items-center gap-2 text-[10px] text-zinc-400">
-                  <span>Less</span>
-                  <span className="w-2.5 h-2.5 rounded-sm bg-zinc-950 border border-zinc-800 inline-block" />
-                  <span className="w-2.5 h-2.5 rounded-sm bg-emerald-800/60 border border-emerald-700/60 inline-block" />
-                  <span className="w-2.5 h-2.5 rounded-sm bg-emerald-600/80 border border-emerald-500/80 inline-block" />
-                  <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500 border border-emerald-400 inline-block" />
-                  <span>More</span>
+                <div className="flex items-center gap-2 text-[10px]">
+                  <span>LESS</span>
+                  <span className="w-3 h-3 bg-white border border-black inline-block" />
+                  <span className="w-3 h-3 bg-[#ffe8dd] border border-black inline-block" />
+                  <span className="w-3 h-3 bg-black border border-black inline-block" />
+                  <span className="w-3 h-3 bg-[#ff4d00] border border-black inline-block" />
+                  <span>MORE</span>
                 </div>
               </div>
 
@@ -430,102 +432,92 @@ export const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ data, loading, onR
                   <div
                     key={idx}
                     onClick={() => setSelectedTile(item)}
-                    className={`p-2 rounded-xl border flex flex-col justify-between h-16 cursor-pointer transition-all hover:scale-105 ${getHeatmapColor(
+                    className={`p-2 border-2 border-black flex flex-col justify-between h-16 cursor-pointer transition-all hover:scale-105 ${getHeatmapColor(
                       item.success,
                       item.total
                     )}`}
                   >
-                    <span className="text-[9px] font-mono opacity-80">{item.date}</span>
+                    <span className="text-[9px] font-mono-brutal font-bold">{item.date}</span>
                     <div className="text-right">
-                      <span className="text-sm font-extrabold font-mono">{item.success}</span>
-                      <span className="text-[9px] block opacity-75 font-mono">{item.rate}%</span>
+                      <span className="text-sm font-mono-brutal font-bold">{item.success}</span>
+                      <span className="text-[9px] block font-mono-brutal">{item.rate}%</span>
                     </div>
                   </div>
                 ))}
               </div>
 
               {selectedTile && (
-                <div className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-xs font-mono flex items-center justify-between text-zinc-300 animate-fadeIn">
+                <div className="p-3 bg-[#f2efeb] border-2 border-black text-xs font-mono-brutal font-bold flex items-center justify-between text-black animate-fadeIn">
                   <span>
-                    Selected Date: <strong className="text-emerald-400">{selectedTile.fullDate}</strong> ({selectedTile.date})
+                    SELECTED: <strong className="text-[#ff4d00]">{selectedTile.fullDate}</strong> ({selectedTile.date})
                   </span>
                   <div className="flex items-center gap-3">
-                    <span>Success: <strong className="text-emerald-400">{selectedTile.success}</strong></span>
-                    <span>Failures: <strong className="text-rose-400">{selectedTile.failure}</strong></span>
-                    <span>Rate: <strong className="text-cyan-400">{selectedTile.rate}%</strong></span>
+                    <span>SUCCESS: <strong>{selectedTile.success}</strong></span>
+                    <span>FAILURES: <strong>{selectedTile.failure}</strong></span>
+                    <span>RATE: <strong className="text-[#ff4d00]">{selectedTile.rate}%</strong></span>
                   </div>
                 </div>
               )}
             </div>
           ) : (
-            <div className="h-64 sm:h-72 w-full pt-2">
+            <div className="h-64 sm:h-72 w-full pt-2 bg-white border-4 border-black p-4 shadow-[4px_4px_0_#000]">
               <ResponsiveContainer width="100%" height="100%">
                 {chartType === 'line' ? (
                   <LineChart data={dailyTrend} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                    <XAxis dataKey="date" stroke="#71717a" fontSize={10} tickLine={false} axisLine={{ stroke: '#27272a' }} />
-                    <YAxis yAxisId="rate" orientation="left" stroke="#10b981" fontSize={10} tickLine={false} axisLine={{ stroke: '#27272a' }} unit="%" domain={[0, 100]} />
-                    <YAxis yAxisId="count" orientation="right" stroke="#06b6d4" fontSize={10} tickLine={false} axisLine={{ stroke: '#27272a' }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" vertical={false} />
+                    <XAxis dataKey="date" stroke="#000000" fontSize={10} tickLine={false} />
+                    <YAxis yAxisId="rate" orientation="left" stroke="#ff4d00" fontSize={10} tickLine={false} unit="%" domain={[0, 100]} />
+                    <YAxis yAxisId="count" orientation="right" stroke="#000000" fontSize={10} tickLine={false} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} formatter={(val) => <span className="text-zinc-300 font-semibold">{val}</span>} />
+                    <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} formatter={(val) => <span className="font-mono-brutal font-bold text-black">{val}</span>} />
                     <Line
                       yAxisId="rate"
                       type="monotone"
                       dataKey="rate"
-                      name="Confirmed Success Rate (%)"
-                      stroke="#10b981"
+                      name="SUCCESS RATE (%)"
+                      stroke="#ff4d00"
                       strokeWidth={3}
-                      dot={{ r: 4, fill: '#10b981', strokeWidth: 2, stroke: '#09090b' }}
-                      activeDot={{ r: 7, fill: '#34d399', stroke: '#ffffff', strokeWidth: 2 }}
+                      dot={{ r: 4, fill: '#ff4d00', strokeWidth: 2, stroke: '#000' }}
+                      activeDot={{ r: 7, fill: '#ff4d00', stroke: '#000', strokeWidth: 2 }}
                     />
                     <Line
                       yAxisId="count"
                       type="monotone"
                       dataKey="success"
-                      name="Confirmed Backlinks (Count)"
-                      stroke="#06b6d4"
+                      name="CONFIRMED BACKLINKS"
+                      stroke="#000000"
                       strokeWidth={2}
                       strokeDasharray="4 4"
-                      dot={{ r: 3, fill: '#06b6d4' }}
+                      dot={{ r: 3, fill: '#000000' }}
                     />
                   </LineChart>
                 ) : chartType === 'area' ? (
                   <AreaChart data={dailyTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="gradientSuccess" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
-                      </linearGradient>
-                      <linearGradient id="gradientFailure" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.8} />
-                        <stop offset="95%" stopColor="#f43f5e" stopOpacity={0.0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                    <XAxis dataKey="date" stroke="#71717a" fontSize={10} tickLine={false} axisLine={{ stroke: '#27272a' }} />
-                    <YAxis stroke="#71717a" fontSize={10} tickLine={false} axisLine={{ stroke: '#27272a' }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" vertical={false} />
+                    <XAxis dataKey="date" stroke="#000000" fontSize={10} tickLine={false} />
+                    <YAxis stroke="#000000" fontSize={10} tickLine={false} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} formatter={(val) => <span className="text-zinc-300 capitalize">{val}</span>} />
-                    <Area type="monotone" dataKey="success" name="Success" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#gradientSuccess)" />
-                    <Area type="monotone" dataKey="failure" name="Failure" stroke="#f43f5e" strokeWidth={2} fillOpacity={1} fill="url(#gradientFailure)" />
+                    <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} formatter={(val) => <span className="font-mono-brutal font-bold text-black uppercase">{val}</span>} />
+                    <Area type="monotone" dataKey="success" name="Success" stroke="#000000" strokeWidth={2} fill="#ff4d00" fillOpacity={0.6} />
+                    <Area type="monotone" dataKey="failure" name="Failure" stroke="#000000" strokeWidth={2} fill="#000000" fillOpacity={0.2} />
                   </AreaChart>
                 ) : chartType === 'bar' ? (
                   <BarChart data={dailyTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                    <XAxis dataKey="date" stroke="#71717a" fontSize={10} tickLine={false} axisLine={{ stroke: '#27272a' }} />
-                    <YAxis stroke="#71717a" fontSize={10} tickLine={false} axisLine={{ stroke: '#27272a' }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" vertical={false} />
+                    <XAxis dataKey="date" stroke="#000000" fontSize={10} tickLine={false} />
+                    <YAxis stroke="#000000" fontSize={10} tickLine={false} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} formatter={(val) => <span className="text-zinc-300 capitalize">{val}</span>} />
-                    <Bar dataKey="success" name="Success" fill="#10b981" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="failure" name="Failure" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+                    <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} formatter={(val) => <span className="font-mono-brutal font-bold text-black uppercase">{val}</span>} />
+                    <Bar dataKey="success" name="Success" fill="#ff4d00" stroke="#000" strokeWidth={1.5} />
+                    <Bar dataKey="failure" name="Failure" fill="#000000" stroke="#000" strokeWidth={1.5} />
                   </BarChart>
                 ) : (
                   <PieChart>
                     <Tooltip content={<CustomTooltip />} />
-                    <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} formatter={(val, entry: any) => <span className="text-zinc-200 font-bold">{val} ({entry.payload.value.toLocaleString()} logs)</span>} />
+                    <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} formatter={(val, entry: any) => <span className="font-mono-brutal font-bold text-black uppercase">{val} ({entry.payload.value.toLocaleString()})</span>} />
                     <Pie data={ratioBreakdown} cx="50%" cy="45%" innerRadius={60} outerRadius={85} paddingAngle={4} dataKey="value">
                       {ratioBreakdown.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} stroke="#09090b" strokeWidth={2} />
+                        <Cell key={`cell-${index}`} fill={index === 0 ? '#ff4d00' : '#000000'} stroke="#000000" strokeWidth={2} />
                       ))}
                     </Pie>
                   </PieChart>
@@ -540,24 +532,24 @@ export const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ data, loading, onR
       {activeTab === 'ai_citations' && (
         <div className="space-y-5 animate-fadeIn">
           {/* Settings & Config Bar */}
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 bg-zinc-950 p-4 rounded-xl border border-zinc-800">
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 bg-[#f2efeb] p-4 border-4 border-black shadow-[4px_4px_0_#000]">
             <div className="sm:col-span-4">
-              <label className="block text-[10px] uppercase font-bold text-purple-400 mb-1">Target Brand Name</label>
+              <label className="block text-[10px] font-mono-brutal font-bold uppercase text-black mb-1">TARGET BRAND NAME</label>
               <input
                 type="text"
                 value={brandName}
                 onChange={(e) => setBrandName(e.target.value)}
-                className="w-full bg-zinc-900 border border-purple-500/30 rounded-xl px-3 py-2 text-xs font-mono text-purple-200 font-bold focus:outline-none focus:border-purple-400"
+                className="w-full bg-white border-2 border-black px-3 py-2 text-xs font-mono-brutal text-black font-bold focus:outline-none"
               />
             </div>
 
             <div className="sm:col-span-6">
-              <label className="block text-[10px] uppercase font-bold text-zinc-400 mb-1">Target Keywords (Comma Separated)</label>
+              <label className="block text-[10px] font-mono-brutal font-bold uppercase text-black mb-1">TARGET KEYWORDS (COMMA SEPARATED)</label>
               <input
                 type="text"
                 value={keywordsInput}
                 onChange={(e) => setKeywordsInput(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs font-mono text-zinc-200 focus:outline-none focus:border-purple-400"
+                className="w-full bg-white border-2 border-black px-3 py-2 text-xs font-mono-brutal text-black focus:outline-none"
               />
             </div>
 
@@ -565,58 +557,58 @@ export const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ data, loading, onR
               <button
                 onClick={handleRunCitationCrawl}
                 disabled={isCrawlingCitations}
-                className="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-md shadow-purple-600/20"
+                className="w-full py-2 bg-[#ff4d00] hover:bg-[#ff5c14] text-black font-mono-brutal font-bold text-xs uppercase border-2 border-black shadow-[2px_2px_0_#000] flex items-center justify-center gap-1.5 transition-all cursor-pointer"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isCrawlingCitations ? 'animate-spin' : ''}`} />
-                <span>Crawl AI Engines</span>
+                <span>CRAWL_AI</span>
               </button>
             </div>
           </div>
 
           {/* AI Platform Citation Rate Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="bg-zinc-950/80 border border-purple-500/30 rounded-xl p-3.5">
-              <div className="flex items-center justify-between text-zinc-400 text-[10px] uppercase font-bold">
-                <span>ChatGPT Search Rate</span>
-                <Bot className="w-3.5 h-3.5 text-emerald-400" />
+            <div className="bg-[#f2efeb] border-2 border-black p-4 shadow-[2px_2px_0_#000]">
+              <div className="flex items-center justify-between text-black text-[10px] font-mono-brutal font-bold uppercase">
+                <span>CHATGPT SEARCH RATE</span>
+                <Bot className="w-3.5 h-3.5 text-[#ff4d00]" />
               </div>
               <div className="flex items-baseline justify-between mt-1">
-                <span className="text-xl font-black text-emerald-400 font-mono">{chatGptRate}%</span>
-                <span className="text-[10px] font-mono text-zinc-400">{chatGptCitations}/{chatGptTotal} Prompts</span>
+                <span className="text-xl font-mono-brutal font-bold text-black">{chatGptRate}%</span>
+                <span className="text-[10px] font-mono-brutal text-zinc-600">{chatGptCitations}/{chatGptTotal} PROMPTS</span>
               </div>
             </div>
 
-            <div className="bg-zinc-950/80 border border-indigo-500/30 rounded-xl p-3.5">
-              <div className="flex items-center justify-between text-zinc-400 text-[10px] uppercase font-bold">
-                <span>Perplexity AI Rate</span>
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <div className="bg-[#f2efeb] border-2 border-black p-4 shadow-[2px_2px_0_#000]">
+              <div className="flex items-center justify-between text-black text-[10px] font-mono-brutal font-bold uppercase">
+                <span>PERPLEXITY AI RATE</span>
+                <Sparkles className="w-3.5 h-3.5 text-[#ff4d00]" />
               </div>
               <div className="flex items-baseline justify-between mt-1">
-                <span className="text-xl font-black text-cyan-400 font-mono">{perplexityRate}%</span>
-                <span className="text-[10px] font-mono text-zinc-400">{perplexityCitations}/{perplexityTotal} Prompts</span>
+                <span className="text-xl font-mono-brutal font-bold text-black">{perplexityRate}%</span>
+                <span className="text-[10px] font-mono-brutal text-zinc-600">{perplexityCitations}/{perplexityTotal} PROMPTS</span>
               </div>
             </div>
 
-            <div className="bg-zinc-950/80 border border-zinc-800 rounded-xl p-3.5">
-              <div className="flex items-center justify-between text-zinc-400 text-[10px] uppercase font-bold">
-                <span>Claude &amp; AI Overviews</span>
-                <Globe className="w-3.5 h-3.5 text-indigo-400" />
+            <div className="bg-[#f2efeb] border-2 border-black p-4 shadow-[2px_2px_0_#000]">
+              <div className="flex items-center justify-between text-black text-[10px] font-mono-brutal font-bold uppercase">
+                <span>CLAUDE &amp; OVERVIEWS</span>
+                <Globe className="w-3.5 h-3.5 text-black" />
               </div>
               <div className="flex items-baseline justify-between mt-1">
-                <span className="text-xl font-black text-indigo-300 font-mono">75%</span>
-                <span className="text-[10px] font-mono text-zinc-400">Cited Share</span>
+                <span className="text-xl font-mono-brutal font-bold text-black">75%</span>
+                <span className="text-[10px] font-mono-brutal text-zinc-600">CITED SHARE</span>
               </div>
             </div>
 
-            <div className="bg-zinc-950/80 border border-zinc-800 rounded-xl p-3.5">
-              <div className="flex items-center justify-between text-zinc-400 text-[10px] uppercase font-bold">
-                <span>Overall GEO Consensus</span>
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <div className="bg-[#f2efeb] border-2 border-black p-4 shadow-[2px_2px_0_#000]">
+              <div className="flex items-center justify-between text-black text-[10px] font-mono-brutal font-bold uppercase">
+                <span>OVERALL GEO CONSENSUS</span>
+                <ShieldCheck className="w-3.5 h-3.5 text-[#ff4d00]" />
               </div>
               <div className="flex items-baseline justify-between mt-1">
-                <span className="text-xl font-black text-emerald-300 font-mono">{overallCitationRate}%</span>
-                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-                  High Share
+                <span className="text-xl font-mono-brutal font-bold text-[#ff4d00]">{overallCitationRate}%</span>
+                <span className="text-[10px] font-mono-brutal font-bold px-1.5 py-0.5 bg-black text-white uppercase">
+                  HIGH_SHARE
                 </span>
               </div>
             </div>
@@ -624,75 +616,75 @@ export const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ data, loading, onR
 
           {/* Table Filters */}
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
-              <Search className="w-3.5 h-3.5 text-purple-400" />
-              <span>Target Keyword Prompt Search Results Crawl</span>
+            <h3 className="text-xs font-mono-brutal font-bold text-black uppercase tracking-wider flex items-center gap-1.5">
+              <Search className="w-3.5 h-3.5 text-[#ff4d00]" />
+              <span>TARGET KEYWORD PROMPT SEARCH RESULTS CRAWL</span>
             </h3>
 
             <div className="flex items-center gap-2">
-              <span className="text-[10px] text-zinc-400 font-mono">Platform Filter:</span>
+              <span className="text-[10px] font-mono-brutal font-bold text-black uppercase">PLATFORM:</span>
               <select
                 value={selectedPlatform}
                 onChange={(e) => setSelectedPlatform(e.target.value)}
-                className="bg-zinc-950 border border-zinc-800 rounded-lg px-2 py-1 text-xs text-zinc-300 font-mono focus:outline-none"
+                className="bg-white border-2 border-black px-2 py-1 text-xs font-mono-brutal font-bold text-black focus:outline-none"
               >
-                <option value="all">All AI Platforms</option>
-                <option value="chatgpt">ChatGPT Search</option>
-                <option value="perplexity">Perplexity AI</option>
-                <option value="claude">Claude 3.5</option>
-                <option value="google">Google AI Overviews</option>
+                <option value="all">ALL AI PLATFORMS</option>
+                <option value="chatgpt">CHATGPT SEARCH</option>
+                <option value="perplexity">PERPLEXITY AI</option>
+                <option value="claude">CLAUDE 3.5</option>
+                <option value="google">GOOGLE AI OVERVIEWS</option>
               </select>
             </div>
           </div>
 
           {/* Citation Results Table */}
-          <div className="overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-950">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-zinc-900/80 text-zinc-400 font-mono text-[10px] uppercase border-b border-zinc-800">
+          <div className="overflow-x-auto border-4 border-black bg-white shadow-[4px_4px_0_#000]">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead className="bg-black text-white font-mono-brutal text-[10px] uppercase border-b-4 border-black">
                 <tr>
-                  <th className="p-3">Target Keyword Prompt</th>
-                  <th className="p-3">AI Engine</th>
-                  <th className="p-3">Citation Status</th>
-                  <th className="p-3">Cited Snippet Quote</th>
-                  <th className="p-3 text-right">Actions</th>
+                  <th className="p-3 border-r-2 border-zinc-800">KEYWORD PROMPT</th>
+                  <th className="p-3 border-r-2 border-zinc-800">AI ENGINE</th>
+                  <th className="p-3 border-r-2 border-zinc-800">CITATION STATUS</th>
+                  <th className="p-3 border-r-2 border-zinc-800">SNIPPET QUOTE</th>
+                  <th className="p-3 text-right">ACTIONS</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/60 font-mono">
+              <tbody className="divide-y-2 divide-black font-mono-brutal text-black">
                 {filteredCitations.map((item) => (
-                  <tr key={item.id} className="hover:bg-zinc-900/50 transition-colors">
-                    <td className="p-3 font-semibold text-zinc-100 max-w-xs truncate">
+                  <tr key={item.id} className="hover:bg-[#f2efeb] transition-colors">
+                    <td className="p-3 font-bold text-black max-w-xs truncate border-r-2 border-black">
                       "{item.keyword}"
                     </td>
-                    <td className="p-3 text-zinc-300">
-                      <span className="px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-[10px] font-bold text-purple-300">
+                    <td className="p-3 border-r-2 border-black">
+                      <span className="px-2 py-0.5 bg-[#f2efeb] border border-black text-[10px] font-bold text-black uppercase">
                         {item.platform}
                       </span>
                     </td>
-                    <td className="p-3">
+                    <td className="p-3 border-r-2 border-black">
                       <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase border border-black ${
                           item.citationType === 'Direct Primary Citation'
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                            ? 'bg-[#ff4d00] text-black shadow-[1px_1px_0_#000]'
                             : item.citationType === 'Contextual Mention'
-                            ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                            : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                            ? 'bg-[#f2efeb] text-black'
+                            : 'bg-black text-[#ff4d00]'
                         }`}
                       >
                         {item.citationType === 'Direct Primary Citation' && <CheckCircle2 className="w-3 h-3" />}
                         {item.citationType}
                       </span>
                     </td>
-                    <td className="p-3 text-zinc-400 text-[11px] max-w-md italic">
+                    <td className="p-3 text-zinc-800 text-[11px] max-w-md italic border-r-2 border-black">
                       "{item.snippet}"
                     </td>
                     <td className="p-3 text-right">
                       {onOpenContentGrader && (
                         <button
                           onClick={() => onOpenContentGrader(`https://${brandName.toLowerCase().replace(/\s+/g, '')}.com`, item.keyword)}
-                          className="px-2.5 py-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-[10px] font-bold rounded-lg border border-purple-500/30 transition-all inline-flex items-center gap-1"
+                          className="px-2.5 py-1 bg-black text-white hover:bg-zinc-800 text-[10px] font-bold uppercase border border-black transition-all inline-flex items-center gap-1 shadow-[1px_1px_0_#ff4d00]"
                         >
-                          <span>Grade Page</span>
-                          <ArrowRight className="w-3 h-3" />
+                          <span>GRADE_PAGE</span>
+                          <ArrowRight className="w-3 h-3 text-[#ff4d00]" />
                         </button>
                       )}
                     </td>

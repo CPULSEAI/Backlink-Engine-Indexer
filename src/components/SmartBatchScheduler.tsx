@@ -243,38 +243,38 @@ export const SmartBatchScheduler: React.FC<SmartBatchSchedulerProps> = ({
   };
 
   return (
-    <div className="bg-zinc-900/60 backdrop-blur-md border border-zinc-800/80 rounded-2xl p-5 shadow-2xl space-y-6">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800/80 pb-4">
+    <div className="bg-white border-4 border-black p-5 shadow-[4px_4px_0_#000] mb-8 space-y-6 text-black">
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-black pb-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-gradient-to-tr from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-xl text-amber-400">
-            <Timer className="w-5 h-5 animate-pulse" />
+          <div className="p-2 bg-[#ff4d00] border-2 border-black text-black shadow-[2px_2px_0_#000]">
+            <Timer className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-zinc-100 flex items-center gap-2">
-              <span>SmartBatchScheduler Engine</span>
-              <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-md font-mono font-bold">
-                Automated Indexation Drip Feed
+            <h3 className="text-base font-bold text-black font-mono-brutal flex items-center gap-2 uppercase">
+              <span>SMART BATCH SCHEDULER ENGINE</span>
+              <span className="text-[10px] bg-black text-white px-2 py-0.5 font-bold">
+                DRIP_FEED
               </span>
             </h3>
-            <p className="text-xs text-zinc-400 mt-0.5">
-              Queue batch submission jobs across custom intervals or peak Googlebot crawl windows to ensure steady, natural indexation velocity.
+            <p className="text-xs text-zinc-700 font-mono-brutal mt-0.5">
+              Queue batch submission jobs across custom intervals or peak Googlebot windows for natural indexation velocity.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap font-mono-brutal">
           <button
             onClick={() => setIsCreatingNew(!isCreatingNew)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-amber-600/20 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#ff4d00] hover:bg-[#ff5c14] text-black font-bold text-xs border-2 border-black shadow-[2px_2px_0_#000] transition-all cursor-pointer uppercase"
           >
             <Plus className="w-4 h-4" />
-            <span>{isCreatingNew ? 'Close Form' : 'Schedule New Batch'}</span>
+            <span>{isCreatingNew ? 'CLOSE FORM' : 'SCHEDULE NEW BATCH'}</span>
           </button>
 
           <button
             onClick={fetchScheduledJobs}
-            className="p-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-xl border border-zinc-700 transition-all"
+            className="p-1.5 bg-[#f2efeb] hover:bg-white text-black border-2 border-black transition-all cursor-pointer shadow-[2px_2px_0_#000]"
             title="Refresh active schedules"
           >
             <RotateCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -283,7 +283,7 @@ export const SmartBatchScheduler: React.FC<SmartBatchSchedulerProps> = ({
           {isOpenModal && onCloseModal && (
             <button
               onClick={onCloseModal}
-              className="p-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-zinc-200 rounded-xl transition-all"
+              className="p-1.5 bg-[#f2efeb] hover:bg-white text-black border-2 border-black transition-all cursor-pointer shadow-[2px_2px_0_#000]"
             >
               <X className="w-4 h-4" />
             </button>
@@ -293,61 +293,61 @@ export const SmartBatchScheduler: React.FC<SmartBatchSchedulerProps> = ({
 
       {/* Preset Strategy Quick-Selector Cards */}
       {!isCreatingNew && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 font-mono-brutal">
           {/* Preset 1 */}
           <button
             onClick={() => applyPreset('drip')}
-            className="bg-zinc-950/80 hover:bg-zinc-900/90 border border-zinc-800/80 hover:border-amber-500/40 p-3.5 rounded-xl text-left transition-all group space-y-1"
+            className="bg-[#f2efeb] hover:bg-white border-2 border-black p-3.5 text-left transition-all group space-y-1 shadow-[2px_2px_0_#000] cursor-pointer"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-amber-300 flex items-center gap-1 font-mono">
-                <Zap className="w-3.5 h-3.5 text-amber-400" />
-                <span>Organic Drip-Feed</span>
+              <span className="text-xs font-bold text-black flex items-center gap-1 uppercase">
+                <Zap className="w-3.5 h-3.5 text-[#ff4d00]" />
+                <span>ORGANIC DRIP-FEED</span>
               </span>
-              <span className="text-[10px] bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded font-mono">
-                5 URLs / 30m
+              <span className="text-[10px] bg-black text-white px-1.5 py-0.5 font-bold">
+                5 URLS / 30M
               </span>
             </div>
-            <p className="text-[11px] text-zinc-400">
-              Distribute backlink submissions gradually to mimic organic site growth and avoid search spam flags.
+            <p className="text-[11px] text-zinc-700 font-sans">
+              Distribute backlink submissions gradually to mimic organic site growth.
             </p>
           </button>
 
           {/* Preset 2 */}
           <button
             onClick={() => applyPreset('googlebot')}
-            className="bg-zinc-950/80 hover:bg-zinc-900/90 border border-zinc-800/80 hover:border-purple-500/40 p-3.5 rounded-xl text-left transition-all group space-y-1"
+            className="bg-[#f2efeb] hover:bg-white border-2 border-black p-3.5 text-left transition-all group space-y-1 shadow-[2px_2px_0_#000] cursor-pointer"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-purple-300 flex items-center gap-1 font-mono">
-                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                <span>Peak Googlebot Window</span>
+              <span className="text-xs font-bold text-black flex items-center gap-1 uppercase">
+                <Sparkles className="w-3.5 h-3.5 text-[#ff4d00]" />
+                <span>PEAK GOOGLEBOT</span>
               </span>
-              <span className="text-[10px] bg-purple-500/10 text-purple-400 px-1.5 py-0.5 rounded font-mono">
-                Nightly 03:00 UTC
+              <span className="text-[10px] bg-[#ff4d00] text-black border border-black px-1.5 py-0.5 font-bold">
+                03:00 UTC
               </span>
             </div>
-            <p className="text-[11px] text-zinc-400">
-              Fire batches during high search crawler density windows for maximum instant discovery.
+            <p className="text-[11px] text-zinc-700 font-sans">
+              Fire batches during high search crawler density windows for maximum discovery.
             </p>
           </button>
 
           {/* Preset 3 */}
           <button
             onClick={() => applyPreset('staggered')}
-            className="bg-zinc-950/80 hover:bg-zinc-900/90 border border-zinc-800/80 hover:border-cyan-500/40 p-3.5 rounded-xl text-left transition-all group space-y-1"
+            className="bg-[#f2efeb] hover:bg-white border-2 border-black p-3.5 text-left transition-all group space-y-1 shadow-[2px_2px_0_#000] cursor-pointer"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-cyan-300 flex items-center gap-1 font-mono">
-                <Clock className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Staggered Index Buffer</span>
+              <span className="text-xs font-bold text-black flex items-center gap-1 uppercase">
+                <Clock className="w-3.5 h-3.5 text-[#ff4d00]" />
+                <span>STAGGERED BUFFER</span>
               </span>
-              <span className="text-[10px] bg-cyan-500/10 text-cyan-400 px-1.5 py-0.5 rounded font-mono">
-                10 URLs / 1h
+              <span className="text-[10px] bg-white text-black border border-black px-1.5 py-0.5 font-bold">
+                10 URLS / 1H
               </span>
             </div>
-            <p className="text-[11px] text-zinc-400">
-              Paces indexing requests smoothly across ping networks and Google Indexing API quotas.
+            <p className="text-[11px] text-zinc-700 font-sans">
+              Paces indexing requests smoothly across ping networks and API quotas.
             </p>
           </button>
         </div>
@@ -355,110 +355,110 @@ export const SmartBatchScheduler: React.FC<SmartBatchSchedulerProps> = ({
 
       {/* New Scheduled Job Creator Form */}
       {isCreatingNew && (
-        <form onSubmit={handleCreateJob} className="bg-zinc-950 p-4 rounded-xl border border-amber-500/30 space-y-4 animate-fadeIn">
-          <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
-            <span className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1">
-              <Calendar className="w-4 h-4 text-amber-400" />
-              <span>Configure Batch Schedule Queue</span>
+        <form onSubmit={handleCreateJob} className="bg-[#f2efeb] p-4 border-2 border-black space-y-4 shadow-[3px_3px_0_#000] font-mono-brutal">
+          <div className="flex items-center justify-between border-b-2 border-black pb-2">
+            <span className="text-xs font-bold text-black uppercase tracking-wider flex items-center gap-1">
+              <Calendar className="w-4 h-4 text-[#ff4d00]" />
+              <span>CONFIGURE BATCH SCHEDULE QUEUE</span>
             </span>
             <button
               type="button"
               onClick={() => setIsCreatingNew(false)}
-              className="text-xs text-zinc-400 hover:text-zinc-200"
+              className="text-xs text-black font-bold uppercase underline cursor-pointer"
             >
-              Cancel
+              [CANCEL]
             </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Job Title */}
             <div>
-              <label className="block text-xs font-bold text-zinc-300 mb-1">Schedule Batch Name</label>
+              <label className="block text-xs font-bold text-black uppercase mb-1">SCHEDULE BATCH NAME</label>
               <input
                 type="text"
                 placeholder="e.g. Weekly Blog Backlinks Drip"
                 value={jobName}
                 onChange={(e) => setJobName(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-amber-500 font-mono"
+                className="w-full bg-white border-2 border-black px-3 py-1.5 text-xs text-black font-bold focus:outline-none shadow-[2px_2px_0_#000]"
               />
             </div>
 
             {/* Schedule Type */}
             <div>
-              <label className="block text-xs font-bold text-zinc-300 mb-1">Execution Schedule Strategy</label>
+              <label className="block text-xs font-bold text-black uppercase mb-1">EXECUTION STRATEGY</label>
               <select
                 value={scheduleType}
                 onChange={(e: any) => setScheduleType(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-amber-500 font-mono cursor-pointer"
+                className="w-full bg-white border-2 border-black px-3 py-1.5 text-xs text-black font-bold focus:outline-none shadow-[2px_2px_0_#000] cursor-pointer"
               >
-                <option value="INTERVAL">Interval Drip Feed (Run X URLs every Y minutes)</option>
-                <option value="DAILY">Daily Recurring (Run batch every day at set time)</option>
-                <option value="ONCE">Scheduled One-Off Time (Run batch once at future time)</option>
+                <option value="INTERVAL">INTERVAL DRIP FEED (RUN X URLS EVERY Y MINS)</option>
+                <option value="DAILY">DAILY RECURRING (RUN BATCH AT SET TIME)</option>
+                <option value="ONCE">SCHEDULED ONE-OFF TIME</option>
               </select>
             </div>
           </div>
 
           {/* Target URLs Multi-Line Entry */}
           <div>
-            <label className="block text-xs font-bold text-zinc-300 mb-1">
-              Target URLs List (One URL per line)
+            <label className="block text-xs font-bold text-black uppercase mb-1">
+              TARGET URLS LIST (ONE PER LINE)
             </label>
             <textarea
               rows={4}
-              placeholder="https://example.com/blog/page-1&#10;https://example.com/features&#10;https://example.com/pricing"
+              placeholder="https://example.com/blog/page-1&#10;https://example.com/features"
               value={urlsInput}
               onChange={(e) => setUrlsInput(e.target.value)}
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs text-zinc-100 font-mono focus:outline-none focus:border-amber-500 placeholder-zinc-600"
+              className="w-full bg-white border-2 border-black p-3 text-xs text-black font-bold focus:outline-none shadow-[2px_2px_0_#000] placeholder-zinc-400"
             />
           </div>
 
           {/* Batch & Timing Parameters */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-zinc-900/60 p-3 rounded-xl border border-zinc-800">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white p-3 border-2 border-black shadow-[2px_2px_0_#000]">
             <div>
-              <label className="block text-[11px] font-bold text-zinc-400 mb-1">Batch Size (URLs / Run)</label>
+              <label className="block text-[11px] font-bold text-black uppercase mb-1">BATCH SIZE (URLS/RUN)</label>
               <input
                 type="number"
                 min={1}
                 max={50}
                 value={batchSize}
                 onChange={(e) => setBatchSize(Number(e.target.value))}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-zinc-200 font-mono focus:border-amber-500"
+                className="w-full bg-[#f2efeb] border-2 border-black px-2.5 py-1 text-xs text-black font-bold focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-zinc-400 mb-1">Drip Interval (Minutes)</label>
+              <label className="block text-[11px] font-bold text-black uppercase mb-1">INTERVAL (MINS)</label>
               <input
                 type="number"
                 min={5}
                 max={1440}
                 value={intervalMinutes}
                 onChange={(e) => setIntervalMinutes(Number(e.target.value))}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-zinc-200 font-mono focus:border-amber-500"
+                className="w-full bg-[#f2efeb] border-2 border-black px-2.5 py-1 text-xs text-black font-bold focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-zinc-400 mb-1">Scheduled Start Date/Time</label>
+              <label className="block text-[11px] font-bold text-black uppercase mb-1">START DATE/TIME</label>
               <input
                 type="datetime-local"
                 value={scheduledAtDate}
                 onChange={(e) => setScheduledAtDate(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-zinc-200 font-mono focus:border-amber-500"
+                className="w-full bg-[#f2efeb] border-2 border-black px-2.5 py-1 text-xs text-black font-bold focus:outline-none"
               />
             </div>
           </div>
 
           {/* Feature Toggles */}
-          <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-zinc-300">
+          <div className="flex flex-wrap items-center gap-4 text-xs font-mono-brutal text-black">
             <label className="flex items-center gap-1.5 cursor-pointer">
               <input
                 type="checkbox"
                 checked={checkLiveConfirmation}
                 onChange={(e) => setCheckLiveConfirmation(e.target.checked)}
-                className="w-4 h-4 rounded bg-zinc-900 border-zinc-700 text-amber-500 focus:ring-amber-500 accent-amber-500"
+                className="w-4 h-4 border-2 border-black text-black accent-black"
               />
-              <span>Live HTTP 200 Scan</span>
+              <span className="font-bold">LIVE HTTP 200 SCAN</span>
             </label>
 
             <label className="flex items-center gap-1.5 cursor-pointer">
@@ -466,9 +466,9 @@ export const SmartBatchScheduler: React.FC<SmartBatchSchedulerProps> = ({
                 type="checkbox"
                 checked={runGoogleIndexing}
                 onChange={(e) => setRunGoogleIndexing(e.target.checked)}
-                className="w-4 h-4 rounded bg-zinc-900 border-zinc-700 text-amber-500 focus:ring-amber-500 accent-amber-500"
+                className="w-4 h-4 border-2 border-black text-black accent-black"
               />
-              <span>Google Indexing API</span>
+              <span className="font-bold">GOOGLE INDEXING API</span>
             </label>
 
             <label className="flex items-center gap-1.5 cursor-pointer">
@@ -476,42 +476,42 @@ export const SmartBatchScheduler: React.FC<SmartBatchSchedulerProps> = ({
                 type="checkbox"
                 checked={runPingServices}
                 onChange={(e) => setRunPingServices(e.target.checked)}
-                className="w-4 h-4 rounded bg-zinc-900 border-zinc-700 text-amber-500 focus:ring-amber-500 accent-amber-500"
+                className="w-4 h-4 border-2 border-black text-black accent-black"
               />
-              <span>Multi-Ping Broadcast</span>
+              <span className="font-bold">MULTI-PING BROADCAST</span>
             </label>
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-zinc-800">
+          <div className="flex justify-end gap-2 pt-2 border-t-2 border-black">
             <button
               type="button"
               onClick={() => setIsCreatingNew(false)}
-              className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium rounded-xl"
+              className="px-3 py-1.5 bg-white hover:bg-black hover:text-white text-black text-xs font-bold border-2 border-black shadow-[2px_2px_0_#000] cursor-pointer"
             >
-              Cancel
+              CANCEL
             </button>
             <button
               type="submit"
-              className="px-4 py-1.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold text-xs rounded-xl shadow-md transition-all"
+              className="px-4 py-1.5 bg-[#ff4d00] hover:bg-[#ff5c14] text-black font-bold text-xs border-2 border-black shadow-[2px_2px_0_#000] transition-all cursor-pointer"
             >
-              Save &amp; Activate Schedule
+              SAVE &amp; ACTIVATE SCHEDULE
             </button>
           </div>
         </form>
       )}
 
       {/* Active & Scheduled Jobs Table/List */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between text-xs font-bold text-zinc-300 uppercase tracking-wider">
+      <div className="space-y-3 font-mono-brutal">
+        <div className="flex items-center justify-between text-xs font-bold text-black uppercase tracking-wider">
           <span className="flex items-center gap-1.5">
-            <Layers className="w-4 h-4 text-amber-400" />
-            <span>Active &amp; Queued Scheduled Batches ({jobs.length})</span>
+            <Layers className="w-4 h-4 text-[#ff4d00]" />
+            <span>ACTIVE &amp; QUEUED SCHEDULED BATCHES ({jobs.length})</span>
           </span>
         </div>
 
         {jobs.length === 0 ? (
-          <div className="text-center py-10 bg-zinc-950/60 rounded-xl border border-zinc-800 text-zinc-500 text-xs font-sans">
-            No scheduled batch jobs active. Click "Schedule New Batch" above or pick a preset strategy to queue automated indexation drip feeds.
+          <div className="text-center py-10 bg-[#f2efeb] border-2 border-black text-black text-xs font-bold uppercase shadow-[2px_2px_0_#000]">
+            NO SCHEDULED BATCH JOBS ACTIVE. CLICK "SCHEDULE NEW BATCH" ABOVE TO QUEUE AUTOMATED INDEXATION.
           </div>
         ) : (
           <div className="space-y-3">
@@ -523,57 +523,57 @@ export const SmartBatchScheduler: React.FC<SmartBatchSchedulerProps> = ({
               return (
                 <div
                   key={job.id}
-                  className="bg-zinc-950 border border-zinc-800/90 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-zinc-700 transition-all"
+                  className="bg-[#f2efeb] border-2 border-black p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white transition-all shadow-[3px_3px_0_#000]"
                 >
                   <div className="space-y-1.5 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-zinc-100 font-mono">{job.name}</span>
+                      <span className="text-xs font-bold text-black uppercase">{job.name}</span>
                       <span
-                        className={`text-[10px] font-bold font-mono px-2 py-0.5 rounded ${
+                        className={`text-[10px] font-bold px-2 py-0.5 border border-black uppercase ${
                           isCompleted
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                            ? 'bg-black text-white'
                             : isPaused
-                            ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                            : 'bg-blue-500/10 text-blue-400 border border-blue-500/20 animate-pulse'
+                            ? 'bg-[#ff4d00] text-black'
+                            : 'bg-white text-black'
                         }`}
                       >
                         {job.status}
                       </span>
-                      <span className="text-[10px] text-zinc-500 font-mono bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">
+                      <span className="text-[10px] text-black bg-white px-1.5 py-0.5 border border-black font-bold uppercase">
                         {job.schedule_type}
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-mono text-zinc-400">
-                      <span>Total URLs: <strong className="text-zinc-200">{job.target_urls.length}</strong></span>
-                      <span>Batch Size: <strong className="text-amber-300">{job.batch_size}</strong></span>
-                      <span>Drip Interval: <strong className="text-cyan-300">{job.interval_minutes}m</strong></span>
-                      <span>Progress: <strong className="text-purple-300">{job.completed_batches} / {job.total_batches} Batches</strong></span>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-700">
+                      <span>TOTAL URLS: <strong className="text-black">{job.target_urls.length}</strong></span>
+                      <span>BATCH: <strong className="text-black">{job.batch_size}</strong></span>
+                      <span>INTERVAL: <strong className="text-black">{job.interval_minutes}M</strong></span>
+                      <span>PROGRESS: <strong className="text-black">{job.completed_batches} / {job.total_batches} BATCHES</strong></span>
                     </div>
                   </div>
 
                   {/* Countdown Timer Widget Pill */}
                   <div className="flex items-center gap-3">
-                    <div className="bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-xl font-mono text-xs text-center">
-                      <span className="text-[10px] uppercase text-zinc-500 font-bold block">Next Fire Window</span>
-                      <span className="font-bold text-amber-400 text-sm">{countdown}</span>
+                    <div className="bg-white border-2 border-black px-3 py-1.5 text-xs text-center shadow-[2px_2px_0_#000]">
+                      <span className="text-[9px] uppercase text-zinc-600 font-bold block">NEXT FIRE</span>
+                      <span className="font-bold text-[#ff4d00] text-sm">{countdown}</span>
                     </div>
 
                     {/* Action Buttons */}
                     <div className="flex items-center gap-1.5">
                       <button
                         onClick={() => handleRunNow(job.id)}
-                        className="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1 shadow-sm"
+                        className="px-2.5 py-1.5 bg-black hover:bg-zinc-800 text-white border-2 border-black text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shadow-[2px_2px_0_#000]"
                         title="Force run batch right now"
                       >
                         <Play className="w-3.5 h-3.5 fill-current" />
-                        <span className="hidden sm:inline">Run Now</span>
+                        <span className="hidden sm:inline">RUN NOW</span>
                       </button>
 
                       {isPaused ? (
                         <button
                           onClick={() => handleResumeJob(job.id)}
-                          className="p-1.5 bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 rounded-lg text-xs transition-all"
+                          className="p-1.5 bg-white hover:bg-[#f2efeb] text-black border-2 border-black text-xs transition-all cursor-pointer shadow-[2px_2px_0_#000]"
                           title="Resume schedule"
                         >
                           <Play className="w-3.5 h-3.5" />
@@ -581,7 +581,7 @@ export const SmartBatchScheduler: React.FC<SmartBatchSchedulerProps> = ({
                       ) : (
                         <button
                           onClick={() => handlePauseJob(job.id)}
-                          className="p-1.5 bg-amber-950 hover:bg-amber-900 text-amber-300 border border-amber-800 rounded-lg text-xs transition-all"
+                          className="p-1.5 bg-[#ff4d00] hover:bg-[#ff5c14] text-black border-2 border-black text-xs transition-all cursor-pointer shadow-[2px_2px_0_#000]"
                           title="Pause schedule"
                         >
                           <Pause className="w-3.5 h-3.5" />
@@ -590,7 +590,7 @@ export const SmartBatchScheduler: React.FC<SmartBatchSchedulerProps> = ({
 
                       <button
                         onClick={() => handleDeleteJob(job.id)}
-                        className="p-1.5 bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 rounded-lg text-xs transition-all"
+                        className="p-1.5 bg-white hover:bg-black hover:text-white text-black border-2 border-black text-xs transition-all cursor-pointer shadow-[2px_2px_0_#000]"
                         title="Delete schedule"
                       >
                         <Trash2 className="w-3.5 h-3.5" />

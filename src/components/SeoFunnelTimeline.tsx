@@ -214,130 +214,130 @@ export const SeoFunnelTimeline: React.FC<SeoFunnelTimelineProps> = ({
   };
 
   return (
-    <div className="bg-zinc-900/60 backdrop-blur-md border border-zinc-800/80 rounded-2xl p-5 shadow-2xl mb-8 space-y-6">
+    <div className="bg-white border-4 border-black p-5 shadow-[4px_4px_0_#000] mb-8 space-y-6 text-black">
       {/* Top Section Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800/80 pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-black pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-400">
+            <div className="p-2 bg-[#ff4d00] border-2 border-black text-black shadow-[2px_2px_0_#000]">
               <Layers className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-zinc-100 flex items-center gap-2">
-                <span>SEO Lifecycle Funnel Timeline Widget</span>
-                <span className="text-[10px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2 py-0.5 rounded-md font-mono font-bold">
-                  Interactive Status Tracker
+              <h3 className="text-base font-bold text-black font-mono-brutal flex items-center gap-2 uppercase">
+                <span>SEO LIFECYCLE FUNNEL TIMELINE</span>
+                <span className="text-[10px] bg-black text-white px-2 py-0.5 font-bold">
+                  STATUS_TRACKER
                 </span>
               </h3>
-              <p className="text-xs text-zinc-400 mt-0.5">
-                Visualize URL progression through the complete SEO lifecycle: <strong className="text-blue-400">Submitted</strong> &rarr; <strong className="text-emerald-400">Live (200 OK)</strong> &rarr; <strong className="text-purple-400">Indexed (Google &amp; Ping)</strong>.
+              <p className="text-xs text-zinc-700 font-mono-brutal mt-0.5">
+                Progression pipeline: <strong className="text-black">SUBMITTED</strong> &rarr; <strong className="text-[#ff4d00]">LIVE (200 OK)</strong> &rarr; <strong className="text-black">INDEXED (API + PING)</strong>
               </p>
             </div>
           </div>
         </div>
 
         {/* Global Funnel Conversion Summary Pill */}
-        <div className="flex items-center gap-3 bg-zinc-950 p-2.5 rounded-xl border border-zinc-800 font-mono text-xs">
+        <div className="flex items-center gap-3 bg-[#f2efeb] p-2.5 border-2 border-black font-mono-brutal text-xs shadow-[2px_2px_0_#000]">
           <div className="flex items-center gap-1.5 px-2">
-            <BarChart3 className="w-4 h-4 text-emerald-400" />
-            <span className="text-zinc-400 text-[11px] uppercase font-bold">Funnel Efficiency:</span>
-            <span className="font-bold text-emerald-300 text-sm">{metrics.overallFunnelEfficiency}%</span>
+            <BarChart3 className="w-4 h-4 text-black" />
+            <span className="text-zinc-600 text-[11px] uppercase font-bold">EFFICIENCY:</span>
+            <span className="font-bold text-black text-sm">{metrics.overallFunnelEfficiency}%</span>
           </div>
-          <div className="h-4 w-[1px] bg-zinc-800" />
-          <div className="flex items-center gap-1 px-2 text-zinc-300">
-            <span className="text-zinc-400 text-[11px]">{metrics.liveCount} Live</span>
-            <span className="text-zinc-600">/</span>
-            <span className="text-purple-400 text-[11px] font-bold">{metrics.indexedCount} Indexed</span>
+          <div className="h-4 w-[2px] bg-black" />
+          <div className="flex items-center gap-1 px-2 text-black font-bold">
+            <span>{metrics.liveCount} LIVE</span>
+            <span className="text-zinc-400">/</span>
+            <span className="text-[#ff4d00]">{metrics.indexedCount} INDEXED</span>
           </div>
         </div>
       </div>
 
       {/* Visual Macro Funnel Flow Stages */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative font-mono-brutal">
         {/* Stage 1: Submitted Card */}
-        <div className="bg-zinc-950/80 border border-blue-500/30 rounded-2xl p-4 relative overflow-hidden space-y-2 shadow-lg group hover:border-blue-500/50 transition-all">
+        <div className="bg-[#f2efeb] border-2 border-black p-4 relative space-y-2 shadow-[3px_3px_0_#000]">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400 flex items-center gap-1 font-mono">
-              <Send className="w-3.5 h-3.5 text-blue-400" />
-              <span>Stage 1: Submitted</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-black flex items-center gap-1">
+              <Send className="w-3.5 h-3.5 text-black" />
+              <span>STAGE 1: SUBMITTED</span>
             </span>
-            <span className="text-xs font-bold font-mono text-zinc-100 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+            <span className="text-xs font-bold text-black bg-white px-2 py-0.5 border border-black">
               {metrics.submittedCount} / {metrics.total}
             </span>
           </div>
-          <div className="text-lg font-bold text-zinc-100 flex items-baseline justify-between">
-            <span>Directory Submissions</span>
-            <span className="text-xs font-normal text-zinc-400">100% Dispatched</span>
+          <div className="text-lg font-bold text-black flex items-baseline justify-between">
+            <span className="font-oswald uppercase">DIRECTORY SUBMISSIONS</span>
+            <span className="text-xs font-bold text-zinc-600">100% DISPATCHED</span>
           </div>
-          <div className="w-full bg-zinc-900 h-2 rounded-full overflow-hidden border border-zinc-800">
-            <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full w-full" />
+          <div className="w-full bg-white h-3 border-2 border-black overflow-hidden">
+            <div className="bg-black h-full w-full" />
           </div>
-          <p className="text-[11px] text-zinc-400 pt-1">
-            HTTP POST payloads dispatched to web directories, WHOIS analyzers, and site authority portals.
+          <p className="text-[11px] text-zinc-700 pt-1 font-sans">
+            HTTP POST payloads dispatched to directories, WHOIS portals, and domain authority systems.
           </p>
         </div>
 
         {/* Stage 2: Confirmed Live Card */}
-        <div className="bg-zinc-950/80 border border-emerald-500/30 rounded-2xl p-4 relative overflow-hidden space-y-2 shadow-lg group hover:border-emerald-500/50 transition-all">
+        <div className="bg-[#f2efeb] border-2 border-black p-4 relative space-y-2 shadow-[3px_3px_0_#000]">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1 font-mono">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Stage 2: Live Verified</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#ff4d00] flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#ff4d00]" />
+              <span>STAGE 2: LIVE VERIFIED</span>
             </span>
-            <span className="text-xs font-bold font-mono text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-              {metrics.liveCount} Confirmed
+            <span className="text-xs font-bold text-black bg-[#ff4d00] px-2 py-0.5 border border-black">
+              {metrics.liveCount} CONFIRMED
             </span>
           </div>
-          <div className="text-lg font-bold text-zinc-100 flex items-baseline justify-between">
-            <span>HTTP 200 OK Live Links</span>
-            <span className="text-xs font-bold text-emerald-400">{metrics.liveConversionPct}% Pass Rate</span>
+          <div className="text-lg font-bold text-black flex items-baseline justify-between">
+            <span className="font-oswald uppercase">HTTP 200 OK LIVE LINKS</span>
+            <span className="text-xs font-bold text-[#ff4d00]">{metrics.liveConversionPct}% PASS</span>
           </div>
-          <div className="w-full bg-zinc-900 h-2 rounded-full overflow-hidden border border-zinc-800">
+          <div className="w-full bg-white h-3 border-2 border-black overflow-hidden">
             <div
-              className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500"
+              className="bg-[#ff4d00] h-full transition-all duration-500"
               style={{ width: `${Math.max(5, metrics.liveConversionPct)}%` }}
             />
           </div>
-          <p className="text-[11px] text-zinc-400 pt-1">
-            Direct crawler GET scan verified active backlink placement on public html page.
+          <p className="text-[11px] text-zinc-700 pt-1 font-sans">
+            Direct crawler GET scan verified active backlink placement on public target page.
           </p>
         </div>
 
         {/* Stage 3: Indexed / Pinged Card */}
-        <div className="bg-zinc-950/80 border border-purple-500/30 rounded-2xl p-4 relative overflow-hidden space-y-2 shadow-lg group hover:border-purple-500/50 transition-all">
+        <div className="bg-[#f2efeb] border-2 border-black p-4 relative space-y-2 shadow-[3px_3px_0_#000]">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400 flex items-center gap-1 font-mono">
-              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-              <span>Stage 3: Indexed &amp; Pinged</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-black flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5 text-black" />
+              <span>STAGE 3: INDEXED &amp; PINGED</span>
             </span>
-            <span className="text-xs font-bold font-mono text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">
-              {metrics.indexedCount} Dispatched
+            <span className="text-xs font-bold text-white bg-black px-2 py-0.5 border border-black">
+              {metrics.indexedCount} DISPATCHED
             </span>
           </div>
-          <div className="text-lg font-bold text-zinc-100 flex items-baseline justify-between">
-            <span>Search Engine Index</span>
-            <span className="text-xs font-bold text-purple-400">{metrics.indexedConversionPct}% Index Rate</span>
+          <div className="text-lg font-bold text-black flex items-baseline justify-between">
+            <span className="font-oswald uppercase">SEARCH ENGINE INDEX</span>
+            <span className="text-xs font-bold text-black">{metrics.indexedConversionPct}% RATE</span>
           </div>
-          <div className="w-full bg-zinc-900 h-2 rounded-full overflow-hidden border border-zinc-800">
+          <div className="w-full bg-white h-3 border-2 border-black overflow-hidden">
             <div
-              className="bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 h-full rounded-full transition-all duration-500"
+              className="bg-black h-full transition-all duration-500"
               style={{ width: `${Math.max(5, metrics.indexedConversionPct)}%` }}
             />
           </div>
-          <p className="text-[11px] text-zinc-400 pt-1">
-            Google Indexing API payload accepted &amp; multi-ping broadcast sent to IndexNow, Bing, and RSS aggregators.
+          <p className="text-[11px] text-zinc-700 pt-1 font-sans">
+            Google Indexing API payload accepted &amp; multi-ping broadcast sent to IndexNow and Bing.
           </p>
         </div>
       </div>
 
       {/* Interactive Specific URL Inspector & Lifecycle Timeline Card */}
-      <div className="bg-zinc-950 border border-zinc-800/90 rounded-2xl p-5 space-y-5">
+      <div className="bg-white border-2 border-black p-5 space-y-5 shadow-[3px_3px_0_#000]">
         {/* Search / Select Record Bar */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-zinc-800/80 pb-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b-2 border-black pb-4 font-mono-brutal">
           <div className="flex items-center gap-2">
-            <Globe className="w-4 h-4 text-cyan-400" />
-            <span className="text-xs font-bold text-zinc-200 uppercase tracking-wider">
-              Single-URL Lifecycle Diagnostic Inspector
+            <Globe className="w-4 h-4 text-[#ff4d00]" />
+            <span className="text-xs font-bold text-black uppercase">
+              SINGLE-URL LIFECYCLE DIAGNOSTIC INSPECTOR
             </span>
           </div>
 
@@ -347,10 +347,10 @@ export const SeoFunnelTimeline: React.FC<SeoFunnelTimelineProps> = ({
               <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Filter target URLs..."
+                placeholder="FILTER TARGET URLS..."
                 value={filterSearch}
                 onChange={(e) => setFilterSearch(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-indigo-500 font-mono"
+                className="w-full bg-[#f2efeb] border-2 border-black pl-8 pr-3 py-1.5 text-xs text-black font-bold focus:outline-none focus:bg-white"
               />
             </div>
 
@@ -358,7 +358,7 @@ export const SeoFunnelTimeline: React.FC<SeoFunnelTimelineProps> = ({
             <select
               value={currentSelectedLog?.id || ''}
               onChange={(e) => setSelectedLogId(e.target.value)}
-              className="w-full sm:w-72 bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs font-mono rounded-xl px-3 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer truncate"
+              className="w-full sm:w-72 bg-[#f2efeb] border-2 border-black text-black text-xs font-bold px-3 py-1.5 focus:outline-none focus:bg-white cursor-pointer truncate"
             >
               {filteredLogsList.length === 0 ? (
                 <option value="">No URL log records available</option>
@@ -375,23 +375,23 @@ export const SeoFunnelTimeline: React.FC<SeoFunnelTimelineProps> = ({
 
         {/* Selected URL Record Header */}
         {currentSelectedLog ? (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-zinc-900/80 p-3.5 rounded-xl border border-zinc-800">
+          <div className="space-y-6 font-mono-brutal">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#f2efeb] p-3.5 border-2 border-black shadow-[2px_2px_0_#000]">
               <div className="space-y-1 overflow-hidden">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-zinc-100 font-mono truncate">
+                  <span className="text-xs font-bold text-black truncate">
                     {currentSelectedLog.targetUrl}
                   </span>
-                  <span className="px-2 py-0.5 rounded-md bg-zinc-800 text-[10px] text-zinc-300 font-mono border border-zinc-700">
+                  <span className="px-2 py-0.5 bg-black text-white text-[10px] font-bold">
                     {currentSelectedLog.directoryName} ({currentSelectedLog.directoryType})
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-xs font-mono text-cyan-400">
+                <div className="flex items-center gap-2 text-xs font-mono-brutal text-zinc-800">
                   <a
                     href={currentSelectedLog.generatedBacklink}
                     target="_blank"
                     rel="noreferrer"
-                    className="hover:underline flex items-center gap-1 truncate max-w-md"
+                    className="hover:text-[#ff4d00] hover:underline flex items-center gap-1 truncate max-w-md font-bold"
                   >
                     <span className="truncate">{currentSelectedLog.generatedBacklink}</span>
                     <ExternalLink className="w-3 h-3 flex-shrink-0" />
@@ -402,34 +402,34 @@ export const SeoFunnelTimeline: React.FC<SeoFunnelTimelineProps> = ({
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   onClick={() => handleCopy(currentSelectedLog.generatedBacklink, currentSelectedLog.id)}
-                  className="px-2.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1 border border-zinc-700"
+                  className="px-2.5 py-1.5 bg-white hover:bg-black hover:text-white text-black border-2 border-black text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shadow-[1px_1px_0_#000]"
                 >
                   {copiedId === currentSelectedLog.id ? (
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <Check className="w-3.5 h-3.5 text-[#ff4d00]" />
                   ) : (
                     <Copy className="w-3.5 h-3.5" />
                   )}
-                  <span>{copiedId === currentSelectedLog.id ? 'Copied' : 'Copy URL'}</span>
+                  <span>{copiedId === currentSelectedLog.id ? 'COPIED' : 'COPY URL'}</span>
                 </button>
 
                 <button
                   onClick={handleReverifyClick}
                   disabled={isSimulatingReverify}
-                  className="px-2.5 py-1.5 bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-800/80 rounded-xl text-xs font-bold transition-all flex items-center gap-1 disabled:opacity-50"
+                  className="px-2.5 py-1.5 bg-[#f2efeb] hover:bg-white text-black border-2 border-black text-xs font-bold transition-all flex items-center gap-1 disabled:opacity-50 cursor-pointer shadow-[1px_1px_0_#000]"
                   title="Re-run live HTTP 200 OK scan for this backlink"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${isSimulatingReverify ? 'animate-spin' : ''}`} />
-                  <span>Re-Scan 200 OK</span>
+                  <span>RE-SCAN 200 OK</span>
                 </button>
 
                 <button
                   onClick={handlePingClick}
                   disabled={isSimulatingPing}
-                  className="px-2.5 py-1.5 bg-purple-950/80 hover:bg-purple-900 text-purple-300 border border-purple-800/80 rounded-xl text-xs font-bold transition-all flex items-center gap-1 disabled:opacity-50"
+                  className="px-2.5 py-1.5 bg-[#ff4d00] hover:bg-[#ff5c14] text-black border-2 border-black text-xs font-bold transition-all flex items-center gap-1 disabled:opacity-50 cursor-pointer shadow-[1px_1px_0_#000]"
                   title="Trigger Google Indexing API & IndexNow ping broadcast"
                 >
-                  <Sparkles className={`w-3.5 h-3.5 ${isSimulatingPing ? 'animate-spin text-purple-300' : ''}`} />
-                  <span>Trigger Index Ping</span>
+                  <Sparkles className={`w-3.5 h-3.5 ${isSimulatingPing ? 'animate-spin' : ''}`} />
+                  <span>TRIGGER PING</span>
                 </button>
               </div>
             </div>
@@ -437,30 +437,18 @@ export const SeoFunnelTimeline: React.FC<SeoFunnelTimelineProps> = ({
             {/* Stepper Timeline Diagram */}
             <div className="relative py-2">
               {/* Stepper Connector Bar */}
-              <div className="hidden md:block absolute top-7 left-12 right-12 h-1 bg-zinc-800 rounded-full z-0">
-                <div
-                  className="h-full bg-gradient-to-r from-blue-500 via-emerald-500 to-purple-500 rounded-full transition-all duration-700"
-                  style={{
-                    width:
-                      stageStatus.stage3.status === 'Completed'
-                        ? '100%'
-                        : stageStatus.stage2.status === 'Completed'
-                        ? '50%'
-                        : '10%',
-                  }}
-                />
-              </div>
+              <div className="hidden md:block absolute top-7 left-12 right-12 h-1.5 bg-black z-0" />
 
               {/* 3 Step Nodes */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
                 {/* Node 1: Submitted */}
-                <div className="bg-zinc-900 border border-zinc-800/80 rounded-xl p-4 space-y-3 relative">
+                <div className="bg-white border-2 border-black p-4 space-y-3 relative shadow-[3px_3px_0_#000]">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs shadow-lg transition-all ${
+                      className={`w-9 h-9 border-2 border-black flex items-center justify-center font-bold text-xs shadow-[2px_2px_0_#000] ${
                         stageStatus.stage1.status === 'Completed'
-                          ? 'bg-blue-600 text-white shadow-blue-500/20'
-                          : 'bg-zinc-800 text-zinc-400'
+                          ? 'bg-black text-white'
+                          : 'bg-[#f2efeb] text-black'
                       }`}
                     >
                       {stageStatus.stage1.status === 'Completed' ? (
@@ -470,43 +458,43 @@ export const SeoFunnelTimeline: React.FC<SeoFunnelTimelineProps> = ({
                       )}
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-zinc-100 uppercase tracking-wider">
-                        1. Submitted
+                      <h4 className="text-xs font-bold text-black uppercase font-mono-brutal">
+                        1. SUBMITTED
                       </h4>
-                      <p className="text-[11px] text-zinc-400">{stageStatus.stage1.label}</p>
+                      <p className="text-[11px] text-zinc-600 font-mono-brutal">{stageStatus.stage1.label}</p>
                     </div>
                   </div>
 
-                  <div className="bg-zinc-950 p-2.5 rounded-lg border border-zinc-800/80 text-[11px] font-mono space-y-1">
-                    <div className="flex justify-between text-zinc-400">
-                      <span>Status:</span>
-                      <span className="text-blue-400 font-bold">{currentSelectedLog.submissionStatus}</span>
+                  <div className="bg-[#f2efeb] p-2.5 border-2 border-black text-[11px] font-mono-brutal space-y-1">
+                    <div className="flex justify-between text-zinc-600">
+                      <span>STATUS:</span>
+                      <span className="text-black font-bold">{currentSelectedLog.submissionStatus}</span>
                     </div>
-                    <div className="flex justify-between text-zinc-400">
-                      <span>HTTP Handshake:</span>
-                      <span className="text-emerald-400">{currentSelectedLog.httpStatus || 200} OK</span>
+                    <div className="flex justify-between text-zinc-600">
+                      <span>HTTP HANDSHAKE:</span>
+                      <span className="text-black font-bold">{currentSelectedLog.httpStatus || 200} OK</span>
                     </div>
-                    <div className="flex justify-between text-zinc-400">
-                      <span>Time:</span>
-                      <span className="text-zinc-300">{stageStatus.stage1.date}</span>
+                    <div className="flex justify-between text-zinc-600">
+                      <span>TIME:</span>
+                      <span className="text-black font-bold">{stageStatus.stage1.date}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Node 2: Live Verified */}
-                <div className="bg-zinc-900 border border-zinc-800/80 rounded-xl p-4 space-y-3 relative">
+                <div className="bg-white border-2 border-black p-4 space-y-3 relative shadow-[3px_3px_0_#000]">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs shadow-lg transition-all ${
+                      className={`w-9 h-9 border-2 border-black flex items-center justify-center font-bold text-xs shadow-[2px_2px_0_#000] ${
                         stageStatus.stage2.status === 'Completed'
-                          ? 'bg-emerald-600 text-white shadow-emerald-500/20 animate-pulse'
+                          ? 'bg-[#ff4d00] text-black'
                           : stageStatus.stage2.status === 'Failed'
-                          ? 'bg-rose-600 text-white shadow-rose-500/20'
-                          : 'bg-zinc-800 text-zinc-400'
+                          ? 'bg-black text-white'
+                          : 'bg-[#f2efeb] text-black'
                       }`}
                     >
                       {stageStatus.stage2.status === 'Completed' ? (
-                        <CheckCircle2 className="w-5 h-5 text-white" />
+                        <CheckCircle2 className="w-5 h-5 text-black" />
                       ) : stageStatus.stage2.status === 'Failed' ? (
                         <XCircle className="w-5 h-5 text-white" />
                       ) : (
@@ -514,45 +502,45 @@ export const SeoFunnelTimeline: React.FC<SeoFunnelTimelineProps> = ({
                       )}
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-zinc-100 uppercase tracking-wider">
-                        2. Live Verified
+                      <h4 className="text-xs font-bold text-black uppercase font-mono-brutal">
+                        2. LIVE VERIFIED
                       </h4>
-                      <p className="text-[11px] text-zinc-400">{stageStatus.stage2.label}</p>
+                      <p className="text-[11px] text-zinc-600 font-mono-brutal">{stageStatus.stage2.label}</p>
                     </div>
                   </div>
 
-                  <div className="bg-zinc-950 p-2.5 rounded-lg border border-zinc-800/80 text-[11px] font-mono space-y-1">
-                    <div className="flex justify-between text-zinc-400">
-                      <span>Live Check:</span>
+                  <div className="bg-[#f2efeb] p-2.5 border-2 border-black text-[11px] font-mono-brutal space-y-1">
+                    <div className="flex justify-between text-zinc-600">
+                      <span>LIVE CHECK:</span>
                       <span
                         className={
                           stageStatus.stage2.status === 'Completed'
-                            ? 'text-emerald-400 font-bold'
-                            : 'text-rose-400 font-bold'
+                            ? 'text-black font-bold'
+                            : 'text-[#ff4d00] font-bold'
                         }
                       >
                         {currentSelectedLog.liveVerification}
                       </span>
                     </div>
-                    <div className="flex justify-between text-zinc-400">
-                      <span>Anchor Detection:</span>
-                      <span className="text-cyan-300">Active HTML Tag</span>
+                    <div className="flex justify-between text-zinc-600">
+                      <span>ANCHOR:</span>
+                      <span className="text-black font-bold">ACTIVE HTML TAG</span>
                     </div>
-                    <div className="flex justify-between text-zinc-400">
-                      <span>Scan Result:</span>
-                      <span className="text-zinc-300">{stageStatus.stage2.date}</span>
+                    <div className="flex justify-between text-zinc-600">
+                      <span>RESULT:</span>
+                      <span className="text-black font-bold">{stageStatus.stage2.date}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Node 3: Indexed / Pinged */}
-                <div className="bg-zinc-900 border border-zinc-800/80 rounded-xl p-4 space-y-3 relative">
+                <div className="bg-white border-2 border-black p-4 space-y-3 relative shadow-[3px_3px_0_#000]">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs shadow-lg transition-all ${
+                      className={`w-9 h-9 border-2 border-black flex items-center justify-center font-bold text-xs shadow-[2px_2px_0_#000] ${
                         stageStatus.stage3.status === 'Completed'
-                          ? 'bg-purple-600 text-white shadow-purple-500/20'
-                          : 'bg-zinc-800 text-zinc-400'
+                          ? 'bg-black text-white'
+                          : 'bg-[#f2efeb] text-black'
                       }`}
                     >
                       {stageStatus.stage3.status === 'Completed' ? (
@@ -562,25 +550,25 @@ export const SeoFunnelTimeline: React.FC<SeoFunnelTimelineProps> = ({
                       )}
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-zinc-100 uppercase tracking-wider">
-                        3. Indexed &amp; Pinged
+                      <h4 className="text-xs font-bold text-black uppercase font-mono-brutal">
+                        3. INDEXED &amp; PINGED
                       </h4>
-                      <p className="text-[11px] text-zinc-400">{stageStatus.stage3.label}</p>
+                      <p className="text-[11px] text-zinc-600 font-mono-brutal">{stageStatus.stage3.label}</p>
                     </div>
                   </div>
 
-                  <div className="bg-zinc-950 p-2.5 rounded-lg border border-zinc-800/80 text-[11px] font-mono space-y-1">
-                    <div className="flex justify-between text-zinc-400">
-                      <span>Google API:</span>
-                      <span className="text-purple-400 font-bold">{currentSelectedLog.googleIndexing}</span>
+                  <div className="bg-[#f2efeb] p-2.5 border-2 border-black text-[11px] font-mono-brutal space-y-1">
+                    <div className="flex justify-between text-zinc-600">
+                      <span>GOOGLE API:</span>
+                      <span className="text-black font-bold">{currentSelectedLog.googleIndexing}</span>
                     </div>
-                    <div className="flex justify-between text-zinc-400">
-                      <span>Ping Service:</span>
-                      <span className="text-cyan-400 font-bold">{currentSelectedLog.pingStatus}</span>
+                    <div className="flex justify-between text-zinc-600">
+                      <span>PING SERVICE:</span>
+                      <span className="text-[#ff4d00] font-bold">{currentSelectedLog.pingStatus}</span>
                     </div>
-                    <div className="flex justify-between text-zinc-400">
-                      <span>Broadcaster:</span>
-                      <span className="text-zinc-300">IndexNow + RSS Ping</span>
+                    <div className="flex justify-between text-zinc-600">
+                      <span>BROADCASTER:</span>
+                      <span className="text-black font-bold">INDEXNOW + RSS</span>
                     </div>
                   </div>
                 </div>
@@ -588,8 +576,8 @@ export const SeoFunnelTimeline: React.FC<SeoFunnelTimelineProps> = ({
             </div>
           </div>
         ) : (
-          <div className="text-center py-8 text-zinc-500 text-xs font-sans">
-            No active URL logs available to visualize. Launch a submission batch to begin real-time URL lifecycle tracking.
+          <div className="text-center py-8 text-zinc-600 text-xs font-mono-brutal font-bold uppercase">
+            NO ACTIVE URL LOGS TO VISUALIZE. LAUNCH A SUBMISSION BATCH TO BEGIN REAL-TIME TRACKING.
           </div>
         )}
       </div>
