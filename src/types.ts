@@ -424,6 +424,142 @@ export interface StripeSubscriptionDetails {
   };
 }
 
+// ==========================================
+// CLARITY OVERLOAD CRO AUDIT ENGINE TYPES
+// ==========================================
+
+export type ClarityOverloadRiskLevel = 'LOW OVERLOAD' | 'MEDIUM OVERLOAD' | 'HIGH OVERLOAD' | 'SEVERE OVERLOAD';
+
+export type FeatureDecision = 'KEEP' | 'SIMPLIFY' | 'DE-EMPHASIZE' | 'REMOVE';
+
+export interface FiveSecondTestResult {
+  whatCompanyDoes: string;
+  whoItIsFor: string;
+  primaryProblemSolved: string;
+  actionVisitorsShouldTake: string;
+  score: number; // 1 - 10
+  unclearExplanation?: string;
+}
+
+export interface ClarityOverloadMetrics {
+  featuresAboveTheFold: number;
+  competingMessagesCount: number;
+  userActionsPresented: number;
+  distinctValuePropsCount: number;
+  ctaVariationsCount: number;
+  riskLevel: ClarityOverloadRiskLevel;
+  riskSummary: string;
+}
+
+export interface MessageHierarchyAnalysis {
+  primaryMessage: string;
+  secondaryMessages: string[];
+  distractingMessages: string[];
+  distractionSections: Array<{
+    sectionName: string;
+    whyItDistracts: string;
+    impact: 'HIGH' | 'MEDIUM' | 'LOW';
+  }>;
+}
+
+export interface FeatureBloatItem {
+  id: string;
+  featureName: string;
+  description: string;
+  essentialToConversion: boolean;
+  niceToHave: boolean;
+  causesConfusion: boolean;
+  shouldMoveLower: boolean;
+  recommendation: FeatureDecision;
+  rationale: string;
+  suggestedOutcomeBenefit: string;
+}
+
+export interface CompetitorClarityInsight {
+  competitorName: string;
+  whatTheyCommunicateBetter: string;
+  whatTheyExplainFaster: string;
+  whatTheySimplifyMoreEffectively: string;
+  hiddenDifferentiator: string;
+}
+
+export interface UvpTestResult {
+  score: number; // 1 - 10
+  whyThisProductOverAlternatives: string;
+  currentUvp: string;
+  missingUvp: string;
+  recommendedUvp: string;
+}
+
+export interface CtaClarityTestResult {
+  visibilityRating: 'EXCELLENT' | 'GOOD' | 'POOR' | 'CRITICAL';
+  relevanceRating: 'HIGH' | 'MEDIUM' | 'LOW';
+  quantityScore: number;
+  consistencyScore: number;
+  causesDecisionParalysis: boolean;
+  primaryCtaText: string;
+  suggestedCtaText: string;
+  paralysisExplanation?: string;
+}
+
+export interface CognitiveLoadBreakdown {
+  informationDensity: number; // 1 - 10
+  complexity: number; // 1 - 10
+  mentalEffortRequired: number; // 1 - 10
+  visualOverload: number; // 1 - 10
+  clarity: number; // 1 - 10 (inverted for load)
+  overallClarityOverloadScore: number; // 0 - 100
+  scoreLabel: 'Excellent (0-20)' | 'Good (21-40)' | 'Moderate Risk (41-60)' | 'High Risk (61-80)' | 'Severe Conversion Risk (81-100)';
+}
+
+export interface CroRecommendationItem {
+  id: string;
+  category: 'QUICK_WIN' | 'MEDIUM_IMPROVEMENT' | 'MAJOR_OPPORTUNITY';
+  timeframe: '< 1 day' | '1-7 days' | 'High Impact Project';
+  title: string;
+  action: string;
+  impactOnClarity: 'HIGH' | 'VERY HIGH' | 'MEDIUM';
+  impactOnConversions: 'HIGH' | 'VERY HIGH' | 'MEDIUM';
+  easeOfImplementation: 'VERY EASY' | 'EASY' | 'MODERATE' | 'COMPLEX';
+}
+
+export interface ClarityOverloadAuditResult {
+  id: string;
+  timestamp: string;
+  targetUrl: string;
+  targetDomain: string;
+  pageTitle?: string;
+  executiveSummary: string;
+  clarityRisk: ClarityOverloadRiskLevel;
+  top5Problems: string[];
+  top5Opportunities: string[];
+  singleMostValuableOutcome: string;
+  step1_FiveSecondTest: FiveSecondTestResult;
+  step2_ClarityOverload: ClarityOverloadMetrics;
+  step3_MessageHierarchy: MessageHierarchyAnalysis;
+  step4_FeatureBloat: FeatureBloatItem[];
+  step5_CompetitorComparison: CompetitorClarityInsight;
+  step6_UvpTest: UvpTestResult;
+  step7_CtaClarity: CtaClarityTestResult;
+  step8_CognitiveLoad: CognitiveLoadBreakdown;
+  step9_Recommendations: CroRecommendationItem[];
+  prioritizedActionPlan: Array<{
+    step: number;
+    phase: string;
+    focus: string;
+    expectedClarityLift: string;
+  }>;
+  aiMasterPrompt: string;
+  homepageHeroRewrite: {
+    heroHeadline: string;
+    subheadline: string;
+    singlePrimaryCta: string;
+    guaranteeMicroCopy: string;
+    heroVisualFocus: string;
+  };
+}
+
+
 
 
 

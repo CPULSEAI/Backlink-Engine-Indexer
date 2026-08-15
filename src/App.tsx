@@ -19,6 +19,7 @@ import { OnboardingWizardModal } from './components/OnboardingWizardModal';
 import { SeoFunnelTimeline } from './components/SeoFunnelTimeline';
 import { SmartBatchScheduler } from './components/SmartBatchScheduler';
 import { ConversionWizardModal } from './components/ConversionWizardModal';
+import { ClarityOverloadWizardModal } from './components/ClarityOverloadWizardModal';
 import { ConversionWizardBanner } from './components/ConversionWizardBanner';
 import { WizardsHubDashboard } from './components/WizardsHubDashboard';
 import { Sidebar } from './components/Sidebar';
@@ -103,7 +104,9 @@ export default function App() {
   const [isHelpManualOpen, setIsHelpManualOpen] = useState(false);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isConversionWizardOpen, setIsConversionWizardOpen] = useState(false);
+  const [isClarityWizardOpen, setIsClarityWizardOpen] = useState(false);
   const [wizardInitialUrl, setWizardInitialUrl] = useState('');
+  const [clarityInitialUrl, setClarityInitialUrl] = useState('');
   const [isSchedulerOpen, setIsSchedulerOpen] = useState(false);
   const [profilerDomain, setProfilerDomain] = useState('');
   const [graderUrl, setGraderUrl] = useState('');
@@ -654,6 +657,10 @@ export default function App() {
         onOpenDomainProfiler={() => handleOpenDomainProfiler()}
         onOpenHelpManual={() => setIsHelpManualOpen(true)}
         onOpenWizard={() => setIsIndexingWizardOpen(true)}
+        onOpenClarityWizard={(url) => {
+          setClarityInitialUrl(url || '');
+          setIsClarityWizardOpen(true);
+        }}
         onOpenScheduler={() => setIsSchedulerOpen(true)}
         onQuickSaveWorkspace={handleQuickSaveWorkspace}
         onImportWorkspace={handleImportWorkspaceClick}
@@ -676,6 +683,10 @@ export default function App() {
           onOpenConversionWizard={(url) => {
             setWizardInitialUrl(url || '');
             setIsConversionWizardOpen(true);
+          }}
+          onOpenClarityWizard={(url) => {
+            setClarityInitialUrl(url || '');
+            setIsClarityWizardOpen(true);
           }}
           onOpenOnboardingWizard={() => setIsWizardOpen(true)}
           onOpenGeoBlueprint={() => setIsGeoBlueprintOpen(true)}
@@ -825,6 +836,10 @@ export default function App() {
               onOpenConversionWizard={(url) => {
                 setWizardInitialUrl(url || '');
                 setIsConversionWizardOpen(true);
+              }}
+              onOpenClarityWizard={(url) => {
+                setClarityInitialUrl(url || '');
+                setIsClarityWizardOpen(true);
               }}
               onOpenOnboardingWizard={() => setIsWizardOpen(true)}
               onOpenGeoBlueprint={() => setIsGeoBlueprintOpen(true)}
@@ -1001,6 +1016,13 @@ export default function App() {
         isOpen={isConversionWizardOpen}
         onClose={() => setIsConversionWizardOpen(false)}
         initialUrl={wizardInitialUrl}
+      />
+
+      {/* Clarity Overload CRO Audit Wizard Modal (5-Second Test & UX Cognitive Load) */}
+      <ClarityOverloadWizardModal
+        isOpen={isClarityWizardOpen}
+        onClose={() => setIsClarityWizardOpen(false)}
+        initialUrl={clarityInitialUrl}
       />
 
       {/* 5-Step Enterprise URL Submission & Indexing Wizard Modal */}

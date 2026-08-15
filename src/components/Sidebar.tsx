@@ -30,6 +30,7 @@ import {
   BarChart3,
   Server,
   Key,
+  Brain,
 } from 'lucide-react';
 import { AuthSession, DashboardViewType } from '../types';
 
@@ -41,6 +42,7 @@ interface SidebarProps {
   isMobileOpen: boolean;
   onCloseMobile: () => void;
   onOpenConversionWizard: () => void;
+  onOpenClarityWizard?: () => void;
   onOpenOnboardingWizard: () => void;
   onOpenGeoBlueprint: () => void;
   onOpenDomainProfiler: () => void;
@@ -65,6 +67,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isMobileOpen,
   onCloseMobile,
   onOpenConversionWizard,
+  onOpenClarityWizard,
   onOpenOnboardingWizard,
   onOpenGeoBlueprint,
   onOpenDomainProfiler,
@@ -230,6 +233,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             {(isCollapsed || openCategories.wizards) && (
               <div className="space-y-1.5">
+                {/* Clarity Overload CRO Audit */}
+                {onOpenClarityWizard && (
+                  <button
+                    onClick={() => handleNavClick(onOpenClarityWizard)}
+                    className={`w-full flex items-center ${
+                      isCollapsed ? 'justify-center p-2.5' : 'space-x-3 px-3 py-2'
+                    } text-xs font-bold text-black bg-amber-50 hover:bg-black hover:text-white border-2 border-black shadow-[2px_2px_0_#000] transition-all cursor-pointer uppercase`}
+                    title="Clarity Overload CRO Audit (5-Second Test & UX Cognitive Load)"
+                  >
+                    <Brain className="w-4 h-4 text-amber-600 shrink-0" />
+                    {!isCollapsed && (
+                      <div className="flex items-center justify-between flex-1">
+                        <span>CLARITY OVERLOAD</span>
+                        <span className="text-[9px] px-1.5 py-0.2 bg-amber-400 text-black border border-black font-bold">
+                          5-SEC
+                        </span>
+                      </div>
+                    )}
+                  </button>
+                )}
+
                 {/* ConversionWizard CRO */}
                 <button
                   onClick={() => handleNavClick(onOpenConversionWizard)}

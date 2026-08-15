@@ -20,6 +20,7 @@ import {
   runScheduledJobNow,
 } from './server/scheduler.js';
 import { runConversionAudit } from './server/conversionWizard.js';
+import { runClarityOverloadAudit } from './server/clarityOverloadAudit.js';
 import { getStripe, isStripeConfigured } from './server/stripe.js';
 
 async function startServer() {
@@ -2688,6 +2689,22 @@ Respond ONLY with a valid JSON object strictly matching this schema:
     } catch (err: any) {
       console.error('[API Error] /api/cro/audit:', err);
       res.status(500).json({ error: err.message || 'Failed to complete ConversionWizard audit.' });
+    }
+  });
+
+  // --- CLARITY OVERLOAD CRO AUDIT WIZARD API ---
+  app.post('/api/cro/clarity-overload-audit', async (req, res) => {
+    try {
+      const { targetUrl } = req.body;
+      if (!targetUrl || typeof targetUrl !== 'string' || !targetUrl.trim()) {
+        return res.status(400).json({ error: 'Please provide a valid website URL to audit.' });
+      }
+
+      const result = await runClarityOverloadAudit(targetUrl.trim());
+      res.json({ success: true, audit: result });
+    } catch (err: any) {
+      console.error('[API Error] /api/cro/clarity-overload-audit:', err);
+      res.status(500).json({ error: err.message || 'Failed to complete Clarity Overload CRO audit.' });
     }
   });
 

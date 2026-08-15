@@ -32,6 +32,7 @@ import {
   LogOut,
   FolderTree,
   FileSpreadsheet,
+  Brain,
 } from 'lucide-react';
 import { AuthSession, DashboardViewType, ApiHealthReport } from '../types';
 import { ApiHealthMonitor } from './ApiHealthMonitor';
@@ -50,6 +51,7 @@ interface HeaderProps {
   onOpenDomainProfiler: () => void;
   onOpenHelpManual: () => void;
   onOpenWizard: () => void;
+  onOpenClarityWizard?: () => void;
   onOpenScheduler?: () => void;
   onLockSession?: () => void;
   onQuickSaveWorkspace?: () => void;
@@ -75,6 +77,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenDomainProfiler,
   onOpenHelpManual,
   onOpenWizard,
+  onOpenClarityWizard,
   onOpenScheduler,
   onLockSession,
   onQuickSaveWorkspace,
@@ -360,6 +363,32 @@ export const Header: React.FC<HeaderProps> = ({
                       // AI &amp; SEO INTELLIGENCE
                     </div>
                     <div className="grid grid-cols-1 gap-1">
+                      {/* Clarity Overload CRO Audit Wizard */}
+                      {onOpenClarityWizard && (
+                        <button
+                          type="button"
+                          onClick={() => handleAction(onOpenClarityWizard)}
+                          className="w-full flex items-center justify-between p-2 hover:bg-amber-50 border border-transparent hover:border-black transition-all text-left text-xs font-medium text-black group cursor-pointer"
+                        >
+                          <div className="flex items-center space-x-2.5">
+                            <div className="p-1.5 bg-amber-400 text-black border border-black group-hover:scale-105 transition-transform">
+                              <Brain className="w-3.5 h-3.5" />
+                            </div>
+                            <div>
+                              <div className="font-bold text-black text-xs group-hover:text-amber-800 transition-colors">
+                                Clarity Overload CRO Audit
+                              </div>
+                              <div className="text-[10px] text-zinc-600 font-mono-brutal">
+                                5-Second Test • UX cognitive friction &amp; bloat
+                              </div>
+                            </div>
+                          </div>
+                          <span className="text-[9px] font-mono-brutal bg-black text-amber-400 px-1.5 py-0.5 uppercase font-bold">
+                            5-SEC_TEST
+                          </span>
+                        </button>
+                      )}
+
                       <button
                         type="button"
                         onClick={() => handleAction(onOpenWizard)}
