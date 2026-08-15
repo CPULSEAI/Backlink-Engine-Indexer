@@ -4,6 +4,14 @@ import { getDb, saveDb } from './db.js';
 import { DIRECTORY_LIST, USER_AGENTS, extractUrlDetails, formatDirectoryUrl } from './directories.js';
 import { verifyLiveBacklink, triggerIndexingWorkflow, parseProxyString } from './indexer.js';
 
+export interface RetryPolicyConfig {
+  enabled: boolean;
+  maxRetries: number;
+  initialBackoffMs: number;
+  maxBackoffMs: number;
+  transientCodes: number[];
+}
+
 export interface TaskJobConfig {
   submissionId: string;
   targetUrls: string[];
@@ -22,6 +30,7 @@ export interface TaskJobConfig {
   autoRotatePatterns?: string[];
   maxRetriesPerProxy?: number;
   proxyCooldownSeconds?: number;
+  retryPolicy?: Partial<RetryPolicyConfig>;
 }
 
 export interface DisabledProxyEntry {
@@ -194,16 +203,26 @@ export class SubmissionJobManager {
       autoRotateEnabled: autoRotateProxies && proxyList.length > 1
     });
 
+    // Configuration for Intelligent Retry Policy
+    const retryPolicyConfig: RetryPolicyConfig = {
+      enabled: config.retryPolicy?.enabled !== false,
+      maxRetries: typeof config.retryPolicy?.maxRetries === 'number' ? config.retryPolicy.maxRetries : 3,
+      initialBackoffMs: config.retryPolicy?.initialBackoffMs || 1000,
+      maxBackoffMs: config.retryPolicy?.maxBackoffMs || 15000,
+      transientCodes: config.retryPolicy?.transientCodes || [408, 429, 500, 502, 503, 504],
+    };
+
     // Generate queue of individual directory submissions
     interface WorkUnit {
       targetUrl: string;
       directory: typeof DIRECTORY_LIST[0];
+      retryAttempt?: number;
     }
 
     const workQueue: WorkUnit[] = [];
     for (const url of targetUrls) {
       for (const dir of directoriesToRun) {
-        workQueue.push({ targetUrl: url, directory: dir });
+        workQueue.push({ targetUrl: url, directory: dir, retryAttempt: 0 });
       }
     }
 
@@ -211,7 +230,22 @@ export class SubmissionJobManager {
     let totalConfirmed = 0;
     let totalIndexed = 0;
 
-    // Concurrency worker implementation with Auto-Rotate Shield
+    // Helper to evaluate transient network/HTTP errors for backoff
+    const isTransientError = (status: number, msg: string): boolean => {
+      if (retryPolicyConfig.transientCodes.includes(status)) return true;
+      const lower = (msg || '').toLowerCase();
+      return (
+        lower.includes('econnreset') ||
+        lower.includes('etimedout') ||
+        lower.includes('socket hang up') ||
+        lower.includes('timeout') ||
+        lower.includes('too many requests') ||
+        lower.includes('service unavailable') ||
+        lower.includes('gateway timeout')
+      );
+    };
+
+    // Concurrency worker implementation with Auto-Rotate Shield & Intelligent Backoff Retry
     const worker = async (workerId: number) => {
       let currentProxyIndex = workerId % Math.max(proxyList.length, 1);
 
@@ -223,9 +257,20 @@ export class SubmissionJobManager {
         const unit = workQueue.shift();
         if (!unit) break;
 
-        const { targetUrl, directory } = unit;
+        const { targetUrl, directory, retryAttempt = 0 } = unit;
         const generatedBacklink = formatDirectoryUrl(directory, targetUrl);
         const { domain } = extractUrlDetails(targetUrl);
+
+        if (retryAttempt > 0) {
+          this.broadcast('retry_executed', {
+            submissionId,
+            targetUrl,
+            directoryName: directory.name,
+            attemptNumber: retryAttempt,
+            maxRetries: retryPolicyConfig.maxRetries,
+            timestamp: new Date().toISOString(),
+          });
+        }
 
         let userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
         const availableProxies = this.getAvailableProxies(proxyList);
@@ -334,6 +379,45 @@ export class SubmissionJobManager {
             notes = err.message || 'Timeout / Connection failed';
             break;
           }
+        }
+
+        // Check if failed due to transient HTTP error and eligible for intelligent exponential backoff re-queue
+        if (
+          !success &&
+          retryPolicyConfig.enabled &&
+          retryAttempt < retryPolicyConfig.maxRetries &&
+          isTransientError(httpStatus, notes)
+        ) {
+          const nextAttempt = retryAttempt + 1;
+          const baseBackoff = retryPolicyConfig.initialBackoffMs * Math.pow(2, nextAttempt - 1);
+          const jitter = Math.floor(Math.random() * 500);
+          const backoffDelayMs = Math.min(baseBackoff + jitter, retryPolicyConfig.maxBackoffMs);
+          const nextAttemptAt = new Date(Date.now() + backoffDelayMs).toISOString();
+
+          this.broadcast('retry_scheduled', {
+            id: `retry_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+            submissionId,
+            targetUrl,
+            directoryName: directory.name,
+            attemptNumber: nextAttempt,
+            maxRetries: retryPolicyConfig.maxRetries,
+            triggerStatus: httpStatus,
+            triggerReason: notes || `Transient HTTP ${httpStatus} Error`,
+            backoffDelayMs,
+            nextAttemptAt,
+            timestamp: new Date().toISOString(),
+          });
+
+          // Re-queue work unit with incremented attempt
+          workQueue.push({
+            targetUrl,
+            directory,
+            retryAttempt: nextAttempt,
+          });
+
+          // Sleep for exponential backoff duration before proceeding with next work unit
+          await new Promise(r => setTimeout(r, Math.min(backoffDelayMs, 3000)));
+          continue;
         }
 
         // Step 2: Live Confirmation Verification

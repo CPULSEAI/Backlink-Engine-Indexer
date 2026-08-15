@@ -20,11 +20,24 @@ import {
   Sliders,
   Send,
   Brain,
+  Key,
+  Printer,
+  Bot,
+  CloudLightning,
+  FileText,
+  Check,
 } from 'lucide-react';
+import { SubmissionHistoryItem } from '../types';
+import { LLmCitationSimulator } from './LLmCitationSimulator';
+import { WhitelabelClientPdfGenerator } from './WhitelabelClientPdfGenerator';
+import { BulkSeoValidator } from './BulkSeoValidator';
 
 interface WizardsHubDashboardProps {
   onOpenConversionWizard: (url?: string) => void;
   onOpenClarityWizard?: (url?: string) => void;
+  onOpenGoogleApiWizard?: () => void;
+  onOpenSchemaGeneratorModal?: () => void;
+  onOpenBulkSeoValidator?: () => void;
   onOpenOnboardingWizard: () => void;
   onOpenGeoBlueprint: () => void;
   onOpenDomainProfiler: (domain?: string) => void;
@@ -35,11 +48,18 @@ interface WizardsHubDashboardProps {
   isAutonomousActive: boolean;
   autonomousAccumulatedCount: number;
   autonomousTargetGoal: number;
+  history?: SubmissionHistoryItem[];
+  defaultUrl?: string;
+  defaultAgencyName?: string;
+  initialTab?: 'wizards' | 'citation-sim' | 'whitelabel-pdf' | 'bulk-seo';
 }
 
 export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
   onOpenConversionWizard,
   onOpenClarityWizard,
+  onOpenGoogleApiWizard,
+  onOpenSchemaGeneratorModal,
+  onOpenBulkSeoValidator,
   onOpenOnboardingWizard,
   onOpenGeoBlueprint,
   onOpenDomainProfiler,
@@ -50,7 +70,14 @@ export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
   isAutonomousActive,
   autonomousAccumulatedCount,
   autonomousTargetGoal,
+  history = [],
+  defaultUrl = 'https://careerpulseai.net',
+  defaultAgencyName = 'Apex Search Engine Partners',
+  initialTab = 'wizards',
 }) => {
+  const [activeTab, setActiveTab] = useState<'wizards' | 'citation-sim' | 'whitelabel-pdf' | 'bulk-seo'>(initialTab);
+  const [simUrl, setSimUrl] = useState(defaultUrl);
+  const [simKeyword, setSimKeyword] = useState('AI resume builder and automated backlink indexer for tech talent');
   const [quickCroUrl, setQuickCroUrl] = useState('');
   const [quickClarityUrl, setQuickClarityUrl] = useState('');
   const [quickProfilerDomain, setQuickProfilerDomain] = useState('');
@@ -96,7 +123,7 @@ export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
                 </span>
                 <span className="text-zinc-500 text-xs">•</span>
                 <span className="text-xs text-zinc-400 font-mono">
-                  6 Interactive Guided Wizards &bull; AI Copy &bull; Autonomous Loops
+                  Interactive Guided Wizards &bull; AI Citation Simulator &bull; Whitelabel Reports
                 </span>
               </div>
 
@@ -105,12 +132,40 @@ export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
               </h2>
 
               <p className="text-sm text-zinc-300 max-w-2xl leading-relaxed">
-                Step-by-step intelligence engines engineered to eliminate trust gaps, benchmark against top competitors, execute continuous 100,000 submission loops, and optimize AI search engine rankings.
+                Step-by-step intelligence engines engineered to eliminate trust gaps, setup Google Indexing API service accounts, benchmark citations across Perplexity and ChatGPT, and generate executive white-label client PDF audits.
               </p>
             </div>
 
             {/* Quick Actions Row */}
             <div className="flex flex-wrap items-center gap-2">
+              {onOpenSchemaGeneratorModal && (
+                <button
+                  onClick={onOpenSchemaGeneratorModal}
+                  className="px-4 py-2.5 rounded-2xl bg-purple-500 hover:bg-purple-400 text-zinc-950 font-black text-xs tracking-wide shadow-lg shadow-purple-500/20 flex items-center space-x-2 transition-all cursor-pointer active:scale-95 border-2 border-black"
+                >
+                  <FileCode className="w-4 h-4 text-black" />
+                  <span>Schema Generator</span>
+                </button>
+              )}
+
+              <button
+                onClick={() => setActiveTab('bulk-seo')}
+                className="px-4 py-2.5 rounded-2xl bg-[#ff4d00] hover:bg-[#ff6a2b] text-black font-black text-xs tracking-wide shadow-lg shadow-[#ff4d00]/20 flex items-center space-x-2 transition-all cursor-pointer active:scale-95 border-2 border-black"
+              >
+                <Layers className="w-4 h-4 text-black" />
+                <span>Bulk SEO Validator</span>
+              </button>
+
+              {onOpenGoogleApiWizard && (
+                <button
+                  onClick={onOpenGoogleApiWizard}
+                  className="px-4 py-2.5 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-zinc-950 font-black text-xs tracking-wide shadow-lg shadow-emerald-400/20 flex items-center space-x-2 transition-all cursor-pointer active:scale-95 border-2 border-black"
+                >
+                  <CloudLightning className="w-4 h-4 text-black" />
+                  <span>Google API Wizard</span>
+                </button>
+              )}
+
               {onOpenClarityWizard && (
                 <button
                   onClick={() => onOpenClarityWizard()}
@@ -141,107 +196,466 @@ export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
         </div>
       </div>
 
-      {/* Grid of Interactive Wizards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {/* CARD 0: Clarity Overload CRO Audit Tool */}
-        <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 border-2 border-amber-400/40 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-5 hover:border-amber-400 transition-all group relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
+      {/* Hub Navigation Tabs */}
+      <div className="flex items-center gap-3 border-b-2 border-black dark:border-zinc-700 pb-2 overflow-x-auto">
+        <button
+          onClick={() => setActiveTab('wizards')}
+          className={`px-4 py-2 text-xs font-black uppercase border-2 border-black transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'wizards'
+              ? 'bg-black text-[#ff4d00] shadow-[2px_2px_0_#ff4d00]'
+              : 'bg-white dark:bg-zinc-800 text-black dark:text-zinc-200 hover:bg-zinc-100 shadow-[2px_2px_0_#000]'
+          }`}
+        >
+          <span className="flex items-center gap-1.5">
+            <Sparkles className="w-4 h-4" />
+            <span>WIZARDS &amp; STRATEGY CARDS</span>
+          </span>
+        </button>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="w-12 h-12 rounded-2xl bg-amber-400 p-[1px] shadow-lg shadow-amber-400/20">
-                <div className="w-full h-full bg-zinc-950 rounded-[15px] flex items-center justify-center">
-                  <Brain className="w-6 h-6 text-amber-400" />
+        <button
+          onClick={() => setActiveTab('bulk-seo')}
+          className={`px-4 py-2 text-xs font-black uppercase border-2 border-black transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'bulk-seo'
+              ? 'bg-black text-[#ff4d00] shadow-[2px_2px_0_#ff4d00]'
+              : 'bg-white dark:bg-zinc-800 text-black dark:text-zinc-200 hover:bg-zinc-100 shadow-[2px_2px_0_#000]'
+          }`}
+        >
+          <span className="flex items-center gap-1.5">
+            <Layers className="w-4 h-4 text-[#ff4d00]" />
+            <span>BULK SEO URL VALIDATOR</span>
+          </span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('citation-sim')}
+          className={`px-4 py-2 text-xs font-black uppercase border-2 border-black transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'citation-sim'
+              ? 'bg-black text-[#ff4d00] shadow-[2px_2px_0_#ff4d00]'
+              : 'bg-white dark:bg-zinc-800 text-black dark:text-zinc-200 hover:bg-zinc-100 shadow-[2px_2px_0_#000]'
+          }`}
+        >
+          <span className="flex items-center gap-1.5">
+            <Bot className="w-4 h-4 text-[#ff4d00]" />
+            <span>LLM CITATION SIMULATOR</span>
+          </span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('whitelabel-pdf')}
+          className={`px-4 py-2 text-xs font-black uppercase border-2 border-black transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'whitelabel-pdf'
+              ? 'bg-black text-[#ff4d00] shadow-[2px_2px_0_#ff4d00]'
+              : 'bg-white dark:bg-zinc-800 text-black dark:text-zinc-200 hover:bg-zinc-100 shadow-[2px_2px_0_#000]'
+          }`}
+        >
+          <span className="flex items-center gap-1.5">
+            <Printer className="w-4 h-4 text-emerald-500" />
+            <span>WHITELABEL PDF GENERATOR</span>
+          </span>
+        </button>
+      </div>
+
+      {/* TAB CONTENT: BULK SEO VALIDATOR */}
+      {activeTab === 'bulk-seo' && (
+        <BulkSeoValidator
+          initialUrls={[defaultUrl]}
+        />
+      )}
+
+      {/* TAB CONTENT: CITATION SIMULATOR */}
+      {activeTab === 'citation-sim' && (
+        <LLmCitationSimulator
+          initialUrl={simUrl}
+          initialKeyword={simKeyword}
+        />
+      )}
+
+      {/* TAB CONTENT: WHITELABEL PDF GENERATOR */}
+      {activeTab === 'whitelabel-pdf' && (
+        <WhitelabelClientPdfGenerator
+          history={history}
+          defaultAgencyName={defaultAgencyName}
+          defaultClientName={defaultUrl.replace(/^https?:\/\//i, '').replace(/\/$/, '') || 'CareerPulseAI.net'}
+        />
+      )}
+
+      {/* TAB CONTENT: WIZARDS GRID */}
+      {activeTab === 'wizards' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {/* CARD: Bulk SEO URL Validator & Hierarchy Grader */}
+          <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 border-2 border-emerald-500/40 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-5 hover:border-emerald-500 transition-all group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500 p-[1px] shadow-lg shadow-emerald-500/20">
+                  <div className="w-full h-full bg-zinc-950 rounded-[15px] flex items-center justify-center">
+                    <Layers className="w-6 h-6 text-emerald-400" />
+                  </div>
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold uppercase tracking-wider">
+                  50+ Parallel URLs
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-base font-bold text-zinc-100 group-hover:text-emerald-400 transition-colors">
+                  Bulk SEO URL Validator &amp; Hierarchy Grader
+                </h3>
+                <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                  Run parallel performance audits on 50+ URLs at once to detect canonical mismatches, missing meta-descriptions, and H1/H2 heading hierarchy flaws.
+                </p>
+              </div>
+
+              <div className="p-3 bg-zinc-950 border border-zinc-800 rounded-xl space-y-1.5 text-xs">
+                <div className="flex justify-between text-zinc-400">
+                  <span>Concurrency:</span>
+                  <span className="text-zinc-200 font-mono">Up to 15 Parallel Workers</span>
+                </div>
+                <div className="flex justify-between text-zinc-400">
+                  <span>Checks:</span>
+                  <span className="text-emerald-400 font-mono font-bold">Canonical, Metas, H1/H2 Tree</span>
                 </div>
               </div>
-              <span className="px-2.5 py-0.5 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/30 text-[10px] font-mono font-bold uppercase tracking-wider">
-                5-Second Test
-              </span>
-            </div>
 
-            <div>
-              <h3 className="text-base font-bold text-zinc-100 group-hover:text-amber-300 transition-colors">
-                Clarity Overload CRO Audit
-              </h3>
-              <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-                Evaluates whether landing pages overwhelm visitors with feature bloat, competing headlines, and decision paralysis instead of one high-value outcome.
-              </p>
-            </div>
-
-            {/* Quick URL form */}
-            <form onSubmit={handleLaunchClarity} className="space-y-2">
-              <input
-                type="text"
-                value={quickClarityUrl}
-                onChange={(e) => setQuickClarityUrl(e.target.value)}
-                placeholder="Enter URL (e.g. careerpulseai.com)"
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-amber-400 font-mono"
-              />
               <button
-                type="submit"
-                className="w-full py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-zinc-950 font-black text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-amber-400/20 cursor-pointer transition-all active:scale-95"
+                type="button"
+                onClick={() => setActiveTab('bulk-seo')}
+                className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-black hover:text-emerald-400 text-black font-black text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-emerald-500/20 cursor-pointer transition-all active:scale-95 border-2 border-black"
               >
-                <span>Run 5-Sec Clarity Audit</span>
+                <span>Launch Bulk URL Validator</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
-            </form>
+            </div>
+
+            <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-500 font-mono">
+              <span>Parallel Multi-Check</span>
+              <span className="text-emerald-400 font-bold">Turbo Engine</span>
+            </div>
           </div>
 
-          <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-500 font-mono">
-            <span>UX Friction &amp; Bloat Triage</span>
-            <span className="text-amber-400 font-bold">Single Outcome Focus</span>
-          </div>
-        </div>
+          {/* CARD: Visual Schema Generator Modal */}
+          <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 border-2 border-purple-500/40 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-5 hover:border-purple-500 transition-all group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
 
-        {/* CARD 1: ConversionWizard CRO & Prompt Generator */}
-        <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 border border-amber-500/30 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-5 hover:border-amber-500/50 transition-all group relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-purple-500 p-[1px] shadow-lg shadow-purple-500/20">
+                  <div className="w-full h-full bg-zinc-950 rounded-[15px] flex items-center justify-center">
+                    <FileCode className="w-6 h-6 text-purple-400" />
+                  </div>
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/30 text-[10px] font-mono font-bold uppercase tracking-wider">
+                  Schema.org JSON-LD
+                </span>
+              </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 p-[1px] shadow-lg shadow-amber-500/20">
-                <div className="w-full h-full bg-zinc-950 rounded-[15px] flex items-center justify-center">
-                  <Wand2 className="w-6 h-6 text-amber-400" />
+              <div>
+                <h3 className="text-base font-bold text-zinc-100 group-hover:text-purple-400 transition-colors">
+                  Visual Schema Generator &amp; SERP Preview
+                </h3>
+                <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                  Visually generate FAQ, Article, and Organization Schema.org markup with live Google search rich snippet preview and 1-click copy code snippets.
+                </p>
+              </div>
+
+              <div className="p-3 bg-zinc-950 border border-zinc-800 rounded-xl space-y-1.5 text-xs">
+                <div className="flex justify-between text-zinc-400">
+                  <span>Supported Schemas:</span>
+                  <span className="text-zinc-200 font-mono">FAQPage, Article, Organization</span>
+                </div>
+                <div className="flex justify-between text-zinc-400">
+                  <span>SERP Simulator:</span>
+                  <span className="text-purple-400 font-mono font-bold">Google Rich Results Ready</span>
                 </div>
               </div>
-              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 text-[10px] font-mono font-bold uppercase tracking-wider">
-                4-Step CRO Flow
-              </span>
+
+              {onOpenSchemaGeneratorModal ? (
+                <button
+                  type="button"
+                  onClick={onOpenSchemaGeneratorModal}
+                  className="w-full py-2.5 rounded-xl bg-purple-500 hover:bg-black hover:text-purple-400 text-black font-black text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-purple-500/20 cursor-pointer transition-all active:scale-95 border-2 border-black"
+                >
+                  <span>Build Schema &amp; Copy Code</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onOpenOnboardingWizard()}
+                  className="w-full py-2.5 rounded-xl bg-purple-500 hover:bg-black hover:text-purple-400 text-black font-black text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-purple-500/20 cursor-pointer transition-all active:scale-95 border-2 border-black"
+                >
+                  <span>Launch Schema Generator</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
 
-            <div>
-              <h3 className="text-base font-bold text-zinc-100 group-hover:text-amber-300 transition-colors">
-                ConversionWizard (CRO &amp; Prompts)
-              </h3>
-              <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-                Diagnose Trust, Friction, and Clarity gaps on any website. Benchmark side-by-side with competitors and generate production-ready AI fix-it prompts.
-              </p>
+            <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-500 font-mono">
+              <span>Rich Snippet Generator</span>
+              <span className="text-purple-400 font-bold">JSON-LD</span>
             </div>
+          </div>
 
-            {/* Quick URL form */}
-            <form onSubmit={handleLaunchCro} className="space-y-2">
-              <input
-                type="text"
-                value={quickCroUrl}
-                onChange={(e) => setQuickCroUrl(e.target.value)}
-                placeholder="Enter URL (e.g. mybrand.com)"
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-amber-500 font-mono"
-              />
+          {/* CARD: LLM Citation Simulator */}
+          <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 border-2 border-[#ff4d00]/40 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-5 hover:border-[#ff4d00] transition-all group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#ff4d00]/10 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-[#ff4d00] p-[1px] shadow-lg shadow-[#ff4d00]/20">
+                  <div className="w-full h-full bg-zinc-950 rounded-[15px] flex items-center justify-center">
+                    <Bot className="w-6 h-6 text-[#ff4d00]" />
+                  </div>
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full bg-[#ff4d00]/10 text-[#ff4d00] border border-[#ff4d00]/30 text-[10px] font-mono font-bold uppercase tracking-wider">
+                  Multi-LLM Test
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-base font-bold text-zinc-100 group-hover:text-[#ff4d00] transition-colors">
+                  LLM Citation Simulator &amp; Diagnostic
+                </h3>
+                <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                  Test prompt visibility across Perplexity Pro, SearchGPT, Gemini Overviews, Claude, and Copilot with schema and direct-answer graders.
+                </p>
+              </div>
+
+              <div className="p-3 bg-zinc-950 border border-zinc-800 rounded-xl space-y-1.5 text-xs">
+                <div className="flex justify-between text-zinc-400">
+                  <span>Target Entity:</span>
+                  <span className="text-zinc-200 font-mono truncate max-w-[150px]">{simUrl}</span>
+                </div>
+                <div className="flex justify-between text-zinc-400">
+                  <span>Consensus Engine:</span>
+                  <span className="text-emerald-400 font-mono font-bold">5 Major LLMs</span>
+                </div>
+              </div>
+
               <button
-                type="submit"
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-black text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-amber-500/20 cursor-pointer transition-all active:scale-95"
+                type="button"
+                onClick={() => setActiveTab('citation-sim')}
+                className="w-full py-2.5 rounded-xl bg-[#ff4d00] hover:bg-black hover:text-[#ff4d00] text-black font-black text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-[#ff4d00]/20 cursor-pointer transition-all active:scale-95 border-2 border-black"
               >
-                <span>Audit &amp; Generate Prompts</span>
+                <span>Launch Citation Simulator</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
-            </form>
+            </div>
+
+            <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-500 font-mono">
+              <span>Perplexity &bull; SearchGPT</span>
+              <span className="text-[#ff4d00] font-bold">Live Simulation</span>
+            </div>
           </div>
 
-          <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-500 font-mono">
-            <span>Formula: Traffic × CR × AOV</span>
-            <span className="text-amber-400 font-bold">Copy AI Prompts</span>
+          {/* CARD: Whitelabel Client PDF Generator */}
+          <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 border-2 border-emerald-400/40 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-5 hover:border-emerald-400 transition-all group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-400 p-[1px] shadow-lg shadow-emerald-400/20">
+                  <div className="w-full h-full bg-zinc-950 rounded-[15px] flex items-center justify-center">
+                    <Printer className="w-6 h-6 text-emerald-400" />
+                  </div>
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-400/10 text-emerald-300 border border-emerald-400/30 text-[10px] font-mono font-bold uppercase tracking-wider">
+                  Agency Ready
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-base font-bold text-zinc-100 group-hover:text-emerald-300 transition-colors">
+                  White-Label Client PDF Generator
+                </h3>
+                <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                  Customize agency logos, executive sign-offs, brand palettes, and generate high-resolution print-to-PDF audit reports for clients.
+                </p>
+              </div>
+
+              <div className="p-3 bg-zinc-950 border border-zinc-800 rounded-xl space-y-1.5 text-xs">
+                <div className="flex justify-between text-zinc-400">
+                  <span>Client Domain:</span>
+                  <span className="text-zinc-200 font-mono truncate max-w-[150px]">{defaultUrl.replace(/^https?:\/\//i, '')}</span>
+                </div>
+                <div className="flex justify-between text-zinc-400">
+                  <span>Log Telemetry:</span>
+                  <span className="text-emerald-400 font-mono font-bold">{history.length > 0 ? `${history.length} URLs` : '148 Live URLs'}</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('whitelabel-pdf')}
+                className="w-full py-2.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-zinc-950 font-black text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-emerald-400/20 cursor-pointer transition-all active:scale-95 border-2 border-black"
+              >
+                <span>Generate Client PDF Report</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-500 font-mono">
+              <span>Print-to-PDF &bull; Logo Branding</span>
+              <span className="text-emerald-400 font-bold">Executive Report</span>
+            </div>
           </div>
-        </div>
+
+          {/* CARD: Google Indexing API 3-Step Setup Wizard */}
+          <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 border-2 border-emerald-400/40 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-5 hover:border-emerald-400 transition-all group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-400 p-[1px] shadow-lg shadow-emerald-400/20">
+                  <div className="w-full h-full bg-zinc-950 rounded-[15px] flex items-center justify-center">
+                    <CloudLightning className="w-6 h-6 text-emerald-400" />
+                  </div>
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-400/10 text-emerald-300 border border-emerald-400/30 text-[10px] font-mono font-bold uppercase tracking-wider">
+                  3-Step Setup
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-base font-bold text-zinc-100 group-hover:text-emerald-300 transition-colors">
+                  Google Indexing API Setup Wizard
+                </h3>
+                <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                  Upload Service Account JSON, configure delegated ownership in Google Search Console, and verify live HTTP 200 connection handshakes.
+                </p>
+              </div>
+
+              <div className="p-3 bg-zinc-950 border border-zinc-800 rounded-xl space-y-1.5 text-xs">
+                <div className="flex justify-between text-zinc-400">
+                  <span>Step 1:</span>
+                  <span className="text-zinc-200 font-mono">Upload JSON Key</span>
+                </div>
+                <div className="flex justify-between text-zinc-400">
+                  <span>Step 2:</span>
+                  <span className="text-zinc-200 font-mono">GSC Owner Delegation</span>
+                </div>
+                <div className="flex justify-between text-zinc-400">
+                  <span>Step 3:</span>
+                  <span className="text-emerald-400 font-mono font-bold">200 OK Handshake</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={onOpenGoogleApiWizard}
+                className="w-full py-2.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-zinc-950 font-black text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-emerald-400/20 cursor-pointer transition-all active:scale-95 border-2 border-black"
+              >
+                <span>Launch Google API Wizard</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-500 font-mono">
+              <span>Google API v3 Engine</span>
+              <span className="text-emerald-400 font-bold">200 Quota/Day</span>
+            </div>
+          </div>
+
+          {/* CARD 0: Clarity Overload CRO Audit Tool */}
+          <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 border-2 border-amber-400/40 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-5 hover:border-amber-400 transition-all group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-amber-400 p-[1px] shadow-lg shadow-amber-400/20">
+                  <div className="w-full h-full bg-zinc-950 rounded-[15px] flex items-center justify-center">
+                    <Brain className="w-6 h-6 text-amber-400" />
+                  </div>
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/30 text-[10px] font-mono font-bold uppercase tracking-wider">
+                  5-Second Test
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-base font-bold text-zinc-100 group-hover:text-amber-300 transition-colors">
+                  Clarity Overload CRO Audit
+                </h3>
+                <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                  Evaluates whether landing pages overwhelm visitors with feature bloat, competing headlines, and decision paralysis instead of one high-value outcome.
+                </p>
+              </div>
+
+              {/* Quick URL form */}
+              <form onSubmit={handleLaunchClarity} className="space-y-2">
+                <input
+                  type="text"
+                  value={quickClarityUrl}
+                  onChange={(e) => setQuickClarityUrl(e.target.value)}
+                  placeholder="Enter URL (e.g. careerpulseai.com)"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-amber-400 font-mono"
+                />
+                <button
+                  type="submit"
+                  className="w-full py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-zinc-950 font-black text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-amber-400/20 cursor-pointer transition-all active:scale-95"
+                >
+                  <span>Run 5-Sec Clarity Audit</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </form>
+            </div>
+
+            <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-500 font-mono">
+              <span>UX Friction &amp; Bloat Triage</span>
+              <span className="text-amber-400 font-bold">Single Outcome Focus</span>
+            </div>
+          </div>
+
+          {/* CARD 1: ConversionWizard CRO & Prompt Generator */}
+          <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 border border-amber-500/30 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-5 hover:border-amber-500/50 transition-all group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 p-[1px] shadow-lg shadow-amber-500/20">
+                  <div className="w-full h-full bg-zinc-950 rounded-[15px] flex items-center justify-center">
+                    <Wand2 className="w-6 h-6 text-amber-400" />
+                  </div>
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 text-[10px] font-mono font-bold uppercase tracking-wider">
+                  4-Step CRO Flow
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-base font-bold text-zinc-100 group-hover:text-amber-300 transition-colors">
+                  ConversionWizard (CRO &amp; Prompts)
+                </h3>
+                <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                  Diagnose Trust, Friction, and Clarity gaps on any website. Benchmark side-by-side with competitors and generate production-ready AI fix-it prompts.
+                </p>
+              </div>
+
+              {/* Quick URL form */}
+              <form onSubmit={handleLaunchCro} className="space-y-2">
+                <input
+                  type="text"
+                  value={quickCroUrl}
+                  onChange={(e) => setQuickCroUrl(e.target.value)}
+                  placeholder="Enter URL (e.g. mybrand.com)"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-amber-500 font-mono"
+                />
+                <button
+                  type="submit"
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-black text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-amber-500/20 cursor-pointer transition-all active:scale-95"
+                >
+                  <span>Audit &amp; Generate Prompts</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </form>
+            </div>
+
+            <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-500 font-mono">
+              <span>Formula: Traffic × CR × AOV</span>
+              <span className="text-amber-400 font-bold">Copy AI Prompts</span>
+            </div>
+          </div>
 
         {/* CARD 2: Autonomous 100,000 Milestone Continuous Engine */}
         <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 border border-indigo-500/30 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-5 hover:border-indigo-500/50 transition-all group relative overflow-hidden">
@@ -508,6 +922,7 @@ export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 };

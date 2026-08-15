@@ -21,6 +21,7 @@ import {
 } from './server/scheduler.js';
 import { runConversionAudit } from './server/conversionWizard.js';
 import { runClarityOverloadAudit } from './server/clarityOverloadAudit.js';
+import { runBulkValidation } from './server/bulkValidator.js';
 import { getStripe, isStripeConfigured } from './server/stripe.js';
 
 async function startServer() {
@@ -2511,7 +2512,7 @@ Respond ONLY with a valid JSON object strictly matching this schema:
 }`;
 
           const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3.7-flash',
             contents: prompt,
           });
 
@@ -2705,6 +2706,35 @@ Respond ONLY with a valid JSON object strictly matching this schema:
     } catch (err: any) {
       console.error('[API Error] /api/cro/clarity-overload-audit:', err);
       res.status(500).json({ error: err.message || 'Failed to complete Clarity Overload CRO audit.' });
+    }
+  });
+
+  // --- BULK SEO URL VALIDATOR (CANONICAL, META, HEADINGS H1/H2 HIERARCHY) API ---
+  app.post('/api/seo-validator/bulk', async (req, res) => {
+    try {
+      const { urls, concurrencyLimit = 8 } = req.body;
+      if (!urls || !Array.isArray(urls) || urls.length === 0) {
+        return res.status(400).json({ error: 'Please provide a list of URLs to validate.' });
+      }
+
+      const validUrls = urls
+        .map((u: string) => String(u).trim())
+        .filter((u: string) => u.length > 0 && !u.startsWith('#'));
+
+      if (validUrls.length === 0) {
+        return res.status(400).json({ error: 'No valid URLs provided.' });
+      }
+
+      const result = await runBulkValidation(validUrls, Number(concurrencyLimit) || 8);
+      res.json({
+        success: true,
+        summary: result.summary,
+        results: result.results,
+        message: `Successfully validated ${result.results.length} URLs across canonical, meta-description, and heading hierarchies.`
+      });
+    } catch (err: any) {
+      console.error('[API Error] /api/seo-validator/bulk:', err);
+      res.status(500).json({ error: err.message || 'Failed to complete bulk SEO URL validation.' });
     }
   });
 

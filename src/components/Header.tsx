@@ -52,6 +52,7 @@ interface HeaderProps {
   onOpenHelpManual: () => void;
   onOpenWizard: () => void;
   onOpenClarityWizard?: () => void;
+  onOpenGoogleApiWizard?: () => void;
   onOpenScheduler?: () => void;
   onLockSession?: () => void;
   onQuickSaveWorkspace?: () => void;
@@ -78,6 +79,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenHelpManual,
   onOpenWizard,
   onOpenClarityWizard,
+  onOpenGoogleApiWizard,
   onOpenScheduler,
   onLockSession,
   onQuickSaveWorkspace,

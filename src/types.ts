@@ -245,6 +245,8 @@ export type DashboardViewType =
   | 'wizards'
   | 'indexing_engine'
   | 'submissions'
+  | 'bulk_seo'
+  | 'schema_generator'
   | 'geo_grader'
   | 'competitor_radar'
   | 'live_operations'
@@ -558,6 +560,124 @@ export interface ClarityOverloadAuditResult {
     heroVisualFocus: string;
   };
 }
+
+// --- BULK SEO URL VALIDATOR TYPES ---
+export interface BulkHeadingItem {
+  tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+  text: string;
+}
+
+export interface BulkValidationIssue {
+  severity: 'error' | 'warning' | 'notice';
+  type: 'canonical' | 'meta_description' | 'headings' | 'status' | 'speed';
+  message: string;
+}
+
+export interface BulkUrlValidationResult {
+  url: string;
+  normalizedUrl: string;
+  statusCode: number;
+  statusText: string;
+  responseTimeMs: number;
+  pageSizeKb: number;
+  title: string;
+  titleLength: number;
+  canonicalUrl: string | null;
+  canonicalStatus: 'valid_match' | 'self_referencing' | 'mismatch' | 'missing' | 'relative' | 'duplicate';
+  canonicalDetails: string;
+  metaDescription: string | null;
+  metaDescriptionLength: number;
+  metaDescriptionStatus: 'optimal' | 'missing' | 'too_short' | 'too_long' | 'duplicate';
+  metaDescriptionDetails: string;
+  h1Count: number;
+  h1List: string[];
+  h2Count: number;
+  h2List: string[];
+  headingHierarchy: BulkHeadingItem[];
+  hierarchyStatus: 'valid' | 'missing_h1' | 'multiple_h1' | 'empty_h1' | 'missing_h2' | 'skipped_levels';
+  hierarchyDetails: string;
+  overallScore: number; // 0 - 100
+  issues: BulkValidationIssue[];
+}
+
+export interface BulkValidationSummary {
+  totalUrls: number;
+  completedUrls: number;
+  avgResponseTimeMs: number;
+  healthScore: number;
+  canonicalIssuesCount: number;
+  missingMetaCount: number;
+  headingHierarchyIssuesCount: number;
+  httpErrorsCount: number;
+  passedCount: number;
+}
+
+// --- INTELLIGENT RETRY POLICY TYPES ---
+export interface RetryPolicyConfig {
+  enabled: boolean;
+  maxRetries: number;
+  initialBackoffMs: number;
+  maxBackoffMs: number;
+  transientCodes: number[];
+}
+
+export interface RetryTelemetryEvent {
+  id: string;
+  submissionId: string;
+  targetUrl: string;
+  directoryName: string;
+  attemptNumber: number;
+  maxRetries: number;
+  triggerStatus: number;
+  triggerReason: string;
+  backoffDelayMs: number;
+  nextAttemptAt: string;
+  timestamp: string;
+}
+
+// --- VISUAL SCHEMA GENERATOR TYPES ---
+export type SchemaType = 'FAQ' | 'Article' | 'Organization';
+
+export interface FaqItem {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+export interface ArticleSchemaData {
+  headline: string;
+  articleType: 'Article' | 'BlogPosting' | 'NewsArticle' | 'TechArticle';
+  description: string;
+  authorName: string;
+  authorType: 'Person' | 'Organization';
+  authorUrl?: string;
+  publisherName: string;
+  publisherLogoUrl: string;
+  datePublished: string;
+  dateModified: string;
+  imageUrl: string;
+  mainEntityUrl: string;
+  keywords?: string;
+}
+
+export interface OrganizationSchemaData {
+  name: string;
+  legalName?: string;
+  url: string;
+  logoUrl: string;
+  description: string;
+  foundingDate?: string;
+  email?: string;
+  telephone?: string;
+  contactType?: string;
+  socialUrls: string[];
+  streetAddress?: string;
+  addressLocality?: string;
+  addressRegion?: string;
+  postalCode?: string;
+  addressCountry?: string;
+}
+
 
 
 

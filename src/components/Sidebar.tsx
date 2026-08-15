@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Zap,
   Sparkles,
@@ -31,6 +31,9 @@ import {
   Server,
   Key,
   Brain,
+  X,
+  Smartphone,
+  CloudLightning,
 } from 'lucide-react';
 import { AuthSession, DashboardViewType } from '../types';
 
@@ -43,6 +46,8 @@ interface SidebarProps {
   onCloseMobile: () => void;
   onOpenConversionWizard: () => void;
   onOpenClarityWizard?: () => void;
+  onOpenGoogleApiWizard?: () => void;
+  onOpenSchemaGenerator?: () => void;
   onOpenOnboardingWizard: () => void;
   onOpenGeoBlueprint: () => void;
   onOpenDomainProfiler: () => void;
@@ -68,6 +73,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile,
   onOpenConversionWizard,
   onOpenClarityWizard,
+  onOpenGoogleApiWizard,
+  onOpenSchemaGenerator,
   onOpenOnboardingWizard,
   onOpenGeoBlueprint,
   onOpenDomainProfiler,
@@ -93,6 +100,76 @@ export const Sidebar: React.FC<SidebarProps> = ({
     system: true,
   });
 
+  // Touch Swipe-to-Close gesture states for mobile
+  const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+  const [dragOffset, setDragOffset] = useState<number>(0);
+  const [isSwiping, setIsSwiping] = useState<boolean>(false);
+
+  // Close on Escape key on mobile
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isMobileOpen) {
+        onCloseMobile();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMobileOpen, onCloseMobile]);
+
+  // Touch gesture handlers for mobile swipe-to-close
+  const handleTouchStart = (e: React.TouchEvent<HTMLElement>) => {
+    if (!isMobileOpen) return;
+    touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
+    setIsSwiping(true);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLElement>) => {
+    if (!touchStartXRef.current || !touchStartYRef.current || !isMobileOpen) return;
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    const deltaX = currentX - touchStartXRef.current;
+    const deltaY = currentY - touchStartYRef.current;
+
+    // Check if horizontal swipe dominates vertical scrolling
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX < 0) {
+        // Dragging left (closing)
+        setDragOffset(deltaX);
+      } else {
+        // Resisting right drag
+        setDragOffset(deltaX * 0.15);
+      }
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLElement>) => {
+    if (!touchStartXRef.current || !isMobileOpen) {
+      setDragOffset(0);
+      setIsSwiping(false);
+      return;
+    }
+    const endX = e.changedTouches[0].clientX;
+    const deltaX = endX - touchStartXRef.current;
+
+    // Threshold: if swiped left by > 45px, trigger close
+    if (deltaX < -45) {
+      onCloseMobile();
+    }
+    setDragOffset(0);
+    setIsSwiping(false);
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+  };
+
+  const handleTouchCancel = () => {
+    setDragOffset(0);
+    setIsSwiping(false);
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+  };
+
   const toggleCategory = (cat: string) => {
     setOpenCategories((prev) => ({ ...prev, [cat]: !prev[cat] }));
   };
@@ -104,25 +181,51 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
+  // Compute transform style during active touch dragging on mobile
+  const sidebarTransform = isMobileOpen
+    ? dragOffset < 0
+      ? `translateX(${dragOffset}px)`
+      : 'translateX(0)'
+    : undefined;
+
   return (
     <>
-      {/* Mobile Backdrop Overlay */}
-      {isMobileOpen && (
-        <div
-          onClick={onCloseMobile}
-          className="fixed inset-0 z-40 bg-black/70 lg:hidden transition-opacity"
-        />
-      )}
+      {/* Enhanced Mobile Backdrop Overlay with Blur & Instant Touch Dismiss */}
+      <div
+        onClick={onCloseMobile}
+        onTouchEnd={(e) => {
+          e.preventDefault();
+          onCloseMobile();
+        }}
+        className={`fixed inset-0 z-40 bg-black/75 backdrop-blur-sm lg:hidden transition-opacity duration-300 ease-in-out ${
+          isMobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        aria-hidden={!isMobileOpen}
+        title="Tap or swipe to close mobile sidebar"
+      />
 
-      {/* Sidebar Container */}
+      {/* Sidebar Container with Swipe Gestures */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-40 bg-[#f2efeb] border-r-4 border-black flex flex-col transition-all duration-300 ease-in-out ${
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchCancel}
+        style={{
+          transform: sidebarTransform,
+          transition: isSwiping ? 'none' : 'transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), width 0.3s ease-in-out',
+        }}
+        className={`fixed top-0 bottom-0 left-0 z-50 lg:z-40 bg-[#f2efeb] border-r-4 border-black flex flex-col ${
           isCollapsed ? 'w-20' : 'w-72'
         } ${
-          isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          isMobileOpen ? 'translate-x-0 shadow-[8px_0_0_#000]' : '-translate-x-full lg:translate-x-0'
         }`}
       >
-        {/* Top Header: Logo + Collapse Toggle */}
+        {/* Mobile Swipe-To-Close Pull Bar on right edge */}
+        <div className="lg:hidden absolute top-0 bottom-0 -right-4 w-4 flex items-center justify-center pointer-events-none">
+          <div className="w-1.5 h-16 bg-black/40 rounded-full" />
+        </div>
+
+        {/* Top Header: Logo + Collapse Toggle + Mobile Close Button */}
         <div className="h-16 px-4 flex items-center justify-between border-b-4 border-black shrink-0 bg-white">
           <div className="flex items-center space-x-3 overflow-hidden">
             <div className="w-9 h-9 bg-black text-[#ff4d00] flex items-center justify-center border-2 border-black shadow-[2px_2px_0_#000] shrink-0 font-display font-black text-xl">
@@ -144,14 +247,35 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
           </div>
 
-          {/* Desktop Collapse Toggle */}
-          <button
-            onClick={onToggleCollapse}
-            className="hidden lg:flex p-1.5 bg-white hover:bg-black hover:text-white text-black border-2 border-black shadow-[2px_2px_0_#000] transition-all cursor-pointer"
-            title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-          >
-            {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-          </button>
+          <div className="flex items-center space-x-1.5">
+            {/* Mobile Close Button with Swipe Hint */}
+            <button
+              onClick={onCloseMobile}
+              className="lg:hidden p-1.5 bg-[#ff4d00] text-black hover:bg-black hover:text-white border-2 border-black shadow-[2px_2px_0_#000] transition-all cursor-pointer flex items-center justify-center"
+              title="Close Mobile Sidebar (Swipe Left)"
+              aria-label="Close sidebar"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Desktop Collapse Toggle */}
+            <button
+              onClick={onToggleCollapse}
+              className="hidden lg:flex p-1.5 bg-white hover:bg-black hover:text-white text-black border-2 border-black shadow-[2px_2px_0_#000] transition-all cursor-pointer"
+              title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+            >
+              {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Swipe Instruction Banner */}
+        <div className="lg:hidden bg-amber-200/90 border-b-2 border-black px-3 py-1 text-[10px] font-mono-brutal font-bold text-black flex items-center justify-between">
+          <span className="flex items-center gap-1.5">
+            <Smartphone className="w-3 h-3 text-[#ff4d00]" />
+            <span>SWIPE LEFT TO CLOSE</span>
+          </span>
+          <span className="text-[9px] bg-black text-white px-1 font-bold">ESC</span>
         </div>
 
         {/* Scrollable Navigation Area */}
@@ -285,6 +409,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {!isCollapsed && <span>ONBOARDING WIZARD</span>}
                 </button>
 
+                {/* Google Indexing API 3-Step Setup Wizard */}
+                {onOpenGoogleApiWizard && (
+                  <button
+                    onClick={() => handleNavClick(onOpenGoogleApiWizard)}
+                    className={`w-full flex items-center ${
+                      isCollapsed ? 'justify-center p-2.5' : 'space-x-3 px-3 py-2'
+                    } text-xs font-bold text-black bg-emerald-50 hover:bg-black hover:text-white border-2 border-black shadow-[2px_2px_0_#000] transition-all cursor-pointer uppercase`}
+                    title="Google Indexing API 3-Step Setup Wizard (JSON, GSC Owner, Handshake)"
+                  >
+                    <CloudLightning className="w-4 h-4 text-emerald-600 shrink-0" />
+                    {!isCollapsed && (
+                      <div className="flex items-center justify-between flex-1">
+                        <span>GOOGLE API WIZARD</span>
+                        <span className="text-[9px] px-1.5 py-0.2 bg-emerald-400 text-black border border-black font-bold">
+                          SETUP
+                        </span>
+                      </div>
+                    )}
+                  </button>
+                )}
+
                 {/* Enterprise GEO Growth Blueprint */}
                 <button
                   onClick={() => handleNavClick(onOpenGeoBlueprint)}
@@ -308,6 +453,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <BarChart3 className="w-4 h-4 text-black shrink-0" />
                   {!isCollapsed && <span>CONTENT GRADER</span>}
                 </button>
+
+                {/* Visual Schema Generator */}
+                {onOpenSchemaGenerator && (
+                  <button
+                    onClick={() => handleNavClick(onOpenSchemaGenerator)}
+                    className={`w-full flex items-center ${
+                      isCollapsed ? 'justify-center p-2.5' : 'space-x-3 px-3 py-2'
+                    } text-xs font-bold text-black bg-purple-50 hover:bg-black hover:text-white border-2 border-black shadow-[2px_2px_0_#000] transition-all cursor-pointer uppercase`}
+                    title="Visual Schema Generator (FAQ, Article, Organization)"
+                  >
+                    <FileCode className="w-4 h-4 text-purple-600 shrink-0" />
+                    {!isCollapsed && (
+                      <div className="flex items-center justify-between flex-1">
+                        <span>SCHEMA GENERATOR</span>
+                        <span className="text-[9px] px-1.5 py-0.2 bg-purple-400 text-black border border-black font-bold">
+                          JSON-LD
+                        </span>
+                      </div>
+                    )}
+                  </button>
+                )}
 
                 {/* Plain-English Executive Reports */}
                 <button
@@ -372,6 +538,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <span>SUBMISSION ENGINE</span>
                       <span className="text-[9px] px-1.5 py-0.2 bg-[#ff4d00] text-black border border-black font-bold">
                         LIVE
+                      </span>
+                    </div>
+                  )}
+                </button>
+
+                {/* Bulk SEO URL Validator */}
+                <button
+                  onClick={() => handleNavClick(() => onChangeView('bulk_seo'))}
+                  className={`w-full flex items-center ${
+                    isCollapsed ? 'justify-center p-2.5' : 'space-x-3 px-3 py-2'
+                  } text-xs font-bold transition-all cursor-pointer border-2 border-black uppercase ${
+                    currentView === 'bulk_seo'
+                      ? 'bg-black text-white shadow-[2px_2px_0_#ff4d00]'
+                      : 'bg-white text-black hover:bg-black hover:text-white shadow-[2px_2px_0_#000]'
+                  }`}
+                  title="Bulk SEO URL Validator (50+ Parallel URLs)"
+                >
+                  <Layers className="w-4 h-4 text-emerald-500 shrink-0" />
+                  {!isCollapsed && (
+                    <div className="flex items-center justify-between flex-1">
+                      <span>BULK SEO VALIDATOR</span>
+                      <span className="text-[9px] px-1.5 py-0.2 bg-emerald-400 text-black border border-black font-bold">
+                        50+
                       </span>
                     </div>
                   )}

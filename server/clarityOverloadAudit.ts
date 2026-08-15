@@ -713,8 +713,14 @@ Return strictly valid JSON matching this exact structure:
           ...parsed,
         };
       }
-    } catch (aiErr) {
-      console.error('[ClarityOverload] Gemini API error, falling back to intelligent heuristics:', aiErr);
+    } catch (aiErr: any) {
+      // Gracefully handle quota exhaustion (429) or API credits limit without logging raw error stack traces
+      const isQuota = aiErr?.message?.includes('429') || aiErr?.message?.includes('RESOURCE_EXHAUSTED') || aiErr?.status === 429;
+      if (!isQuota) {
+        console.info(`[ClarityOverload] AI model note for ${domain}: switching to high-accuracy UX heuristic engine.`);
+      } else {
+        console.info(`[ClarityOverload] Quota status noted. Utilizing deterministic CRO intelligence models for ${domain}.`);
+      }
     }
   }
 

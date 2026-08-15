@@ -22,6 +22,9 @@ import { ConversionWizardModal } from './components/ConversionWizardModal';
 import { ClarityOverloadWizardModal } from './components/ClarityOverloadWizardModal';
 import { ConversionWizardBanner } from './components/ConversionWizardBanner';
 import { WizardsHubDashboard } from './components/WizardsHubDashboard';
+import { GoogleApiWizard } from './components/GoogleApiWizard';
+import { BulkSeoValidator } from './components/BulkSeoValidator';
+import { VisualSchemaGeneratorModal } from './components/VisualSchemaGeneratorModal';
 import { Sidebar } from './components/Sidebar';
 import { PlainEnglishSummaryCard } from './components/PlainEnglishSummaryCard';
 import { AuthAccountCenter } from './components/AuthAccountCenter';
@@ -105,6 +108,8 @@ export default function App() {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isConversionWizardOpen, setIsConversionWizardOpen] = useState(false);
   const [isClarityWizardOpen, setIsClarityWizardOpen] = useState(false);
+  const [isGoogleApiWizardOpen, setIsGoogleApiWizardOpen] = useState(false);
+  const [isSchemaModalOpen, setIsSchemaModalOpen] = useState(false);
   const [wizardInitialUrl, setWizardInitialUrl] = useState('');
   const [clarityInitialUrl, setClarityInitialUrl] = useState('');
   const [isSchedulerOpen, setIsSchedulerOpen] = useState(false);
@@ -301,6 +306,24 @@ export default function App() {
               <span className="text-[10px] font-mono text-zinc-400">Switched to: {newProxy || 'Next node'} (Attempt {attempt}, {remainingProxies} left in pool)</span>
             </div>
           ), { duration: 5000, icon: '🔄' });
+        } else if (data.event === 'retry_scheduled') {
+          const { targetUrl, directoryName, attempt, maxRetries, delayMs, error } = data.payload || {};
+          toast((t) => (
+            <div className="flex flex-col gap-0.5">
+              <span className="font-bold text-amber-400 text-xs">⏳ Intelligent Retry Scheduled (Attempt {attempt}/{maxRetries})</span>
+              <span className="text-[11px] text-zinc-300 truncate max-w-xs">{directoryName}: {targetUrl}</span>
+              <span className="text-[10px] font-mono text-amber-300">Backoff delay: {(delayMs / 1000).toFixed(1)}s &bull; Reason: {error}</span>
+            </div>
+          ), { duration: 4000, icon: '⏱️' });
+        } else if (data.event === 'retry_executed') {
+          const { targetUrl, directoryName, attempt } = data.payload || {};
+          toast((t) => (
+            <div className="flex flex-col gap-0.5">
+              <span className="font-bold text-emerald-400 text-xs">🚀 Exponential Backoff Retry Executing</span>
+              <span className="text-[11px] text-zinc-300 truncate max-w-xs">{directoryName}: {targetUrl}</span>
+              <span className="text-[10px] font-mono text-zinc-400">Attempt #{attempt} re-dispatched to worker pool</span>
+            </div>
+          ), { duration: 3000, icon: '⚡' });
         } else if (data.event === 'submission_finished') {
           const isCancelled = data.payload.status === 'Cancelled';
           setJobStatus(isCancelled ? 'Cancelled' : 'Completed');
@@ -661,6 +684,7 @@ export default function App() {
           setClarityInitialUrl(url || '');
           setIsClarityWizardOpen(true);
         }}
+        onOpenGoogleApiWizard={() => setIsGoogleApiWizardOpen(true)}
         onOpenScheduler={() => setIsSchedulerOpen(true)}
         onQuickSaveWorkspace={handleQuickSaveWorkspace}
         onImportWorkspace={handleImportWorkspaceClick}
@@ -688,6 +712,8 @@ export default function App() {
             setClarityInitialUrl(url || '');
             setIsClarityWizardOpen(true);
           }}
+          onOpenGoogleApiWizard={() => setIsGoogleApiWizardOpen(true)}
+          onOpenSchemaGenerator={() => setIsSchemaModalOpen(true)}
           onOpenOnboardingWizard={() => setIsWizardOpen(true)}
           onOpenGeoBlueprint={() => setIsGeoBlueprintOpen(true)}
           onOpenDomainProfiler={(domain) => handleOpenDomainProfiler(domain)}
@@ -841,6 +867,9 @@ export default function App() {
                 setClarityInitialUrl(url || '');
                 setIsClarityWizardOpen(true);
               }}
+              onOpenGoogleApiWizard={() => setIsGoogleApiWizardOpen(true)}
+              onOpenSchemaGeneratorModal={() => setIsSchemaModalOpen(true)}
+              onOpenBulkSeoValidator={() => setCurrentView('bulk_seo')}
               onOpenOnboardingWizard={() => setIsWizardOpen(true)}
               onOpenGeoBlueprint={() => setIsGeoBlueprintOpen(true)}
               onOpenDomainProfiler={(domain) => handleOpenDomainProfiler(domain)}
@@ -855,6 +884,9 @@ export default function App() {
               isAutonomousActive={isAutonomousActive}
               autonomousAccumulatedCount={autonomousAccumulatedCount}
               autonomousTargetGoal={autonomousTargetGoal}
+              history={history}
+              defaultUrl={history.length > 0 ? (history[0].urlList?.[0] || 'https://careerpulseai.net') : 'https://careerpulseai.net'}
+              defaultAgencyName="Apex Enterprise Growth Labs"
             />
           )}
 
@@ -882,6 +914,15 @@ export default function App() {
               onExportCsv={handleExportCsv}
               onOpenWizard={() => setIsIndexingWizardOpen(true)}
             />
+          )}
+
+          {/* VIEW: Bulk SEO URL Validator */}
+          {currentView === 'bulk_seo' && (
+            <div className="space-y-6">
+              <BulkSeoValidator
+                initialUrls={history.length > 0 && history[0].urlList ? history[0].urlList : ['https://careerpulseai.net']}
+              />
+            </div>
           )}
 
           {/* VIEW: Executive Reports & Exports */}
@@ -1025,6 +1066,17 @@ export default function App() {
         initialUrl={clarityInitialUrl}
       />
 
+      {/* Google Indexing API 3-Step Setup Wizard Modal */}
+      <GoogleApiWizard
+        isOpen={isGoogleApiWizardOpen}
+        onClose={() => setIsGoogleApiWizardOpen(false)}
+        initialJson={settings.googleServiceAccountJson || ''}
+        onSaveServiceAccountJson={(jsonString) => {
+          setSettings((prev) => ({ ...prev, googleServiceAccountJson: jsonString }));
+          axios.post('/api/settings', { settings: { ...settings, googleServiceAccountJson: jsonString } }).catch(() => null);
+        }}
+      />
+
       {/* 5-Step Enterprise URL Submission & Indexing Wizard Modal */}
       <UrlIndexingWizardModal
         isOpen={isIndexingWizardOpen}
@@ -1044,6 +1096,12 @@ export default function App() {
             concurrencyLimit: config.concurrencyThreads,
           });
         }}
+      />
+
+      {/* Visual Schema Generator Modal (FAQ, Article, Organization) */}
+      <VisualSchemaGeneratorModal
+        isOpen={isSchemaModalOpen}
+        onClose={() => setIsSchemaModalOpen(false)}
       />
 
       {/* AI Copilot Float Widget */}
