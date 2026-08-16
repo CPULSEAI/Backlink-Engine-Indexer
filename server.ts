@@ -2005,7 +2005,7 @@ async function startServer() {
         return res.status(400).json({ error: 'Message parameter is required.' });
       }
 
-      // Check if Gemini API key exists
+      // Check if Gemini API key exists and try live inference
       if (process.env.GEMINI_API_KEY) {
         try {
           const { GoogleGenAI } = await import('@google/genai');
@@ -2016,7 +2016,7 @@ You specialize in:
 1. Automated backlink submission workflows, live HTTP 200 verification, and IndexNow / Google Indexing API protocols.
 2. Proxy management, troubleshooting 403 Forbidden / 429 Too Many Requests rate limits, and configuring the 403 Auto-Isolation Shield.
 3. Generative Engine Optimization (GEO), structured JSON-LD entity markup (FAQPage, Article), Answer-First copywriting, and AI engine citation tracking (ChatGPT, Perplexity, Google AI Overviews).
-4. System settings, Smart Retry backoff configuration, and CSV report export.
+4. XML Sitemap crawling, broken link detection (404/500), peer-to-peer backlink exchange telemetry, and CSV report exports.
 
 Keep your answers concise, practical, authoritative, and direct. Format response with clean markdown headings and bullet points. If relevant, suggest exact steps in the AutoSubmit Pro UI.`;
 
@@ -2032,24 +2032,38 @@ Keep your answers concise, practical, authoritative, and direct. Format response
           const reply = response.text || 'I am here to assist with your backlink submission campaigns, proxy configuration, and technical SEO optimization.';
           return res.json({ reply, model: 'gemini-3.7-flash', success: true });
         } catch (geminiErr: any) {
-          console.warn('[AI Assistant] Gemini API error, using built-in knowledge engine:', geminiErr?.message);
+          const isQuota = geminiErr?.message?.includes('429') ||
+                          geminiErr?.message?.includes('RESOURCE_EXHAUSTED') ||
+                          geminiErr?.message?.includes('prepayment') ||
+                          geminiErr?.status === 429;
+          if (isQuota) {
+            console.info('[AI Assistant] Gemini API quota limit reached. Using built-in SEO knowledge engine.');
+          } else {
+            console.info('[AI Assistant] Switched to built-in SEO knowledge engine.');
+          }
         }
       }
 
-      // Built-in intelligent response engine if API key is not yet set
+      // Built-in intelligent response engine (instant fallback or offline mode)
       const lowerMsg = message.toLowerCase();
       let fallbackReply = '';
 
-      if (lowerMsg.includes('403') || lowerMsg.includes('quarantine') || lowerMsg.includes('isolation')) {
-        fallbackReply = `### 🛡️ Understanding the 403 Auto-Isolation Shield\n\nWhen a directory or target server returns **HTTP 403 Forbidden** 3 consecutive times, AutoSubmit Pro's **403 Auto-Isolation Shield** immediately quarantines that specific proxy node for **10 minutes**.\n\n**Key Actions:**\n* **Automatic Cooldown:** The isolated node will automatically return to active rotation once the 10-minute cooldown timer expires.\n* **Manual Reinstatement:** You can open **Settings > Diagnostics** and click **"Reinstate Now"** to immediately restore the proxy.\n* **Smart Retries:** Ensure Smart Retry is enabled (2–3 attempts) to reroute pending tasks through healthy fallback nodes.`;
+      if (lowerMsg.includes('403') || lowerMsg.includes('quarantine') || lowerMsg.includes('isolation') || lowerMsg.includes('waf')) {
+        fallbackReply = `### 🛡️ Understanding the 403 Auto-Isolation Shield\n\nWhen a directory or target server returns **HTTP 403 Forbidden** 3 consecutive times, AutoSubmit Pro's **403 Auto-Isolation Shield** immediately quarantines that specific proxy node for **10 minutes** to protect your primary domain reputation.\n\n**Key Actions:**\n* **Automatic Cooldown:** The isolated node will automatically return to active rotation once the 10-minute cooldown timer expires.\n* **Manual Reinstatement:** You can open **Settings > Diagnostics** and click **"Reinstate Now"** to immediately restore the proxy.\n* **Smart Retries:** Ensure Smart Retry is enabled (2–3 attempts with exponential jitter) to reroute pending tasks through healthy fallback nodes.`;
       } else if (lowerMsg.includes('proxy') || lowerMsg.includes('latency') || lowerMsg.includes('ping')) {
-        fallbackReply = `### 🌐 Proxy Management & Latency Diagnostics\n\nAutoSubmit Pro supports residential and datacenter HTTP/HTTPS and SOCKS5 proxy pools.\n\n**Recommendations:**\n1. **Diagnostic Tab:** Open the **Settings Modal > Diagnostic Tab** to run live latency pings on individual proxy nodes or the entire pool.\n2. **Optimal Latency:** Nodes under 120ms latency are prioritized for high-speed indexing.\n3. **Format:** Enter proxies in \`ip:port\` or \`user:pass@ip:port\` format (one per line).`;
-      } else if (lowerMsg.includes('geo') || lowerMsg.includes('chatgpt') || lowerMsg.includes('perplexity') || lowerMsg.includes('citation')) {
-        fallbackReply = `### 🤖 Generative Engine Optimization (GEO)\n\nGEO optimizes your website to be cited by AI search engines like **ChatGPT Search**, **Perplexity AI**, and **Google AI Overviews**.\n\n**Top 3 Strategies:**\n1. **Answer-First Structure:** Place a 40–50 word concise direct answer in the introductory block directly below the H1.\n2. **Structured JSON-LD Data:** Inject Article and FAQPage schema with entity definitions.\n3. **High-Authority Backlinks:** Distribute anchor links across verified WHOIS and SEO directories to establish domain entity consensus.`;
+        fallbackReply = `### 🌐 Proxy Management & Latency Diagnostics\n\nAutoSubmit Pro supports residential, mobile, and datacenter HTTP/HTTPS and SOCKS5 proxy pools.\n\n**Best Practices:**\n1. **Diagnostic Tab:** Open the **Settings Modal > Diagnostic Tab** to run live latency pings on individual proxy nodes or the entire pool.\n2. **Optimal Latency:** Nodes under 120ms latency are prioritized for high-speed indexing.\n3. **Format:** Enter proxies in \`ip:port\` or \`user:pass@ip:port\` format (one per line).`;
+      } else if (lowerMsg.includes('sitemap') || lowerMsg.includes('crawl') || lowerMsg.includes('broken link') || lowerMsg.includes('404')) {
+        fallbackReply = `### 🗺️ XML Sitemap Crawler & Technical Health Auditor\n\nAutoSubmit Pro includes a multi-threaded **XML Sitemap Audit Engine** (accessible via the Sidebar under **SITEMAP AUDIT**).\n\n**Capabilities:**\n* **Broken Link Detection:** Identifies HTTP 404 and 500 error responses across up to 100 sitemap URLs.\n* **Meta Description Inspection:** Flags missing meta tags or descriptions shorter than 50 characters.\n* **Canonical Tag Match:** Verifies that internal canonical links point to matching URLs.\n* **1-Click Queue Submission:** Send flagged or defective URLs straight to the backlink indexing pipeline with one click.`;
+      } else if (lowerMsg.includes('peer') || lowerMsg.includes('partner') || lowerMsg.includes('exchange') || lowerMsg.includes('injection')) {
+        fallbackReply = `### 🤝 Peer-to-Peer Partner Backlink Exchange Network\n\nOur decentralized backlink mesh connects verified high-authority partner domains to exchange contextual links safely.\n\n**Network Safeguards:**\n* **Quality Filter:** Requires a minimum Domain Trust Score &ge; 80 and Topic Relevance &ge; 85%.\n* **Human Approval Option:** Toggle operator confirmation before any link is injected.\n* **Telemetry Stream:** Monitor live node count, 99.98% SLA uptime, and verified link streams directly on your dashboard.`;
+      } else if (lowerMsg.includes('geo') || lowerMsg.includes('chatgpt') || lowerMsg.includes('perplexity') || lowerMsg.includes('citation') || lowerMsg.includes('ai overview')) {
+        fallbackReply = `### 🤖 Generative Engine Optimization (GEO)\n\nGEO optimizes your website to be cited and recommended by AI search engines like **ChatGPT Search**, **Perplexity AI**, and **Google AI Overviews**.\n\n**Top 3 Strategies:**\n1. **Answer-First Structure:** Place a 40–50 word concise direct answer in the introductory block directly below the H1 or H2 heading.\n2. **Structured JSON-LD Data:** Inject Article and FAQPage schema with entity definitions.\n3. **High-Authority Backlinks:** Distribute anchor links across verified WHOIS and SEO directories to establish domain entity consensus.`;
       } else if (lowerMsg.includes('google') || lowerMsg.includes('indexing api') || lowerMsg.includes('service account')) {
         fallbackReply = `### ⚡ Google Indexing API Setup Guide\n\nTo enable direct automated pings to Google's indexing endpoints:\n\n1. **Google Cloud Console:** Create a Project and enable the **Web Search Indexing API**.\n2. **Service Account:** Generate a Service Account with JSON key credentials.\n3. **Search Console:** Add the Service Account email as an **Owner** in your Google Search Console property.\n4. **Paste JSON Key:** In **Settings > Google Indexing API**, paste the JSON credentials.`;
+      } else if (lowerMsg.includes('campaign') || lowerMsg.includes('launch') || lowerMsg.includes('start') || lowerMsg.includes('submit')) {
+        fallbackReply = `### 🚀 Launching Your First Backlink Campaign\n\n1. **Enter Target URLs:** Paste your single URL or bulk domain URLs into the main input form.\n2. **Select Directories:** Choose high-authority directory categories (e.g., WHOIS, SEO Metrics, Technology).\n3. **Enable Features:** Toggle **Live HTTP 200 Verification**, **Google Indexing API**, and **SERP Pings**.\n4. **Execute:** Click **Start Submission Pipeline** to monitor real-time worker threads in the live stream table.`;
       } else {
-        fallbackReply = `### 🚀 AutoSubmit Pro Assistant\n\nI can assist you with:\n* **Indexing Engine:** Starting automated directory submissions with live HTTP 200 validation.\n* **Diagnostic Health:** Testing proxy node latency and reviewing the 24-hour success rate timeline.\n* **Content Grader:** Auditing your keyword density, schema markup, and technical SEO before publishing.\n* **Smart Retry & Scheduler:** Setting up automated drip campaigns and retry thresholds.\n\n*How can I help optimize your SEO campaigns today?*`;
+        fallbackReply = `### 🚀 AutoSubmit Pro SEO Assistant\n\nI can assist you with:\n* **Indexing Pipeline:** Running automated directory submissions with live HTTP 200 confirmation.\n* **Technical Sitemap Audit:** Crawling 50+ sitemap pages to detect broken links and missing meta descriptions.\n* **Peer Network Telemetry:** Monitoring verified partner backlink injections with topic relevance safeguards.\n* **Generative Engine Optimization (GEO):** Structuring content to maximize citations in ChatGPT, Perplexity, and Google AI Overviews.\n* **Proxy & Health Diagnostics:** Reviewing latency benchmarks and isolating rate-limited nodes.\n\n*How can I help optimize your site's search visibility today?*`;
       }
 
       return res.json({ reply: fallbackReply, model: 'builtin-seo-engine', success: true });
