@@ -13,20 +13,44 @@ import {
   FileText,
   Copy,
   Check,
+  Play,
+  Download,
+  Activity,
+  ExternalLink,
+  Layers,
+  ArrowUpRight,
 } from 'lucide-react';
 import { ExecutiveSummaryReport } from '../types';
 import toast from 'react-hot-toast';
 
-interface PlainEnglishSummaryCardProps {
+export interface PlainEnglishSummaryCardProps {
   report: ExecutiveSummaryReport;
   collapsible?: boolean;
   compact?: boolean;
+  onOpenWizard?: () => void;
+  onScrollToStream?: () => void;
+  onOpenClientPdf?: () => void;
+  onOpenSitemapAudit?: () => void;
+  onOpenSchemaGenerator?: () => void;
+  onOpenBulkValidator?: () => void;
+  onOpenGoogleApiWizard?: () => void;
+  onOpenConversionWizard?: () => void;
+  onStepClick?: (step: string, index: number) => void;
 }
 
 export const PlainEnglishSummaryCard: React.FC<PlainEnglishSummaryCardProps> = ({
   report,
   collapsible = false,
   compact = false,
+  onOpenWizard,
+  onScrollToStream,
+  onOpenClientPdf,
+  onOpenSitemapAudit,
+  onOpenSchemaGenerator,
+  onOpenBulkValidator,
+  onOpenGoogleApiWizard,
+  onOpenConversionWizard,
+  onStepClick,
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -118,6 +142,119 @@ export const PlainEnglishSummaryCard: React.FC<PlainEnglishSummaryCardProps> = (
     setTimeout(() => setCopied(false), 2500);
   };
 
+  // Helper to determine action metadata based on step text and index
+  const getStepActionMeta = (step: string, index: number) => {
+    const s = step.toLowerCase();
+    if (s.includes('wizard') || s.includes('queue') || s.includes('5-step') || s.includes('onboarding') || index === 0) {
+      return {
+        label: 'LAUNCH WIZARD',
+        icon: Play,
+        badgeColor: 'bg-[#ff4d00] text-black border-black',
+        tooltip: 'Click to launch the 5-Step Indexing Wizard',
+      };
+    }
+    if (s.includes('stream') || s.includes('live') || s.includes('table') || s.includes('monitor') || s.includes('200') || s.includes('confirmation') || index === 1) {
+      return {
+        label: 'VIEW STREAM',
+        icon: Activity,
+        badgeColor: 'bg-emerald-400 text-black border-black',
+        tooltip: 'Click to navigate to Real-time Stream & Results Table',
+      };
+    }
+    if (s.includes('export') || s.includes('compliance') || s.includes('report') || s.includes('stakeholder') || s.includes('client') || s.includes('pdf') || index === 2) {
+      return {
+        label: 'EXPORT REPORT',
+        icon: Download,
+        badgeColor: 'bg-indigo-400 text-black border-black',
+        tooltip: 'Click to generate Whitelabel Client & Compliance PDF',
+      };
+    }
+    if (s.includes('sitemap') || s.includes('broken')) {
+      return {
+        label: 'AUDIT SITEMAP',
+        icon: FileText,
+        badgeColor: 'bg-purple-400 text-black border-black',
+        tooltip: 'Click to open XML Sitemap Crawler & Auditor',
+      };
+    }
+    if (s.includes('schema') || s.includes('json-ld')) {
+      return {
+        label: 'GENERATE SCHEMA',
+        icon: Layers,
+        badgeColor: 'bg-amber-400 text-black border-black',
+        tooltip: 'Click to open Visual Schema Generator',
+      };
+    }
+    return {
+      label: 'EXECUTE STEP',
+      icon: ArrowUpRight,
+      badgeColor: 'bg-black text-white border-black',
+      tooltip: 'Click to execute this recommended action',
+    };
+  };
+
+  const handleExecuteStep = (step: string, index: number) => {
+    if (onStepClick) {
+      onStepClick(step, index);
+      return;
+    }
+
+    const s = step.toLowerCase();
+    if (s.includes('wizard') || s.includes('queue') || s.includes('5-step') || s.includes('onboarding') || index === 0) {
+      if (onOpenWizard) {
+        onOpenWizard();
+        toast.success('🚀 Launching 5-Step URL Indexing Wizard...');
+      } else {
+        const formEl = document.getElementById('url-input-form');
+        if (formEl) {
+          formEl.scrollIntoView({ behavior: 'smooth' });
+          toast.success('Navigated to Target URLs & Pipeline Form');
+        }
+      }
+      return;
+    }
+
+    if (s.includes('stream') || s.includes('live') || s.includes('table') || s.includes('monitor') || s.includes('200') || s.includes('confirmation') || index === 1) {
+      if (onScrollToStream) {
+        onScrollToStream();
+      } else {
+        const tableEl = document.getElementById('results-table');
+        if (tableEl) {
+          tableEl.scrollIntoView({ behavior: 'smooth' });
+          toast.success('📊 Navigated to Live Operations Stream Table');
+        }
+      }
+      return;
+    }
+
+    if (s.includes('export') || s.includes('compliance') || s.includes('report') || s.includes('stakeholder') || s.includes('client') || s.includes('pdf') || index === 2) {
+      if (onOpenClientPdf) {
+        onOpenClientPdf();
+        toast.success('📄 Opening Whitelabel Client Report Generator...');
+      } else {
+        toast.success('Exporting summary report...');
+        handleCopySummary();
+      }
+      return;
+    }
+
+    if (s.includes('sitemap') && onOpenSitemapAudit) {
+      onOpenSitemapAudit();
+      return;
+    }
+
+    if (s.includes('schema') && onOpenSchemaGenerator) {
+      onOpenSchemaGenerator();
+      return;
+    }
+
+    // Default fallback action
+    const formEl = document.getElementById('url-input-form');
+    if (formEl) {
+      formEl.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="bg-white dark:bg-zinc-900 border-2 border-black dark:border-zinc-700 rounded-2xl shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#222] overflow-hidden transition-all">
       {/* Header */}
@@ -196,25 +333,58 @@ export const PlainEnglishSummaryCard: React.FC<PlainEnglishSummaryCardProps> = (
             </div>
           </div>
 
-          {/* Question 3: Recommended Next Steps */}
+          {/* Question 3: Recommended Next Steps (Clickable Action Links) */}
           <div className="space-y-2">
-            <h4 className="text-xs font-bold uppercase font-mono-brutal text-zinc-900 dark:text-zinc-200 flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-black text-white dark:bg-zinc-800 dark:text-emerald-400 inline-flex items-center justify-center text-[10px]">3</span>
-              <span>What should you do next? (Action plan)</span>
-            </h4>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <h4 className="text-xs font-bold uppercase font-mono-brutal text-zinc-900 dark:text-zinc-200 flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-black text-white dark:bg-zinc-800 dark:text-emerald-400 inline-flex items-center justify-center text-[10px]">3</span>
+                <span>What should you do next? (Click to execute action)</span>
+              </h4>
+              <span className="text-[10px] font-mono-brutal text-zinc-500 uppercase">
+                Interactive Action Links Active
+              </span>
+            </div>
+
             <div className="space-y-2">
-              {whatToDoNext.map((step, idx) => (
-                <div
-                  key={idx}
-                  className="bg-[#f2efeb] dark:bg-zinc-950/80 p-3 rounded-xl border border-black/30 dark:border-zinc-700 text-xs font-medium text-black dark:text-zinc-200 flex items-center gap-3"
-                >
-                  <span className="px-2 py-0.5 rounded-md bg-black text-white dark:bg-zinc-800 dark:text-white font-mono-brutal text-[10px] font-bold shrink-0">
-                    STEP {idx + 1}
-                  </span>
-                  <span className="flex-1">{step}</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-[#ff4d00] shrink-0" />
-                </div>
-              ))}
+              {whatToDoNext.map((step, idx) => {
+                const actionMeta = getStepActionMeta(step, idx);
+                const ActionIcon = actionMeta.icon;
+
+                return (
+                  <div
+                    key={idx}
+                    id={`next-step-action-${idx + 1}`}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => handleExecuteStep(step, idx)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleExecuteStep(step, idx);
+                      }
+                    }}
+                    title={actionMeta.tooltip}
+                    className="group bg-[#f2efeb] hover:bg-black text-black hover:text-white dark:bg-zinc-950/80 dark:hover:bg-zinc-800 dark:text-zinc-200 dark:hover:text-white p-3 rounded-xl border-2 border-black/30 hover:border-black dark:border-zinc-700 dark:hover:border-zinc-500 text-xs font-medium flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-[2px_2px_0_rgba(0,0,0,0.1)] hover:shadow-[3px_3px_0_#000] transition-all cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
+                  >
+                    <div className="flex items-center gap-3 flex-1">
+                      <span className="px-2 py-0.5 rounded-md bg-black text-white group-hover:bg-[#ff4d00] group-hover:text-black dark:bg-zinc-800 dark:text-white dark:group-hover:bg-[#ff4d00] font-mono-brutal text-[10px] font-bold shrink-0 transition-colors shadow-sm">
+                        STEP {idx + 1}
+                      </span>
+                      <span className="flex-1 font-semibold leading-relaxed">
+                        {step}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-mono-brutal font-bold rounded uppercase border ${actionMeta.badgeColor} shadow-[1px_1px_0_#000] group-hover:bg-white group-hover:text-black transition-all`}>
+                        <ActionIcon className="w-3 h-3 shrink-0" />
+                        <span>{actionMeta.label}</span>
+                      </span>
+                      <ArrowRight className="w-4 h-4 text-[#ff4d00] group-hover:text-white group-hover:translate-x-1 transition-all shrink-0" />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

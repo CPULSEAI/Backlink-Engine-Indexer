@@ -258,7 +258,7 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
   };
 
   return (
-    <div className="bg-white border-4 border-black p-6 shadow-[6px_6px_0_#000] space-y-6">
+    <div id="results-table" className="bg-white border-4 border-black p-6 shadow-[6px_6px_0_#000] space-y-6">
       {/* Table Top Header & Title */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b-4 border-black">
         <div>
@@ -290,6 +290,7 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
           </button>
 
           <button
+            id="export-logs-csv-btn"
             onClick={onExportCsv}
             disabled={logs.length === 0}
             className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-[#f2efeb] disabled:opacity-40 text-black text-xs font-mono-brutal font-bold uppercase border-2 border-black shadow-[2px_2px_0_#000] transition-all cursor-pointer"

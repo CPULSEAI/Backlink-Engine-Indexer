@@ -159,7 +159,7 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
   };
 
   return (
-    <div className="bg-white border-4 border-black p-6 sm:p-8 shadow-[6px_6px_0_#000] space-y-6 mb-8">
+    <div id="url-input-form" className="bg-white border-4 border-black p-6 sm:p-8 shadow-[6px_6px_0_#000] space-y-6 mb-8">
       <form onSubmit={handleStart} className="space-y-6">
         {/* Top Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b-4 border-black">

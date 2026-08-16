@@ -844,6 +844,49 @@ export default function App() {
                     estimatedRevenueOrRankGain: '+35% Bot Crawl Acceleration',
                   },
                 }}
+                onOpenWizard={() => setIsIndexingWizardOpen(true)}
+                onScrollToStream={() => {
+                  const el = document.getElementById('results-table');
+                  if (el) {
+                    el.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                onOpenClientPdf={() => {
+                  const csvBtn = document.getElementById('export-logs-csv-btn');
+                  if (csvBtn) {
+                    csvBtn.click();
+                  } else {
+                    toast.success('📄 Exporting compliance & audit report...');
+                  }
+                }}
+                onOpenSitemapAudit={() => handleOpenSitemapAudit()}
+                onOpenSchemaGenerator={() => setIsSchemaModalOpen(true)}
+                onOpenGoogleApiWizard={() => setIsGoogleApiWizardOpen(true)}
+                onOpenConversionWizard={() => setIsConversionWizardOpen(true)}
+                onStepClick={(step, idx) => {
+                  const s = step.toLowerCase();
+                  if (s.includes('wizard') || s.includes('queue') || s.includes('5-step') || idx === 0) {
+                    setIsIndexingWizardOpen(true);
+                    toast.success('🚀 Launching 5-Step URL Indexing Wizard...');
+                  } else if (s.includes('stream') || s.includes('live') || s.includes('table') || s.includes('monitor') || idx === 1) {
+                    const el = document.getElementById('results-table');
+                    if (el) {
+                      el.scrollIntoView({ behavior: 'smooth' });
+                      toast.success('📊 Navigated to Real-time Stream & Audit Table');
+                    }
+                  } else if (s.includes('export') || s.includes('compliance') || s.includes('report') || idx === 2) {
+                    const csvBtn = document.getElementById('export-logs-csv-btn');
+                    if (csvBtn) {
+                      csvBtn.click();
+                    } else {
+                      toast.success('📄 Exporting verification report for stakeholders...');
+                    }
+                  } else if (s.includes('sitemap')) {
+                    handleOpenSitemapAudit();
+                  } else if (s.includes('schema')) {
+                    setIsSchemaModalOpen(true);
+                  }
+                }}
               />
 
               {/* ConversionWizard CRO Engine & AI Prompt Generator Banner */}
