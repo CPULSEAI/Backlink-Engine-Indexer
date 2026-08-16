@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   X,
   BookOpen,
@@ -22,9 +23,26 @@ import {
   Layers,
   PlayCircle,
   Download,
-  Check
+  Check,
+  RefreshCw,
+  Clock,
+  Activity,
+  Share2,
 } from 'lucide-react';
 import { generateUserManualPdf } from '../utils/generateManualPdf';
+
+interface ChangelogFeature {
+  module: string;
+  description: string;
+}
+
+interface ChangelogEntry {
+  version: string;
+  releaseDate: string;
+  status: string;
+  highlights: string[];
+  features: ChangelogFeature[];
+}
 
 interface HelpManualModalProps {
   isOpen: boolean;
@@ -56,7 +74,34 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
     | 'faq'
     | 'advanced'
     | 'glossary'
+    | 'changelog'
   >('intro');
+
+  // Dynamic backend changelog state
+  const [changelogList, setChangelogList] = useState<ChangelogEntry[]>([]);
+  const [isLoadingChangelog, setIsLoadingChangelog] = useState(false);
+  const [lastChangelogSync, setLastChangelogSync] = useState<string | null>(null);
+
+  const fetchChangelog = async () => {
+    setIsLoadingChangelog(true);
+    try {
+      const res = await axios.get('/api/changelog');
+      if (res.data && res.data.changelog) {
+        setChangelogList(res.data.changelog);
+        setLastChangelogSync(new Date().toLocaleTimeString());
+      }
+    } catch (err) {
+      console.error('Failed to fetch changelog:', err);
+    } finally {
+      setIsLoadingChangelog(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchChangelog();
+    }
+  }, [isOpen]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
@@ -69,7 +114,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
       // Brief timeout to yield thread and render state
       await new Promise(r => setTimeout(r, 100));
       const doc = generateUserManualPdf({
-        version: 'v2.4',
+        version: 'v3.0',
         generatedDate: new Date().toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
@@ -77,7 +122,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
         }),
         author: 'CareerPulse AI Systems & SEO Engineering',
       });
-      doc.save('SEO_GEO_Indexing_Engine_User_Manual_v2.4.pdf');
+      doc.save('SEO_GEO_Indexing_Engine_User_Manual_v3.0.pdf');
       setPdfDownloaded(true);
       setTimeout(() => setPdfDownloaded(false), 3000);
     } catch (err) {
@@ -89,14 +134,20 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
 
   if (!isOpen) return null;
 
-  // 22 Detailed Troubleshooting Items
+  // 28 Detailed Troubleshooting Items (including Retry, Bulk SEO, Schema, and LLM simulation)
   const troubleshootingItems = [
     { problem: 'IndexNow 403 Forbidden Error', cause: 'Invalid or missing IndexNow API Key file hosted at root domain.', solution: 'Verify key in Settings Modal and ensure the key text file matches host key hash.' },
-    { problem: 'Google Indexing API Permission Denied (403)', cause: 'Service account JSON key lacks Owner/Editor permission in Google Search Console.', solution: 'Add your service account email as Owner inside Search Console property settings.' },
+    { problem: 'Google Indexing API Permission Denied (403)', cause: 'Service account JSON key lacks Owner/Editor permission in Google Search Console.', solution: 'Add your service account email as Owner inside Search Console property settings using the Google API 3-Step Wizard.' },
+    { problem: 'Transient HTTP 429/503 Queue Errors', cause: 'Downstream directory or API endpoint temporarily rate-limited or congested.', solution: 'Intelligent Retry Policy automatically catches 429, 500, 502, 503, 504 and re-queues with exponential backoff delay.' },
+    { problem: 'Bulk SEO Validator Canonical Mismatch', cause: 'Target URL serves a rel="canonical" tag pointing to a different domain or protocol (HTTP vs HTTPS).', solution: 'Fix server canonical headers or update URL list to point to authoritative destination before batch submission.' },
+    { problem: 'Bulk SEO Validator Missing Meta Description', cause: 'Page HTML lacks <meta name="description"> or contains empty content.', solution: 'Add a 50–160 character meta description containing key search entity terms to avoid SERP snippet penalty.' },
+    { problem: 'Visual Schema Generator JSON-LD Syntax Error', cause: 'Unescaped double-quotes or invalid URL format inside schema fields.', solution: 'Use the Visual Schema Generator form to auto-format, escape strings, and validate JSON-LD syntax prior to copying.' },
+    { problem: 'LLM Citation Simulator Low Probability (<50%)', cause: 'Page lacks structured Q&A blocks, quantitative facts, or explicit author/source schema.', solution: 'Use the 1-Click Schema Generator in the simulator to generate FAQ and Article Schema and increase entity citation density.' },
+    { problem: 'Whitelabel PDF Print Preview Blank Logo', cause: 'CORS restriction or invalid image URL provided for custom logo.', solution: 'Upload a direct PNG/SVG image or use a public HTTPS image URL in the Whitelabel Client PDF Generator.' },
     { problem: 'Backlink Verification Timeout', cause: 'Target website blocking automated user-agent or response time > 6000ms.', solution: 'Enable High-Anonymity Proxies in Settings or adjust thread delay.' },
     { problem: 'Gemini API Credit Exceeded (429)', cause: 'Prepayment quota or free tier rate limits reached on Google Gemini API.', solution: 'System automatically falls back to offline heuristic scoring engine. Add fresh key in Settings if needed.' },
     { problem: 'Proxy Connection Failure', cause: 'Proxy host/port unreachable or requires username/password auth.', solution: 'Test proxy string in Settings. Format: http://user:pass@ip:port.' },
-    { problem: 'WebSocket Disconnected Status', cause: 'Temporary container network blip or browser sleeping in background tab.', solution: 'Click reconnect status icon or refresh page. Server state remains safe.' },
+    { problem: 'WebSocket Disconnected Status', cause: 'Temporary container network blip or browser sleeping in background tab.', solution: 'Click reconnect status icon or refresh page. Server state remains safe in SQLite WAL vault.' },
     { problem: 'Keyword Gap Radar Empty Chart', cause: 'Domains entered do not have enough indexable keyword data.', solution: 'Click "Recalculate Radar Data" or ensure valid top-level domain syntax (e.g., brand.com).' },
     { problem: 'Content Grader Page Fetch AbortError', cause: 'Target URL timed out after 6 seconds or strictly blocks server-side scraping.', solution: 'The system uses fallback URL structure and meta heuristics. Ensure public accessibility.' },
     { problem: 'Webhook Notification Not Firing', cause: 'Webhook endpoint URL misconfigured or returning non-200 HTTP code.', solution: 'Send test payload in Settings Modal and check server response logs.' },
@@ -107,8 +158,8 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
     { problem: 'Recharts Rendering Distortion', cause: 'Window resize occurred during graph render.', solution: 'Click chart mode toggles (Line/Area/Heatmap) to trigger instant clean re-render.' },
     { problem: 'Duplicate Submissions Flagged', cause: 'Identical URL submitted within the 24-hour indexing cooldown window.', solution: 'Toggle "Force Re-Index" checkbox in Smart Batcher configuration.' },
     { problem: 'High Failure Rate in Indexing Pings', cause: 'Engine endpoints unreachable or ISP rate-limiting outbound pings.', solution: 'Switch protocol pings to IndexNow protocol and decrease thread count.' },
-    { problem: 'Missing Schema Markup in GEO Grade', cause: 'Target page lacks JSON-LD or Microdata structured tags.', solution: 'Use the "Generate GEO JSON-LD Schema" button inside Content Grader to generate ready code.' },
-    { problem: 'Database Persistence Reset', cause: 'Local browser cache wiped or server temporary storage purged.', solution: 'Export historical database via SQL.js export tool prior to major browser updates.' },
+    { problem: 'Missing Schema Markup in GEO Grade', cause: 'Target page lacks JSON-LD or Microdata structured tags.', solution: 'Use the Visual Schema Generator modal to create FAQPage, Article, or Organization JSON-LD snippets.' },
+    { problem: 'Database Persistence Reset', cause: 'Local browser cache wiped or server temporary storage purged.', solution: 'All data is stored in the persistent backend SQLite WAL database (`backlink_indexer.sqlite`).' },
     { problem: 'Rate Limit Throttling on Bing Ping', cause: 'Exceeded 10,000 URLs per day IndexNow quota.', solution: 'Batch URLs across multiple site host keys or schedule weekly drip indexing.' },
     { problem: 'Competitor Score Delta Discrepancy', cause: 'Different benchmark modes selected (Solo vs 3-Way Comparative).', solution: 'Toggle benchmark view mode top right in Keyword Gap Radar component.' },
     { problem: 'Export CSV Empty Output', cause: 'No submission rows selected or active filter hides all rows.', solution: 'Select "All Rows" or clear search filter before clicking Export CSV.' },
@@ -128,12 +179,28 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
       a: 'Traditional SEO focuses on rank position #1-10 on standard search engine results pages (SERPs). GEO optimizes content to be cited, referenced, and synthesized by AI models like ChatGPT, Perplexity, Claude, and Google Gemini during natural language answers.'
     },
     {
+      q: 'How does the Bulk SEO URL Validator handle 50+ URLs at once?',
+      a: 'The Bulk SEO Validator uses a multi-threaded parallel crawler. It concurrently checks canonical tag accuracy, meta description lengths and presence, and H1/H2 header hierarchy integrity, allowing 1-click batch export or direct handoff to the live submission queue.'
+    },
+    {
+      q: 'How does the Intelligent Retry Policy protect against API bans and rate limits?',
+      a: 'When an endpoint returns transient HTTP error codes (408, 429, 500, 502, 503, 504), the engine automatically schedules an exponential backoff re-queue with randomized jitter. This prevents burst traffic and guarantees high overall completion rates.'
+    },
+    {
+      q: 'How does the LLM Citation Simulator estimate citation probability?',
+      a: 'The simulator runs a multi-factor parser evaluating Citation Readability, Information Density, Schema Health, Fact Anchor Counts, and Domain Authority baseline, providing an immediate diagnostic scorecard with 1-click Schema generation.'
+    },
+    {
+      q: 'Can I whitelabel executive PDF reports with my agency branding?',
+      a: 'Yes! The Whitelabel Client PDF Generator lets you upload your custom logo, customize primary and accent brand colors, configure client domain information, write executive summaries, and print or export styled PDF reports.'
+    },
+    {
       q: 'How fast does IndexNow push pages to search engines?',
       a: 'IndexNow notifies Bing, Yandex, and participating search engines instantly (typically within 1 to 5 seconds). Indexing usually occurs within minutes to a few hours depending on site authority.'
     },
     {
       q: 'Do I need a Google Search Console Service Account to use Google Indexing API?',
-      a: 'Yes, for automated Google indexing pings, you need a Service Account JSON key added as an Owner inside Google Search Console. Instructions are in the Settings Modal.'
+      a: 'Yes, for automated Google indexing pings, you need a Service Account JSON key added as an Owner inside Google Search Console. Use the Google API 3-Step Setup Wizard for quick verification.'
     },
     {
       q: 'What happens if the Gemini API key runs out of credits?',
@@ -142,10 +209,6 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
     {
       q: 'How does the 3-Way Competitor Keyword Gap Radar work?',
       a: 'The radar maps your domain’s visibility across high-value search intent clusters against your top two competitors and an industry average baseline, highlighting immediate content expansion gaps.'
-    },
-    {
-      q: 'Can I schedule automated weekly domain audits?',
-      a: 'Yes! Inside the SEO Domain Profiler, you can set daily, weekly, or monthly scheduled crawls. Results are automatically saved to historical trend analysis.'
     }
   ];
 
@@ -159,7 +222,8 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
     { id: 'troubleshooting', label: '7. Troubleshooting', icon: ShieldAlert },
     { id: 'faq', label: '8. FAQ', icon: HelpCircle },
     { id: 'advanced', label: '9. Advanced', icon: Terminal },
-    { id: 'glossary', label: '10. Glossary', icon: FileText }
+    { id: 'glossary', label: '10. Glossary', icon: FileText },
+    { id: 'changelog', label: '11. Live Updates & Changelog', icon: Activity },
   ];
 
   return (
@@ -176,11 +240,11 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
               <h2 className="text-lg font-bold flex items-center gap-2">
                 <span>Platform Help Manual &amp; Documentation</span>
                 <span className="text-[10px] font-mono uppercase bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded font-bold">
-                  v2.4
+                  v3.0 (2026 Enterprise Edition)
                 </span>
               </h2>
               <p className="text-xs text-zinc-400">
-                Complete guide to Generative Engine Optimization, Indexing Pipeline &amp; GEO Gap Analytics
+                Complete guide to GEO Indexing, Bulk SEO Validator, Intelligent Retry Policy, Visual Schema &amp; Whitelabel Reports
               </p>
             </div>
           </div>
@@ -456,6 +520,33 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
                       Features a Recharts Line Chart visualizing the 30-day confirmed backlink success rate (%), alongside Area, Bar, Heatmap views, and AI Citation Monitoring tab.
                     </p>
                   </div>
+
+                  <div className="p-4 bg-zinc-900/80 border border-zinc-800 rounded-xl space-y-2">
+                    <h4 className="font-bold text-white flex items-center gap-2 text-sm">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400"></span> Bulk SEO URL Validator
+                    </h4>
+                    <p className="text-xs text-zinc-300">
+                      Parallel audit engine capable of scanning 50+ URLs at once. Automatically flags canonical mismatches, missing/empty meta descriptions, and improper H1/H2 header hierarchies.
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-zinc-900/80 border border-zinc-800 rounded-xl space-y-2">
+                    <h4 className="font-bold text-white flex items-center gap-2 text-sm">
+                      <span className="w-2 h-2 rounded-full bg-amber-400"></span> Visual Schema Generator
+                    </h4>
+                    <p className="text-xs text-zinc-300">
+                      Interactive Schema.org form builder generating FAQPage, Article, and Organization JSON-LD snippets with live Google search rich result previews and instant clipboard copying.
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-zinc-900/80 border border-zinc-800 rounded-xl space-y-2">
+                    <h4 className="font-bold text-white flex items-center gap-2 text-sm">
+                      <span className="w-2 h-2 rounded-full bg-blue-400"></span> LLM Citation Simulator &amp; Whitelabel Reports
+                    </h4>
+                    <p className="text-xs text-zinc-300">
+                      Simulates search query citations across ChatGPT, Perplexity, Gemini, and Claude with diagnostic scoring, paired with the Whitelabel PDF Generator for custom branded client reporting.
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
@@ -542,6 +633,126 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
                       <div>
                         <strong className="text-emerald-300 block mb-1">Best Practices</strong>
                         Aim for a Citation Likelihood score of &gt; 80%. Include clear bullet points, quantitative facts, and JSON-LD schema on all landing pages.
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Feature 4: Bulk SEO URL Validator */}
+                  <div className="p-5 bg-zinc-900/70 border border-zinc-800 rounded-xl space-y-3">
+                    <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2">
+                      <h4 className="text-base font-bold text-emerald-400 flex items-center gap-2">
+                        <Layers className="w-4 h-4 text-emerald-400" />
+                        <span>Bulk SEO URL Validator (50+ Parallel Crawl)</span>
+                      </h4>
+                      <span className="text-[10px] font-mono bg-emerald-500/10 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/20 font-bold">
+                        Auditing &amp; Quality
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <strong className="text-zinc-200 block mb-1">Purpose</strong>
+                        Audits up to 50+ URLs simultaneously with parallel worker threads. Tests canonical tags, missing meta descriptions, and H1/H2 header hierarchies.
+                      </div>
+                      <div>
+                        <strong className="text-emerald-300 block mb-1">Best Practices &amp; Actions</strong>
+                        Export the audited table to CSV for client deliverables or click "Send to Submissions" to instantly push clean URLs to live directory indexing.
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Feature 5: Intelligent Retry Policy */}
+                  <div className="p-5 bg-zinc-900/70 border border-zinc-800 rounded-xl space-y-3">
+                    <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2">
+                      <h4 className="text-base font-bold text-amber-300 flex items-center gap-2">
+                        <ShieldAlert className="w-4 h-4 text-amber-400" />
+                        <span>Intelligent Retry Policy &amp; Exponential Backoff</span>
+                      </h4>
+                      <span className="text-[10px] font-mono bg-amber-500/10 text-amber-300 px-2 py-0.5 rounded border border-amber-500/20 font-bold">
+                        Reliability Shield
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <strong className="text-zinc-200 block mb-1">Purpose</strong>
+                        Automatically intercepts transient HTTP error codes (408, 429, 500, 502, 503, 504) and schedules automated re-queuing with randomized backoff.
+                      </div>
+                      <div>
+                        <strong className="text-emerald-300 block mb-1">Best Practices</strong>
+                        No manual retry clicks needed; WebSocket events (`retry_scheduled`, `retry_executed`) provide full real-time operational visibility.
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Feature 6: Visual Schema Generator */}
+                  <div className="p-5 bg-zinc-900/70 border border-zinc-800 rounded-xl space-y-3">
+                    <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2">
+                      <h4 className="text-base font-bold text-purple-300 flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-purple-400" />
+                        <span>Visual Schema Generator (FAQ, Article, Org)</span>
+                      </h4>
+                      <span className="text-[10px] font-mono bg-purple-500/10 text-purple-300 px-2 py-0.5 rounded border border-purple-500/20 font-bold">
+                        Structured Data
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <strong className="text-zinc-200 block mb-1">Purpose</strong>
+                        Enables non-technical users to build clean Schema.org structured data (FAQPage, Article, Organization) with instant Google rich snippet search previews.
+                      </div>
+                      <div>
+                        <strong className="text-emerald-300 block mb-1">Best Practices</strong>
+                        Embed the generated JSON-LD snippet directly into your site's `&lt;head&gt;` tag before launching an indexing crawl to maximize AI entity recognition.
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Feature 7: LLM Citation Simulator */}
+                  <div className="p-5 bg-zinc-900/70 border border-zinc-800 rounded-xl space-y-3">
+                    <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2">
+                      <h4 className="text-base font-bold text-blue-300 flex items-center gap-2">
+                        <Radio className="w-4 h-4 text-blue-400" />
+                        <span>LLM Citation Simulator &amp; Diagnostic Checklist</span>
+                      </h4>
+                      <span className="text-[10px] font-mono bg-blue-500/10 text-blue-300 px-2 py-0.5 rounded border border-blue-500/20 font-bold">
+                        AI Simulation
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <strong className="text-zinc-200 block mb-1">Purpose</strong>
+                        Simulates search query synthesis by ChatGPT Search, Perplexity, Gemini, and Claude, reporting Citation Probability % and Fact Anchor density.
+                      </div>
+                      <div>
+                        <strong className="text-emerald-300 block mb-1">Best Practices</strong>
+                        Review the diagnostic checklist and click "Generate Structured Schema" to remedy missing entity signals in under 30 seconds.
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Feature 8: Whitelabel Client PDF Generator */}
+                  <div className="p-5 bg-zinc-900/70 border border-zinc-800 rounded-xl space-y-3">
+                    <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2">
+                      <h4 className="text-base font-bold text-rose-300 flex items-center gap-2">
+                        <Download className="w-4 h-4 text-rose-400" />
+                        <span>Whitelabel Client PDF Generator &amp; Print Preview</span>
+                      </h4>
+                      <span className="text-[10px] font-mono bg-rose-500/10 text-rose-300 px-2 py-0.5 rounded border border-rose-500/20 font-bold">
+                        Agency Reports
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <strong className="text-zinc-200 block mb-1">Purpose</strong>
+                        Allows agencies and consultants to brand executive reports with custom logos, custom primary/accent hex colors, client domains, and executive commentary.
+                      </div>
+                      <div>
+                        <strong className="text-emerald-300 block mb-1">Best Practices</strong>
+                        Use the interactive Print Preview mode to inspect visual formatting and alignment before exporting executive PDF deliverables to clients.
                       </div>
                     </div>
                   </div>
@@ -778,11 +989,107 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
                     { term: 'Citation Likelihood', def: 'Percentage score estimating the probability that AI answer engines will cite a given web page for relevant prompts.' },
                     { term: 'EEAT Score', def: 'Google & AI Search framework assessing Experience, Expertise, Authoritativeness, and Trustworthiness.' },
                     { term: 'JSON-LD Schema', def: 'Structured data code injected into HTML head allowing search bots and LLMs to parse facts easily.' },
-                    { term: 'Keyword Gap Delta', def: 'The visibility score difference between your domain and your top competitors in a specific intent cluster.' }
+                    { term: 'Keyword Gap Delta', def: 'The visibility score difference between your domain and your top competitors in a specific intent cluster.' },
+                    { term: 'Intelligent Retry Backoff', def: 'Exponential re-queuing policy with jitter for transient HTTP errors (408, 429, 500, 502, 503, 504).' },
+                    { term: 'Bulk SEO Concurrency', def: 'Multi-worker parallel inspection of canonical tags, meta description presence, and H1/H2 header hierarchies.' }
                   ].map((g, idx) => (
                     <div key={idx} className="p-3 bg-zinc-900/60 border border-zinc-800 rounded-xl space-y-1">
                       <strong className="text-indigo-300 block font-mono">{g.term}</strong>
                       <p className="text-zinc-400 leading-relaxed font-sans">{g.def}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 11. LIVE CHANGELOG & UPDATES */}
+            {activeTab === 'changelog' && (
+              <div className="space-y-6 animate-in fade-in duration-200">
+                <div className="border-b border-zinc-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+                      <Activity className="w-6 h-6 text-[#ff4d00]" />
+                      <span>11. Live System Changelog &amp; Real-time Documentation</span>
+                    </h3>
+                    <p className="text-zinc-400 text-sm mt-1">
+                      Continuously synchronized with live backend release notes, features, and enterprise updates.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    {lastChangelogSync && (
+                      <span className="text-[11px] font-mono text-zinc-500 flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5 text-zinc-400" />
+                        <span>Synced at {lastChangelogSync}</span>
+                      </span>
+                    )}
+                    <button
+                      onClick={fetchChangelog}
+                      disabled={isLoadingChangelog}
+                      className="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-mono font-bold rounded-lg border border-zinc-700 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${isLoadingChangelog ? 'animate-spin text-[#ff4d00]' : ''}`} />
+                      <span>Sync Latest</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Real-time Status Card */}
+                <div className="p-4 bg-zinc-900/90 border border-zinc-800 rounded-xl flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-emerald-500 animate-ping" />
+                    <div>
+                      <h4 className="text-sm font-bold text-white font-mono">AUTOMATED USER MANUAL SYNC ACTIVE</h4>
+                      <p className="text-xs text-zinc-400">
+                        The user manual dynamically polls the backend API to inject the latest capabilities into documentation in real-time.
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold rounded">
+                    DOCUMENTATION v3.1.0
+                  </span>
+                </div>
+
+                {/* Changelog Entries List */}
+                <div className="space-y-6">
+                  {changelogList.map((entry, eIdx) => (
+                    <div key={eIdx} className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-5 space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-800/80 pb-3">
+                        <div className="flex items-center gap-2.5">
+                          <span className="px-2.5 py-0.5 bg-[#ff4d00]/20 text-[#ff4d00] border border-[#ff4d00]/40 text-xs font-mono font-bold rounded">
+                            {entry.version}
+                          </span>
+                          <span className="text-xs text-zinc-400 font-mono">{entry.releaseDate}</span>
+                        </div>
+                        <span className="text-xs font-mono text-zinc-500 uppercase">{entry.status}</span>
+                      </div>
+
+                      {/* Highlights */}
+                      <div>
+                        <h5 className="text-xs font-bold text-zinc-300 uppercase font-mono tracking-wider mb-2">
+                          Key Release Highlights
+                        </h5>
+                        <ul className="space-y-1.5 text-xs text-zinc-400">
+                          {entry.highlights.map((hl, hIdx) => (
+                            <li key={hIdx} className="flex items-start gap-2">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                              <span>{hl}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {/* Feature Modules */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                        {entry.features.map((feat, fIdx) => (
+                          <div key={fIdx} className="bg-zinc-950/70 border border-zinc-800 p-3 rounded-lg space-y-1">
+                            <strong className="text-indigo-300 text-xs font-mono block font-bold">
+                              {feat.module}
+                            </strong>
+                            <p className="text-zinc-400 text-xs leading-relaxed">{feat.description}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -794,7 +1101,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
 
         {/* Footer */}
         <div className="px-6 py-3 bg-zinc-900 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-400 shrink-0 font-mono">
-          <span>Documentation Edition v2.4 • GEO SEO Engine</span>
+          <span>Documentation Edition v3.0 (2026 Enterprise Edition) • GEO SEO Engine</span>
           <div className="flex items-center space-x-4">
             <button
               onClick={() => {

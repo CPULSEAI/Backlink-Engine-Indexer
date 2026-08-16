@@ -48,6 +48,7 @@ interface SidebarProps {
   onOpenClarityWizard?: () => void;
   onOpenGoogleApiWizard?: () => void;
   onOpenSchemaGenerator?: () => void;
+  onOpenSitemapAudit?: () => void;
   onOpenOnboardingWizard: () => void;
   onOpenGeoBlueprint: () => void;
   onOpenDomainProfiler: () => void;
@@ -75,6 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenClarityWizard,
   onOpenGoogleApiWizard,
   onOpenSchemaGenerator,
+  onOpenSitemapAudit,
   onOpenOnboardingWizard,
   onOpenGeoBlueprint,
   onOpenDomainProfiler,
@@ -623,6 +625,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <Search className="w-4 h-4 text-black shrink-0" />
                   {!isCollapsed && <span>TECHNICAL CRAWLER</span>}
                 </button>
+
+                {/* XML Sitemap Audit Engine */}
+                {onOpenSitemapAudit && (
+                  <button
+                    onClick={() => handleNavClick(onOpenSitemapAudit)}
+                    className={`w-full flex items-center ${
+                      isCollapsed ? 'justify-center p-2.5' : 'space-x-3 px-3 py-2'
+                    } text-xs font-bold text-black bg-white hover:bg-black hover:text-white border-2 border-black shadow-[2px_2px_0_#000] transition-all cursor-pointer uppercase`}
+                    title="XML Sitemap Crawler & Health Auditor"
+                  >
+                    <FileCode className="w-4 h-4 text-[#ff4d00] shrink-0" />
+                    {!isCollapsed && <span>SITEMAP AUDIT</span>}
+                  </button>
+                )}
               </div>
             )}
           </div>

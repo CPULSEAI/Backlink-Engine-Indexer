@@ -25,6 +25,8 @@ import { WizardsHubDashboard } from './components/WizardsHubDashboard';
 import { GoogleApiWizard } from './components/GoogleApiWizard';
 import { BulkSeoValidator } from './components/BulkSeoValidator';
 import { VisualSchemaGeneratorModal } from './components/VisualSchemaGeneratorModal';
+import { PeerNetworkStatusCard } from './components/PeerNetworkStatusCard';
+import { SitemapAuditModal } from './components/SitemapAuditModal';
 import { Sidebar } from './components/Sidebar';
 import { PlainEnglishSummaryCard } from './components/PlainEnglishSummaryCard';
 import { AuthAccountCenter } from './components/AuthAccountCenter';
@@ -110,12 +112,66 @@ export default function App() {
   const [isClarityWizardOpen, setIsClarityWizardOpen] = useState(false);
   const [isGoogleApiWizardOpen, setIsGoogleApiWizardOpen] = useState(false);
   const [isSchemaModalOpen, setIsSchemaModalOpen] = useState(false);
+  const [isSitemapAuditOpen, setIsSitemapAuditOpen] = useState(false);
+  const [sitemapInitialDomain, setSitemapInitialDomain] = useState('careerpulseai.net');
   const [wizardInitialUrl, setWizardInitialUrl] = useState('');
   const [clarityInitialUrl, setClarityInitialUrl] = useState('');
   const [isSchedulerOpen, setIsSchedulerOpen] = useState(false);
   const [profilerDomain, setProfilerDomain] = useState('');
   const [graderUrl, setGraderUrl] = useState('');
   const [graderKeyword, setGraderKeyword] = useState('');
+
+  // --- DESKTOP BROWSER NOTIFICATION TRIGGER ---
+  // Fires when apiHealthReport shows degradation below 80% to ensure immediate awareness of indexing pipeline issues
+  const lastHealthAlertRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!apiHealthReport) return;
+    const score = apiHealthReport.overallScore;
+    if (score < 80) {
+      const now = Date.now();
+      // Throttle notifications so user is not spammed (max 1 per 5 mins unless score drops)
+      if (!lastHealthAlertRef.current || now - lastHealthAlertRef.current > 300000) {
+        lastHealthAlertRef.current = now;
+
+        // Browser Native Desktop Notification
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+          if (Notification.permission === 'granted') {
+            try {
+              new Notification('⚠️ Indexing Pipeline Alert: Health Degraded', {
+                body: `API Health dropped to ${score}% (<80% SLA threshold). Check Diagnostics Center.`,
+                icon: '/favicon.ico',
+              });
+            } catch (e) {
+              console.warn('Desktop notification dispatch failed:', e);
+            }
+          } else if (Notification.permission === 'default') {
+            Notification.requestPermission().then((perm) => {
+              if (perm === 'granted') {
+                try {
+                  new Notification('⚠️ Indexing Pipeline Alert: Health Degraded', {
+                    body: `API Health dropped to ${score}% (<80% SLA threshold). Check Diagnostics Center.`,
+                    icon: '/favicon.ico',
+                  });
+                } catch (e) {
+                  console.warn('Desktop notification dispatch failed:', e);
+                }
+              }
+            });
+          }
+        }
+
+        // Accompanying Toast Alert
+        toast.error(`⚠️ PIPELINE ALERT: API Health degraded to ${score}% (<80% SLA threshold). Check Diagnostics Center!`, {
+          duration: 6000,
+        });
+      }
+    }
+  }, [apiHealthReport]);
+
+  const handleOpenSitemapAudit = (domain?: string) => {
+    if (domain) setSitemapInitialDomain(domain);
+    setIsSitemapAuditOpen(true);
+  };
 
   // Auto-launch Onboarding Wizard for first-time visitors
   useEffect(() => {
@@ -714,6 +770,7 @@ export default function App() {
           }}
           onOpenGoogleApiWizard={() => setIsGoogleApiWizardOpen(true)}
           onOpenSchemaGenerator={() => setIsSchemaModalOpen(true)}
+          onOpenSitemapAudit={() => handleOpenSitemapAudit()}
           onOpenOnboardingWizard={() => setIsWizardOpen(true)}
           onOpenGeoBlueprint={() => setIsGeoBlueprintOpen(true)}
           onOpenDomainProfiler={(domain) => handleOpenDomainProfiler(domain)}
@@ -845,6 +902,9 @@ export default function App() {
                 onRefresh={fetchAnalytics}
                 onOpenContentGrader={handleOpenContentGrader}
               />
+
+              {/* Real-time Peer-to-Peer Partner Backlink Network Telemetry */}
+              <PeerNetworkStatusCard />
 
               {/* Real-time Stream Results Table */}
               <ResultsTable
@@ -1102,6 +1162,27 @@ export default function App() {
       <VisualSchemaGeneratorModal
         isOpen={isSchemaModalOpen}
         onClose={() => setIsSchemaModalOpen(false)}
+      />
+
+      {/* XML Sitemap Crawler & Technical Audit Modal */}
+      <SitemapAuditModal
+        isOpen={isSitemapAuditOpen}
+        onClose={() => setIsSitemapAuditOpen(false)}
+        initialDomain={sitemapInitialDomain}
+        onSendToIndexingQueue={(flaggedUrls) => {
+          handleStartJob({
+            targetUrls: flaggedUrls,
+            features: {
+              generateBacklinks: true,
+              checkLiveConfirmation: true,
+              requestIndexing: true,
+              runGoogleIndexing: true,
+              runPingServices: true,
+            },
+            selectedDirectoryIds: directories.slice(0, 5).map((d) => d.id),
+            concurrencyLimit: 4,
+          });
+        }}
       />
 
       {/* AI Copilot Float Widget */}

@@ -13,7 +13,7 @@ export function generateUserManualPdf(options: ManualPdfOptions = {}): jsPDF {
     format: 'a4',
   });
 
-  const version = options.version || 'v2.4';
+  const version = options.version || 'v3.0';
   const generatedDate = options.generatedDate || new Date().toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -43,7 +43,7 @@ export function generateUserManualPdf(options: ManualPdfOptions = {}): jsPDF {
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
       doc.setTextColor(130, 140, 160);
-      doc.text('SEO & GEO Backlink Indexing Engine — Complete Platform Manual', margin, 12);
+      doc.text('SEO & GEO Backlink Indexing Engine — Complete Platform Manual v3.0', margin, 12);
       doc.text(version, pageWidth - margin - 10, 12);
       doc.setDrawColor(220, 225, 235);
       doc.line(margin, 14, pageWidth - margin, 14);
@@ -71,7 +71,7 @@ export function generateUserManualPdf(options: ManualPdfOptions = {}): jsPDF {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   doc.setTextColor(190, 210, 240);
-  doc.text('Enterprise Operations, Automated Indexing, Radar Gap Analytics & Troubleshooting', margin + 8, cursorY + 34);
+  doc.text('Enterprise Operations, Bulk SEO Validator, Intelligent Retry & Whitelabel Reporting', margin + 8, cursorY + 34);
 
   doc.setFontSize(8.5);
   doc.setTextColor(148, 163, 184);
@@ -92,7 +92,7 @@ export function generateUserManualPdf(options: ManualPdfOptions = {}): jsPDF {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
   doc.setTextColor(71, 85, 105);
-  const summaryText = 'This enterprise platform coordinates high-velocity backlink creation, real-time HTTP verification, Google Indexing API v3 and IndexNow protocol pushes, 3-way competitor GEO gap radar mapping, and AI-powered conversion optimization.';
+  const summaryText = 'This enterprise platform coordinates high-velocity backlink creation, parallel Bulk SEO URL validation (50+ URLs), Google Indexing API v3 and IndexNow protocol pushes, 3-way competitor GEO gap radar mapping, Intelligent Retry exponential backoff, Visual Schema generator, and Whitelabel client PDF reporting.';
   const summaryLines = doc.splitTextToSize(summaryText, contentWidth - 12);
   doc.text(summaryLines, margin + 6, cursorY + 13);
 
@@ -134,7 +134,6 @@ export function generateUserManualPdf(options: ManualPdfOptions = {}): jsPDF {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9);
     doc.setTextColor(30, 41, 59);
-    const titleWidth = doc.getTextWidth(`•  ${boldTitle}: `);
     
     doc.setFont('helvetica', 'normal');
     const remainingWidth = contentWidth - 8;
@@ -156,46 +155,55 @@ export function generateUserManualPdf(options: ManualPdfOptions = {}): jsPDF {
   // --- 2. QUICK START GUIDE ---
   addSectionHeading('2. Five-Minute Quick Start Guide', 'End-to-end steps to launch your first verified indexing job');
   addBullet('Step 1 — Input Target URLs', 'Enter single or batch URLs in the submission console or upload CSV/TXT format files.');
-  addBullet('Step 2 — Configure Indexing Engine', 'Select whether to engage Google Indexing API v3, the IndexNow multi-engine protocol, or SERP multi-ping nodes.');
-  addBullet('Step 3 — Proxy & Concurrency', 'Set worker threads (1 to 10) and enable the Intelligent Auto-Rotate Proxy Shield for 429/403 rate-limit evasion.');
-  addBullet('Step 4 — Execute & Live Stream', 'Click "Start Automated Submission". WebSocket streaming delivers live HTTP status codes and backlink verification logs.');
-  addBullet('Step 5 — Export Audit Package', 'Download full CSV/JSON audit reports, schema snippets, and historical rank tracking metrics.');
+  addBullet('Step 2 — Bulk SEO Pre-Flight Validation', 'Optionally run the Bulk SEO Validator on 50+ URLs to inspect canonical tags and meta description health.');
+  addBullet('Step 3 — Configure Indexing Engine', 'Select whether to engage Google Indexing API v3, the IndexNow multi-engine protocol, or SERP multi-ping nodes.');
+  addBullet('Step 4 — Proxy & Concurrency', 'Set worker threads (1 to 10) and enable the Intelligent Auto-Rotate Proxy Shield for 429/403 rate-limit evasion.');
+  addBullet('Step 5 — Execute & Live Stream', 'Click "Start Automated Submission". WebSocket streaming delivers live HTTP status codes, backlink verification logs, and retry notifications.');
+  addBullet('Step 6 — Export Whitelabel Deliverables', 'Download full CSV/JSON audit reports, schema snippets, and whitelabel branded client PDF packages.');
 
   // --- 3. ARCHITECTURE & USER INTERFACE ---
   addSectionHeading('3. Architecture & User Interface Map', 'Component layout and navigation hierarchy');
   addBullet('Bento Analytics Dashboard', 'High-level real-time KPI tiles including confirmed backlinks, active worker nodes, indexing score, and 30-day velocity.');
+  addBullet('Bulk SEO URL Validator', 'Parallel multi-threaded scanner analyzing canonical tags, missing meta descriptions, and H1/H2 header hierarchies for 50+ URLs.');
+  addBullet('Intelligent Retry Policy', 'Automated exponential backoff shield catching transient 408/429/500/502/503/504 errors with real-time WebSocket toast notifications.');
+  addBullet('Visual Schema Generator', 'Interactive Schema.org form builder generating FAQPage, Article, and Organization JSON-LD markup with rich snippet preview.');
+  addBullet('LLM Citation Simulator', 'AI search simulation evaluating citation probability for ChatGPT, Perplexity, Gemini, and Claude with diagnostic scorecard.');
+  addBullet('Whitelabel Client PDF Generator', 'Executive report studio with custom logo upload, brand color pickers, client domain setup, and live print preview.');
   addBullet('Interactive Keyword Gap Radar', 'Comparative 3-way radar visualization benchmarking your domain against two competitors across search intent clusters.');
   addBullet('Enterprise Content & GEO Grader', 'Deep-dive AI analysis inspecting keyword density, answer-first positioning, entity schema, and information gain.');
-  addBullet('Live Submissions & Streaming Console', 'Real-time tabular feed showing directory targets, response status, proxy node latency, and Google API verification.');
-  addBullet('Smart Batch Scheduler', 'Automated recurring task orchestrator for daily, weekly, or continuous drip indexing campaigns.');
-  addBullet('Conversion Wizard (CRO Audit)', 'AI-powered conversion rate heuristic engine computing trust, friction, and revenue lift projections.');
 
-  // --- 4. 22 DETAILED TROUBLESHOOTING DIAGNOSTICS ---
-  addSectionHeading('4. Complete Diagnostic & Troubleshooting Matrix (22 Items)', 'Comprehensive issue resolution reference for DevOps and SEO operators');
+  // --- 4. 28 DETAILED TROUBLESHOOTING DIAGNOSTICS ---
+  addSectionHeading('4. Complete Diagnostic & Troubleshooting Matrix (28 Items)', 'Comprehensive issue resolution reference for DevOps and SEO operators');
 
   const troubleshootingItems = [
     { p: '1. IndexNow 403 Forbidden Error', c: 'Missing IndexNow API Key file at root domain.', s: 'Verify key in Settings Modal and ensure the key text file matches host key hash.' },
-    { p: '2. Google Indexing API 403 (Permission Denied)', c: 'Service account JSON lacks Owner role in Search Console.', s: 'Add service account email as Owner inside Google Search Console property settings.' },
-    { p: '3. Backlink Verification Timeout', c: 'Target website blocking automated UA or latency >6000ms.', s: 'Enable High-Anonymity Proxies in Settings or adjust worker thread delay.' },
-    { p: '4. Gemini API Quota Exceeded (429)', c: 'Free tier or prepayment quota exhausted on Google Gemini.', s: 'System automatically falls back to offline heuristic scoring engine. Add fresh key in Settings.' },
-    { p: '5. Proxy Node Connection Failure', c: 'Proxy unreachable or requires credentials.', s: 'Format proxy string as http://user:pass@ip:port and run Diagnostic Latency Ping.' },
-    { p: '6. Consecutive 403 Proxy Auto-Disabling', c: 'Proxy node received 3 consecutive 403 WAF blocks.', s: 'System auto-disables the node for 10 minutes to protect submission flow and alerts in Settings.' },
-    { p: '7. WebSocket Disconnected Status', c: 'Temporary container network sleep or background tab.', s: 'Click reconnect status icon or refresh page. Server database state remains persistent.' },
-    { p: '8. Keyword Gap Radar Empty Chart', c: 'Entered domains lack indexable keyword data.', s: 'Click "Recalculate Radar Data" or ensure valid top-level domain syntax (e.g., brand.com).' },
-    { p: '9. Content Grader Fetch AbortError', c: 'Target URL timed out after 6s or blocks server scrape.', s: 'The engine uses fallback URL structure and meta heuristics. Ensure public accessibility.' },
-    { p: '10. Webhook Notification Not Firing', c: 'Webhook endpoint URL misconfigured or non-200 HTTP code.', s: 'Send test payload in Settings Modal and check server response logs.' },
-    { p: '11. SEO Audit Crawler Stuck at 0%', c: 'Robots.txt on target domain strictly disallows bot crawling.', s: 'Use custom user-agent string or bypass robots check in Domain Audit parameters.' },
-    { p: '12. Scheduled Crawl Not Running', c: 'Browser session cleared or server restart occurred.', s: 'Re-activate schedule inside Domain Profiler modal. Schedule persists in SQLite store.' },
-    { p: '13. SSL Certificate Warning in Domain Profiler', c: 'Target domain SSL chain incomplete or expired.', s: 'Verify domain HTTPS configuration or run full technical audit for SSL details.' },
-    { p: '14. Batch File Upload Parse Failure', c: 'CSV or TXT formatted with invalid delimiters.', s: 'Format file with one URL per line or standard header "url,anchor,target".' },
-    { p: '15. Recharts Rendering Distortion', c: 'Window resize occurred during graph render.', s: 'Click chart mode toggles (Line/Area/Heatmap) to trigger instant clean re-render.' },
-    { p: '16. Duplicate Submissions Flagged', c: 'Identical URL submitted within 24h cooldown window.', s: 'Toggle "Force Re-Index" checkbox in Smart Batcher configuration.' },
-    { p: '17. High Failure Rate in Indexing Pings', c: 'Engine endpoints unreachable or ISP rate-limiting outbound.', s: 'Switch protocol pings to IndexNow protocol and decrease thread count.' },
-    { p: '18. Missing Schema Markup in GEO Grade', c: 'Target page lacks JSON-LD or Microdata structured tags.', s: 'Use "Generate GEO JSON-LD Schema" button inside Content Grader for ready code.' },
-    { p: '19. Database Persistence Reset', c: 'Local browser cache wiped or temporary container purged.', s: 'Export historical database via SQL.js export tool prior to major browser updates.' },
-    { p: '20. Rate Limit Throttling on Bing Ping', c: 'Exceeded 10,000 URLs per day IndexNow quota.', s: 'Batch URLs across multiple site host keys or schedule weekly drip indexing.' },
-    { p: '21. Competitor Score Delta Discrepancy', c: 'Different benchmark modes selected (Solo vs 3-Way).', s: 'Toggle benchmark view mode top right in Keyword Gap Radar component.' },
-    { p: '22. Export CSV Empty Output', c: 'No submission rows selected or active filter hides rows.', s: 'Select "All Rows" or clear search filter before clicking Export CSV.' }
+    { p: '2. Google Indexing API 403 (Permission Denied)', c: 'Service account JSON lacks Owner role in Search Console.', s: 'Add service account email as Owner inside Google Search Console property settings using the Google API 3-Step Wizard.' },
+    { p: '3. Transient HTTP 429/503 Queue Errors', c: 'Downstream directory or API endpoint temporarily rate-limited or congested.', s: 'Intelligent Retry Policy automatically catches 429/500/502/503/504 and re-queues with exponential backoff delay.' },
+    { p: '4. Bulk SEO Validator Canonical Mismatch', c: 'Target URL serves a rel="canonical" pointing to a different domain or protocol.', s: 'Fix server canonical headers or update URL list to point to authoritative destination before batch submission.' },
+    { p: '5. Bulk SEO Validator Missing Meta Description', c: 'Page HTML lacks <meta name="description"> or contains empty content.', s: 'Add a 50-160 character meta description containing key search entity terms.' },
+    { p: '6. Visual Schema Generator JSON-LD Error', c: 'Unescaped double-quotes or invalid URL format inside schema fields.', s: 'Use the Visual Schema Generator form to auto-format, escape strings, and validate JSON-LD syntax.' },
+    { p: '7. LLM Citation Simulator Low Probability (<50%)', c: 'Page lacks structured Q&A blocks, quantitative facts, or explicit author schema.', s: 'Use the 1-Click Schema Generator in the simulator to generate FAQ and Article Schema.' },
+    { p: '8. Whitelabel PDF Print Preview Blank Logo', c: 'CORS restriction or invalid image URL provided for custom logo.', s: 'Upload a direct PNG/SVG image or use a public HTTPS image URL in the Whitelabel Client PDF Generator.' },
+    { p: '9. Backlink Verification Timeout', c: 'Target website blocking automated UA or latency >6000ms.', s: 'Enable High-Anonymity Proxies in Settings or adjust worker thread delay.' },
+    { p: '10. Gemini API Quota Exceeded (429)', c: 'Free tier or prepayment quota exhausted on Google Gemini.', s: 'System automatically falls back to offline heuristic scoring engine. Add fresh key in Settings.' },
+    { p: '11. Proxy Node Connection Failure', c: 'Proxy unreachable or requires credentials.', s: 'Format proxy string as http://user:pass@ip:port and run Diagnostic Latency Ping.' },
+    { p: '12. Consecutive 403 Proxy Auto-Disabling', c: 'Proxy node received 3 consecutive 403 WAF blocks.', s: 'System auto-disables the node for 10 minutes to protect submission flow and alerts in Settings.' },
+    { p: '13. WebSocket Disconnected Status', c: 'Temporary container network sleep or background tab.', s: 'Click reconnect status icon or refresh page. Server SQLite database state remains persistent.' },
+    { p: '14. Keyword Gap Radar Empty Chart', c: 'Entered domains lack indexable keyword data.', s: 'Click "Recalculate Radar Data" or ensure valid top-level domain syntax (e.g., brand.com).' },
+    { p: '15. Content Grader Fetch AbortError', c: 'Target URL timed out after 6s or blocks server scrape.', s: 'The engine uses fallback URL structure and meta heuristics. Ensure public accessibility.' },
+    { p: '16. Webhook Notification Not Firing', c: 'Webhook endpoint URL misconfigured or non-200 HTTP code.', s: 'Send test payload in Settings Modal and check server response logs.' },
+    { p: '17. SEO Audit Crawler Stuck at 0%', c: 'Robots.txt on target domain strictly disallows bot crawling.', s: 'Use custom user-agent string or bypass robots check in Domain Audit parameters.' },
+    { p: '18. Scheduled Crawl Not Running', c: 'Browser session cleared or server restart occurred.', s: 'Re-activate schedule inside Domain Profiler modal. Schedule persists in SQLite store.' },
+    { p: '19. SSL Certificate Warning in Domain Profiler', c: 'Target domain SSL chain incomplete or expired.', s: 'Verify domain HTTPS configuration or run full technical audit for SSL details.' },
+    { p: '20. Batch File Upload Parse Failure', c: 'CSV or TXT formatted with invalid delimiters.', s: 'Format file with one URL per line or standard header "url,anchor,target".' },
+    { p: '21. Recharts Rendering Distortion', c: 'Window resize occurred during graph render.', s: 'Click chart mode toggles (Line/Area/Heatmap) to trigger instant clean re-render.' },
+    { p: '22. Duplicate Submissions Flagged', c: 'Identical URL submitted within 24h cooldown window.', s: 'Toggle "Force Re-Index" checkbox in Smart Batcher configuration.' },
+    { p: '23. High Failure Rate in Indexing Pings', c: 'Engine endpoints unreachable or ISP rate-limiting outbound.', s: 'Switch protocol pings to IndexNow protocol and decrease thread count.' },
+    { p: '24. Missing Schema Markup in GEO Grade', c: 'Target page lacks JSON-LD or Microdata structured tags.', s: 'Use Visual Schema Generator modal to create FAQPage, Article, or Organization JSON-LD snippets.' },
+    { p: '25. Database Persistence Reset', c: 'Local browser cache wiped or temporary container purged.', s: 'All data is stored in the persistent backend SQLite WAL database (`backlink_indexer.sqlite`).' },
+    { p: '26. Rate Limit Throttling on Bing Ping', c: 'Exceeded 10,000 URLs per day IndexNow quota.', s: 'Batch URLs across multiple site host keys or schedule weekly drip indexing.' },
+    { p: '27. Competitor Score Delta Discrepancy', c: 'Different benchmark modes selected (Solo vs 3-Way).', s: 'Toggle benchmark view mode top right in Keyword Gap Radar component.' },
+    { p: '28. Export CSV Empty Output', c: 'No submission rows selected or active filter hides rows.', s: 'Select "All Rows" or clear search filter before clicking Export CSV.' }
   ];
 
   troubleshootingItems.forEach((item) => {

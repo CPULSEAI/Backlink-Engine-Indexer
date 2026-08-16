@@ -129,6 +129,17 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
     });
   };
 
+  const handleQuickCopyBacklink = (id: string, backlinkUrl: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!backlinkUrl) return;
+    navigator.clipboard.writeText(backlinkUrl);
+    setCopiedBacklinkId(id);
+    toast.success('📋 Backlink URL copied to clipboard!');
+    setTimeout(() => {
+      setCopiedBacklinkId(null);
+    }, 2000);
+  };
+
   // Bulk CSV Export Function
   const handleExportSelectedCsv = () => {
     const selectedLogs = logs.filter((log) => selectedLogIds.has(log.id));
@@ -322,6 +333,44 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
 
         {/* Status & Audit Specific Filter Toggles */}
         <div className="flex flex-wrap items-center gap-2">
+          {/* Primary Status Filter (All / Success / Failed) */}
+          <div className="flex items-center gap-1 bg-white p-1 border-2 border-black shadow-[2px_2px_0_#000]">
+            <span className="text-[10px] font-mono-brutal font-bold text-black px-2 flex items-center gap-1 uppercase">
+              <CheckCircle2 className="w-3 h-3 text-[#ff4d00]" />
+              <span>STATUS:</span>
+            </span>
+            <button
+              onClick={() => setStatusFilter('ALL')}
+              className={`px-2.5 py-0.5 text-[10px] font-mono-brutal font-bold uppercase transition-all ${
+                statusFilter === 'ALL'
+                  ? 'bg-black text-white'
+                  : 'text-black hover:bg-zinc-200'
+              }`}
+            >
+              ALL
+            </button>
+            <button
+              onClick={() => setStatusFilter('SUCCESS')}
+              className={`px-2.5 py-0.5 text-[10px] font-mono-brutal font-bold uppercase transition-all ${
+                statusFilter === 'SUCCESS'
+                  ? 'bg-emerald-500 text-black border border-black'
+                  : 'text-black hover:bg-zinc-200'
+              }`}
+            >
+              SUCCESS
+            </button>
+            <button
+              onClick={() => setStatusFilter('FAILED')}
+              className={`px-2.5 py-0.5 text-[10px] font-mono-brutal font-bold uppercase transition-all ${
+                statusFilter === 'FAILED'
+                  ? 'bg-red-600 text-white border border-black'
+                  : 'text-black hover:bg-zinc-200'
+              }`}
+            >
+              FAILURE
+            </button>
+          </div>
+
           {/* Live Verification Toggle */}
           <div className="flex items-center gap-1 bg-white p-1 border-2 border-black shadow-[2px_2px_0_#000]">
             <span className="text-[10px] font-mono-brutal font-bold text-black px-2 flex items-center gap-1 uppercase">
@@ -557,7 +606,7 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
 
                       {/* Generated Backlink Link */}
                       <td className="py-3 px-4 max-w-[220px] border-r-2 border-black" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center justify-between gap-1.5">
                           <a
                             href={log.generatedBacklink}
                             target="_blank"
@@ -566,8 +615,20 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                             title={log.generatedBacklink}
                           >
                             <span className="truncate">{log.generatedBacklink}</span>
-                            <ExternalLink className="w-3 h-3 flex-shrink-0 text-black" />
+                            <ExternalLink className="w-3 h-3 flex-shrink-0 text-zinc-500" />
                           </a>
+
+                          <button
+                            onClick={(e) => handleQuickCopyBacklink(log.id, log.generatedBacklink, e)}
+                            className="p-1 text-black hover:text-[#ff4d00] hover:bg-zinc-200 border border-transparent hover:border-black transition-all shrink-0 cursor-pointer"
+                            title="Quick Copy Backlink URL"
+                          >
+                            {copiedBacklinkId === log.id ? (
+                              <Check className="w-3.5 h-3.5 text-emerald-600 font-bold" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
+                          </button>
                         </div>
                       </td>
 
