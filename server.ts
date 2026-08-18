@@ -18,6 +18,7 @@ import {
   resumeScheduledJob,
   deleteScheduledJob,
   runScheduledJobNow,
+  getSchedulerStatus,
 } from './server/scheduler.js';
 import { runConversionAudit } from './server/conversionWizard.js';
 import { runClarityOverloadAudit } from './server/clarityOverloadAudit.js';
@@ -2859,6 +2860,24 @@ Respond ONLY with a valid JSON object strictly matching this schema:
     } catch (err: any) {
       console.error('[API Error] /api/peer-network/stats:', err);
       res.status(500).json({ error: 'Failed to retrieve peer network stats' });
+    }
+  });
+
+  // --- CRON & SERVER-SIDE SCHEDULER STATUS API ---
+  app.get('/api/cron/status', async (req, res) => {
+    try {
+      const status = await getSchedulerStatus();
+      res.json({
+        success: true,
+        scheduler: status,
+        cronStatus: status.status,
+        message: status.isLoopActive
+          ? 'Server-side Cron & Indexing Scheduler is running and actively processing background queues.'
+          : 'Server-side Scheduler loop is currently idle.',
+      });
+    } catch (err: any) {
+      console.error('[API Error] /api/cron/status:', err);
+      res.status(500).json({ error: 'Failed to retrieve server-side cron scheduler status', details: err.message });
     }
   });
 

@@ -45,6 +45,28 @@ export async function initSchedulerLoop() {
   console.log('[SmartBatchScheduler] Engine initialized and actively polling...');
 }
 
+export async function getSchedulerStatus() {
+  const jobs = await getScheduledJobs();
+  const activeJobs = jobs.filter(j => j.status === 'SCHEDULED' || j.status === 'RUNNING');
+  const runningJobs = jobs.filter(j => j.status === 'RUNNING');
+  const completedJobs = jobs.filter(j => j.status === 'COMPLETED');
+  const pausedJobs = jobs.filter(j => j.status === 'PAUSED');
+
+  return {
+    status: schedulerTimer ? 'RUNNING' : 'IDLE',
+    isLoopActive: !!schedulerTimer,
+    pollingIntervalMs: 10000,
+    activeJobsCount: activeJobs.length,
+    runningJobsCount: runningJobs.length,
+    pausedJobsCount: pausedJobs.length,
+    completedJobsCount: completedJobs.length,
+    totalJobsCount: jobs.length,
+    nextExecution: activeJobs.length > 0 ? activeJobs.map(j => j.next_run_at).sort()[0] || null : null,
+    serverTime: new Date().toISOString(),
+    uptimeSeconds: process.uptime ? Math.round(process.uptime()) : 0
+  };
+}
+
 export async function getScheduledJobs(): Promise<ScheduledJobRecord[]> {
   try {
     const db = await getDb();

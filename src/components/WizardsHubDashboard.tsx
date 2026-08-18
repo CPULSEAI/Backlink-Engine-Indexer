@@ -26,6 +26,10 @@ import {
   CloudLightning,
   FileText,
   Check,
+  Workflow,
+  Network,
+  Filter,
+  Play,
 } from 'lucide-react';
 import { SubmissionHistoryItem } from '../types';
 import { LLmCitationSimulator } from './LLmCitationSimulator';
@@ -44,6 +48,7 @@ interface WizardsHubDashboardProps {
   onOpenAudit: () => void;
   onOpenScheduler: () => void;
   onOpenContentGrader: (url?: string, keyword?: string) => void;
+  onOpenIndexingWizard?: () => void;
   onStartAutonomous100k: () => void;
   isAutonomousActive: boolean;
   autonomousAccumulatedCount: number;
@@ -51,7 +56,7 @@ interface WizardsHubDashboardProps {
   history?: SubmissionHistoryItem[];
   defaultUrl?: string;
   defaultAgencyName?: string;
-  initialTab?: 'wizards' | 'citation-sim' | 'whitelabel-pdf' | 'bulk-seo';
+  initialTab?: 'wizards' | 'citation-sim' | 'whitelabel-pdf' | 'bulk-seo' | 'funnel-map';
 }
 
 export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
@@ -66,6 +71,7 @@ export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
   onOpenAudit,
   onOpenScheduler,
   onOpenContentGrader,
+  onOpenIndexingWizard,
   onStartAutonomous100k,
   isAutonomousActive,
   autonomousAccumulatedCount,
@@ -75,7 +81,7 @@ export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
   defaultAgencyName = 'Apex Search Engine Partners',
   initialTab = 'wizards',
 }) => {
-  const [activeTab, setActiveTab] = useState<'wizards' | 'citation-sim' | 'whitelabel-pdf' | 'bulk-seo'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'wizards' | 'citation-sim' | 'whitelabel-pdf' | 'bulk-seo' | 'funnel-map'>(initialTab);
   const [simUrl, setSimUrl] = useState(defaultUrl);
   const [simKeyword, setSimKeyword] = useState('AI resume builder and automated backlink indexer for tech talent');
   const [quickCroUrl, setQuickCroUrl] = useState('');
@@ -253,7 +259,283 @@ export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
             <span>WHITELABEL PDF GENERATOR</span>
           </span>
         </button>
+
+        <button
+          onClick={() => setActiveTab('funnel-map')}
+          className={`px-4 py-2 text-xs font-black uppercase border-2 border-black transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'funnel-map'
+              ? 'bg-[#ff4d00] text-black shadow-[2px_2px_0_#000]'
+              : 'bg-white dark:bg-zinc-800 text-black dark:text-zinc-200 hover:bg-zinc-100 shadow-[2px_2px_0_#000]'
+          }`}
+        >
+          <span className="flex items-center gap-1.5">
+            <Workflow className="w-4 h-4 text-black dark:text-zinc-100" />
+            <span>TOOL-TO-STEP FUNNEL GUIDE</span>
+          </span>
+        </button>
       </div>
+
+      {/* TAB CONTENT: TOOL-TO-STEP FUNNEL GUIDE */}
+      {activeTab === 'funnel-map' && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-zinc-900 border-4 border-black p-6 sm:p-8 shadow-[6px_6px_0_#000] space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b-4 border-black">
+              <div>
+                <div className="flex items-center space-x-2">
+                  <span className="px-2 py-0.5 bg-[#ff4d00] text-black text-[10px] font-mono-brutal font-bold uppercase">
+                    ARCHITECTURE // STAGES 1 TO 5
+                  </span>
+                  <span className="text-xs font-mono-brutal text-zinc-500 uppercase">
+                    GEO_INDEXING_LIFECYCLE
+                  </span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-black text-black dark:text-zinc-100 tracking-tight uppercase mt-1">
+                  Visual Tool-to-Step Indexing Funnel Map
+                </h3>
+                <p className="text-xs sm:text-sm font-mono-brutal text-zinc-600 dark:text-zinc-300 mt-1 max-w-3xl">
+                  Every wizard and diagnostic engine corresponds directly to an essential stage in the Search &amp; Generative Engine lifecycle. Use this interactive roadmap to launch each tool at the optimal phase of your campaign.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={onOpenOnboardingWizard}
+                  className="px-4 py-2 bg-black text-white hover:bg-zinc-800 text-xs font-mono-brutal font-bold uppercase border-2 border-black shadow-[2px_2px_0_#ff4d00] transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <Compass className="w-3.5 h-3.5 text-[#ff4d00]" />
+                  <span>3-Step Quickstart</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Visual Funnel Step-by-Step Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 relative">
+              {/* STAGE 1 */}
+              <div className="bg-[#fcfaf7] dark:bg-zinc-950 border-3 border-black p-4 space-y-3 flex flex-col justify-between shadow-[3px_3px_0_#000] hover:translate-y-[-2px] transition-transform">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 bg-black text-white text-[10px] font-mono-brutal font-bold uppercase">
+                      STAGE 01
+                    </span>
+                    <span className="text-[10px] font-mono-brutal text-zinc-500 uppercase font-bold">
+                      DISCOVERY
+                    </span>
+                  </div>
+                  <h4 className="font-bold text-sm text-black dark:text-zinc-100 uppercase tracking-tight">
+                    Technical &amp; Site Crawl
+                  </h4>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400 font-sans leading-relaxed">
+                    Identify indexation blockers, 404 broken links, short descriptions, and canonical headers across the domain.
+                  </p>
+                  <div className="p-2 bg-white dark:bg-zinc-900 border border-black/30 rounded text-[11px] font-mono-brutal space-y-1">
+                    <div className="text-zinc-500 uppercase text-[9px] font-bold">Active Engine:</div>
+                    <div className="font-bold text-black dark:text-zinc-100">XML Sitemap &amp; Technical Audit Crawler</div>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-black/20 space-y-2">
+                  <button
+                    onClick={onOpenAudit}
+                    className="w-full py-1.5 px-2 bg-black hover:bg-zinc-800 text-white text-xs font-mono-brutal font-bold uppercase border border-black transition-all cursor-pointer flex items-center justify-center gap-1"
+                  >
+                    <Search className="w-3 h-3 text-[#ff4d00]" />
+                    <span>LAUNCH AUDIT</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('bulk-seo')}
+                    className="w-full py-1 px-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 text-black dark:text-zinc-200 text-[10px] font-mono-brutal font-bold uppercase border border-black/40 transition-all cursor-pointer flex items-center justify-center gap-1"
+                  >
+                    <Layers className="w-3 h-3" />
+                    <span>BULK SEO VALIDATOR</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* STAGE 2 */}
+              <div className="bg-[#fcfaf7] dark:bg-zinc-950 border-3 border-black p-4 space-y-3 flex flex-col justify-between shadow-[3px_3px_0_#000] hover:translate-y-[-2px] transition-transform">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 bg-emerald-400 text-black text-[10px] font-mono-brutal font-bold uppercase">
+                      STAGE 02
+                    </span>
+                    <span className="text-[10px] font-mono-brutal text-zinc-500 uppercase font-bold">
+                      AUTHENTICATION
+                    </span>
+                  </div>
+                  <h4 className="font-bold text-sm text-black dark:text-zinc-100 uppercase tracking-tight">
+                    API &amp; Proxy Readiness
+                  </h4>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400 font-sans leading-relaxed">
+                    Verify Google Cloud Service Account permissions, test proxy node latencies, and check 403 shield isolation.
+                  </p>
+                  <div className="p-2 bg-white dark:bg-zinc-900 border border-black/30 rounded text-[11px] font-mono-brutal space-y-1">
+                    <div className="text-zinc-500 uppercase text-[9px] font-bold">Active Engine:</div>
+                    <div className="font-bold text-black dark:text-zinc-100">Google API 3-Step Wizard &amp; Latency Monitor</div>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-black/20 space-y-2">
+                  {onOpenGoogleApiWizard && (
+                    <button
+                      onClick={onOpenGoogleApiWizard}
+                      className="w-full py-1.5 px-2 bg-emerald-400 hover:bg-emerald-300 text-black text-xs font-mono-brutal font-bold uppercase border border-black transition-all cursor-pointer flex items-center justify-center gap-1"
+                    >
+                      <CloudLightning className="w-3 h-3 text-black" />
+                      <span>GOOGLE API WIZARD</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={onOpenScheduler}
+                    className="w-full py-1 px-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 text-black dark:text-zinc-200 text-[10px] font-mono-brutal font-bold uppercase border border-black/40 transition-all cursor-pointer flex items-center justify-center gap-1"
+                  >
+                    <Timer className="w-3 h-3" />
+                    <span>SCHEDULER HEALTH</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* STAGE 3 */}
+              <div className="bg-[#fcfaf7] dark:bg-zinc-950 border-3 border-black p-4 space-y-3 flex flex-col justify-between shadow-[3px_3px_0_#000] hover:translate-y-[-2px] transition-transform">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 bg-[#ff4d00] text-black text-[10px] font-mono-brutal font-bold uppercase">
+                      STAGE 03
+                    </span>
+                    <span className="text-[10px] font-mono-brutal text-zinc-500 uppercase font-bold">
+                      EXECUTION
+                    </span>
+                  </div>
+                  <h4 className="font-bold text-sm text-black dark:text-zinc-100 uppercase tracking-tight">
+                    Batch Submission Engine
+                  </h4>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400 font-sans leading-relaxed">
+                    Queue target URLs, configure high-authority directories, calibrate concurrency limits, and dispatch workers.
+                  </p>
+                  <div className="p-2 bg-white dark:bg-zinc-900 border border-black/30 rounded text-[11px] font-mono-brutal space-y-1">
+                    <div className="text-zinc-500 uppercase text-[9px] font-bold">Active Engine:</div>
+                    <div className="font-bold text-black dark:text-zinc-100">5-Step URL Indexing Wizard &amp; Live Stream</div>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-black/20 space-y-2">
+                  <button
+                    onClick={() => {
+                      if (onOpenIndexingWizard) onOpenIndexingWizard();
+                      else onOpenConversionWizard();
+                    }}
+                    className="w-full py-1.5 px-2 bg-[#ff4d00] hover:bg-[#ff6a2b] text-black text-xs font-mono-brutal font-bold uppercase border border-black transition-all cursor-pointer flex items-center justify-center gap-1 shadow-[2px_2px_0_#000]"
+                  >
+                    <Zap className="w-3 h-3 text-black" />
+                    <span>5-STEP WIZARD</span>
+                  </button>
+                  <button
+                    onClick={onStartAutonomous100k}
+                    className="w-full py-1 px-2 bg-zinc-900 hover:bg-zinc-800 text-[#ff4d00] text-[10px] font-mono-brutal font-bold uppercase border border-black transition-all cursor-pointer flex items-center justify-center gap-1"
+                  >
+                    <Flame className="w-3 h-3 text-[#ff4d00]" />
+                    <span>AUTONOMOUS 100K</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* STAGE 4 */}
+              <div className="bg-[#fcfaf7] dark:bg-zinc-950 border-3 border-black p-4 space-y-3 flex flex-col justify-between shadow-[3px_3px_0_#000] hover:translate-y-[-2px] transition-transform">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 bg-purple-400 text-black text-[10px] font-mono-brutal font-bold uppercase">
+                      STAGE 04
+                    </span>
+                    <span className="text-[10px] font-mono-brutal text-zinc-500 uppercase font-bold">
+                      GEO &amp; AI ENGINES
+                    </span>
+                  </div>
+                  <h4 className="font-bold text-sm text-black dark:text-zinc-100 uppercase tracking-tight">
+                    LLM Citation &amp; Schema
+                  </h4>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400 font-sans leading-relaxed">
+                    Optimize for Perplexity, ChatGPT Search, and Gemini with direct answer framing and JSON-LD structured data.
+                  </p>
+                  <div className="p-2 bg-white dark:bg-zinc-900 border border-black/30 rounded text-[11px] font-mono-brutal space-y-1">
+                    <div className="text-zinc-500 uppercase text-[9px] font-bold">Active Engine:</div>
+                    <div className="font-bold text-black dark:text-zinc-100">GEO Grader, Schema Gen &amp; Citation Sim</div>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-black/20 space-y-2">
+                  <button
+                    onClick={() => setActiveTab('citation-sim')}
+                    className="w-full py-1.5 px-2 bg-purple-400 hover:bg-purple-300 text-black text-xs font-mono-brutal font-bold uppercase border border-black transition-all cursor-pointer flex items-center justify-center gap-1"
+                  >
+                    <Bot className="w-3 h-3 text-black" />
+                    <span>CITATION SIMULATOR</span>
+                  </button>
+                  {onOpenSchemaGeneratorModal && (
+                    <button
+                      onClick={onOpenSchemaGeneratorModal}
+                      className="w-full py-1 px-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 text-black dark:text-zinc-200 text-[10px] font-mono-brutal font-bold uppercase border border-black/40 transition-all cursor-pointer flex items-center justify-center gap-1"
+                    >
+                      <FileCode className="w-3 h-3" />
+                      <span>SCHEMA GENERATOR</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* STAGE 5 */}
+              <div className="bg-[#fcfaf7] dark:bg-zinc-950 border-3 border-black p-4 space-y-3 flex flex-col justify-between shadow-[3px_3px_0_#000] hover:translate-y-[-2px] transition-transform">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 bg-amber-400 text-black text-[10px] font-mono-brutal font-bold uppercase">
+                      STAGE 05
+                    </span>
+                    <span className="text-[10px] font-mono-brutal text-zinc-500 uppercase font-bold">
+                      CONVERSION &amp; PROOF
+                    </span>
+                  </div>
+                  <h4 className="font-bold text-sm text-black dark:text-zinc-100 uppercase tracking-tight">
+                    CRO &amp; Client Reporting
+                  </h4>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400 font-sans leading-relaxed">
+                    Eliminate cognitive friction, trigger high-converting trust levers, and export whitelabeled PDF audit reports.
+                  </p>
+                  <div className="p-2 bg-white dark:bg-zinc-900 border border-black/30 rounded text-[11px] font-mono-brutal space-y-1">
+                    <div className="text-zinc-500 uppercase text-[9px] font-bold">Active Engine:</div>
+                    <div className="font-bold text-black dark:text-zinc-100">ConversionWizard &amp; Whitelabel PDF Suite</div>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-black/20 space-y-2">
+                  <button
+                    onClick={() => onOpenConversionWizard()}
+                    className="w-full py-1.5 px-2 bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-300 hover:to-orange-300 text-black text-xs font-mono-brutal font-bold uppercase border border-black transition-all cursor-pointer flex items-center justify-center gap-1 shadow-[2px_2px_0_#000]"
+                  >
+                    <Wand2 className="w-3 h-3 text-black" />
+                    <span>CONVERSION WIZARD</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('whitelabel-pdf')}
+                    className="w-full py-1 px-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 text-black dark:text-zinc-200 text-[10px] font-mono-brutal font-bold uppercase border border-black/40 transition-all cursor-pointer flex items-center justify-center gap-1"
+                  >
+                    <Printer className="w-3 h-3 text-emerald-600" />
+                    <span>WHITELABEL PDF</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Flow Summary Bar */}
+            <div className="p-4 bg-[#f2efeb] dark:bg-zinc-800 border-2 border-black flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono-brutal">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span className="text-zinc-800 dark:text-zinc-200">
+                  <strong>Recommended Workflow:</strong> Audit Site (Stage 1) &rarr; Verify API Credentials (Stage 2) &rarr; Launch Batch Indexing (Stage 3) &rarr; Harvest JSON-LD (Stage 4) &rarr; Export Client PDF (Stage 5)
+                </span>
+              </div>
+              <button
+                onClick={() => setActiveTab('wizards')}
+                className="px-3 py-1 bg-white dark:bg-zinc-900 hover:bg-zinc-100 text-black dark:text-zinc-100 text-xs font-bold uppercase border border-black shadow-[1px_1px_0_#000] shrink-0"
+              >
+                Back to Wizards
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* TAB CONTENT: BULK SEO VALIDATOR */}
       {activeTab === 'bulk-seo' && (

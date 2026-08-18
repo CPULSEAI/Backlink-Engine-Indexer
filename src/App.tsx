@@ -979,6 +979,7 @@ export default function App() {
               onOpenAudit={() => setIsAuditOpen(true)}
               onOpenScheduler={() => setIsSchedulerOpen(true)}
               onOpenContentGrader={(url, kw) => handleOpenContentGrader(url, kw)}
+              onOpenIndexingWizard={() => setIsIndexingWizardOpen(true)}
               onStartAutonomous100k={() => {
                 setIsAutonomousActive(true);
                 setCurrentView('bento');

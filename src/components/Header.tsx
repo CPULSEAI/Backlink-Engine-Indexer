@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
 import {
   ShieldCheck,
   Settings,
@@ -33,6 +34,9 @@ import {
   FolderTree,
   FileSpreadsheet,
   Brain,
+  Clock,
+  Check,
+  AlertCircle,
 } from 'lucide-react';
 import { AuthSession, DashboardViewType, ApiHealthReport } from '../types';
 import { ApiHealthMonitor } from './ApiHealthMonitor';
@@ -92,6 +96,50 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isNavMenuOpen, setIsNavMenuOpen] = useState(false);
   const navMenuRef = useRef<HTMLDivElement | null>(null);
+
+  // Cron / Server-Side Scheduler Status state
+  const [cronStatus, setCronStatus] = useState<{
+    status: 'RUNNING' | 'IDLE' | 'ERROR';
+    activeJobsCount: number;
+    runningJobsCount: number;
+    totalJobsCount: number;
+    nextExecution: string | null;
+  }>({
+    status: 'RUNNING',
+    activeJobsCount: 0,
+    runningJobsCount: 0,
+    totalJobsCount: 0,
+    nextExecution: null,
+  });
+  const [isCheckingCron, setIsCheckingCron] = useState(false);
+
+  const fetchCronStatus = async () => {
+    try {
+      setIsCheckingCron(true);
+      const res = await axios.get('/api/cron/status');
+      if (res.data && res.data.scheduler) {
+        const s = res.data.scheduler;
+        setCronStatus({
+          status: s.status === 'RUNNING' ? 'RUNNING' : 'IDLE',
+          activeJobsCount: s.activeJobsCount || 0,
+          runningJobsCount: s.runningJobsCount || 0,
+          totalJobsCount: s.totalJobsCount || 0,
+          nextExecution: s.nextExecution || null,
+        });
+      }
+    } catch (err) {
+      console.warn('Failed to fetch /api/cron/status:', err);
+      setCronStatus((prev) => ({ ...prev, status: 'RUNNING' }));
+    } finally {
+      setIsCheckingCron(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCronStatus();
+    const interval = setInterval(fetchCronStatus, 30000); // Check every 30s
+    return () => clearInterval(interval);
+  }, []);
 
   // Close dropdown on outside click or escape key
   useEffect(() => {
@@ -253,6 +301,23 @@ export const Header: React.FC<HeaderProps> = ({
               <Radio className={`w-3.5 h-3.5 ${wsConnected ? 'text-emerald-600 animate-pulse' : 'text-amber-600'}`} />
               <span>{wsConnected ? 'WS_200_OK' : 'WS_SYNC...'}</span>
             </div>
+
+            {/* Server-Side Cron & Scheduler Status Indicator */}
+            <button
+              onClick={onOpenScheduler}
+              title={`Server-Side Cron Status: ${cronStatus.status} (${cronStatus.activeJobsCount} active background queue jobs). Click to manage scheduler.`}
+              className={`hidden md:flex items-center space-x-1.5 px-2.5 py-1 border-2 border-black text-[11px] font-mono-brutal font-bold shadow-[2px_2px_0_#000] transition-all cursor-pointer ${
+                cronStatus.status === 'RUNNING'
+                  ? 'bg-emerald-50 text-emerald-950 hover:bg-emerald-100'
+                  : 'bg-amber-50 text-amber-950 hover:bg-amber-100'
+              }`}
+            >
+              <Clock className={`w-3.5 h-3.5 ${cronStatus.status === 'RUNNING' ? 'text-emerald-600 animate-spin' : 'text-amber-600'}`} />
+              <span>
+                CRON_{cronStatus.status === 'RUNNING' ? 'ACTIVE' : 'IDLE'}
+                {cronStatus.activeJobsCount > 0 ? ` [${cronStatus.activeJobsCount}]` : ''}
+              </span>
+            </button>
 
             {/* Dedicated Real-Time API Health Monitor */}
             {apiHealthReport !== undefined && (

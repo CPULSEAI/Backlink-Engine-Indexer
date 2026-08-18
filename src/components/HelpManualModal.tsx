@@ -28,6 +28,12 @@ import {
   Clock,
   Activity,
   Share2,
+  Cpu,
+  Copy,
+  CheckCheck,
+  Server,
+  Play,
+  Flame,
 } from 'lucide-react';
 import { generateUserManualPdf } from '../utils/generateManualPdf';
 
@@ -73,6 +79,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
     | 'troubleshooting'
     | 'faq'
     | 'advanced'
+    | 'server-automation'
     | 'glossary'
     | 'changelog'
   >('intro');
@@ -107,6 +114,13 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [pdfDownloaded, setPdfDownloaded] = useState(false);
+  const [copiedSnippet, setCopiedSnippet] = useState<string | null>(null);
+
+  const handleCopySnippet = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedSnippet(id);
+    setTimeout(() => setCopiedSnippet(null), 2500);
+  };
 
   const handleDownloadPdf = async () => {
     try {
@@ -222,8 +236,9 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
     { id: 'troubleshooting', label: '7. Troubleshooting', icon: ShieldAlert },
     { id: 'faq', label: '8. FAQ', icon: HelpCircle },
     { id: 'advanced', label: '9. Advanced', icon: Terminal },
-    { id: 'glossary', label: '10. Glossary', icon: FileText },
-    { id: 'changelog', label: '11. Live Updates & Changelog', icon: Activity },
+    { id: 'server-automation', label: '10. Server-Side Automation (Cron)', icon: Server },
+    { id: 'glossary', label: '11. Glossary', icon: FileText },
+    { id: 'changelog', label: '12. Live Updates & Changelog', icon: Activity },
   ];
 
   return (
@@ -969,7 +984,157 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
               </div>
             )}
 
-            {/* 10. GLOSSARY */}
+            {/* 10. SERVER-SIDE AUTOMATION (CRON & PYTHON PIPELINE) */}
+            {activeTab === 'server-automation' && (
+              <div className="space-y-6 animate-in fade-in duration-200">
+                <div className="border-b border-zinc-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+                      <Server className="w-6 h-6 text-emerald-400" />
+                      <span>10. Server-Side Automation &amp; Cron Orchestration</span>
+                    </h3>
+                    <p className="text-zinc-400 text-sm mt-1">
+                      Automate the 4-step indexing pipeline using Linux Cron, systemd, or standalone Python orchestration with intelligent proxy rotation.
+                    </p>
+                  </div>
+                  <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold rounded">
+                    REST API v2.4 COMPLIANT
+                  </span>
+                </div>
+
+                {/* 4-Step Pipeline Summary */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div className="p-3 bg-zinc-900/80 border border-zinc-800 rounded-xl space-y-1">
+                    <div className="text-[10px] font-mono font-bold text-zinc-500 uppercase">Step 01</div>
+                    <div className="font-bold text-white text-xs">Pre-Flight Health Check</div>
+                    <div className="text-[11px] font-mono text-emerald-400">GET /api/health/integrations</div>
+                    <p className="text-[11px] text-zinc-400">Queries Google API, IndexNow, and SERP latency before starting heavy tasks.</p>
+                  </div>
+
+                  <div className="p-3 bg-zinc-900/80 border border-zinc-800 rounded-xl space-y-1">
+                    <div className="text-[10px] font-mono font-bold text-zinc-500 uppercase">Step 02</div>
+                    <div className="font-bold text-white text-xs">Batch Submission Engine</div>
+                    <div className="text-[11px] font-mono text-[#ff4d00]">POST /api/submissions/start</div>
+                    <p className="text-[11px] text-zinc-400">Pushes target URLs with auto-rotating proxy pool and multi-worker concurrency.</p>
+                  </div>
+
+                  <div className="p-3 bg-zinc-900/80 border border-zinc-800 rounded-xl space-y-1">
+                    <div className="text-[10px] font-mono font-bold text-zinc-500 uppercase">Step 03</div>
+                    <div className="font-bold text-white text-xs">Multi-Vector GEO Grader</div>
+                    <div className="text-[11px] font-mono text-purple-400">POST /api/geo/grade</div>
+                    <p className="text-[11px] text-zinc-400">Evaluates citation likelihood, information density, and structured schema.</p>
+                  </div>
+
+                  <div className="p-3 bg-zinc-900/80 border border-zinc-800 rounded-xl space-y-1">
+                    <div className="text-[10px] font-mono font-bold text-zinc-500 uppercase">Step 04</div>
+                    <div className="font-bold text-white text-xs">XML Sitemap Audit</div>
+                    <div className="text-[11px] font-mono text-cyan-400">POST /api/sitemap/audit</div>
+                    <p className="text-[11px] text-zinc-400">Deep crawls sitemaps for 404 broken links, short descriptions, and canonicals.</p>
+                  </div>
+                </div>
+
+                {/* Environment Variables Setup */}
+                <div className="p-5 bg-zinc-900/90 border border-zinc-800 rounded-xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Terminal className="w-4 h-4 text-emerald-400" />
+                      <h4 className="text-sm font-bold text-white font-mono uppercase">1. Environment Variable Setup</h4>
+                    </div>
+                    <button
+                      onClick={() => handleCopySnippet(`export API_BASE_URL="http://localhost:3000"
+export GOOGLE_SERVICE_ACCOUNT_JSON="$(cat /path/to/service-account.json 2>/dev/null || echo '')"
+export PIPELINE_TARGET_URLS="https://careerpulseai.net,https://careerpulseai.net/resume-builder"
+export PIPELINE_SITEMAP_URL="https://careerpulseai.net/sitemap.xml"
+export LOG_DIR="/var/log/indexing-pipeline"`, 'env-vars')}
+                      className="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-mono rounded flex items-center gap-1 transition-all cursor-pointer"
+                    >
+                      {copiedSnippet === 'env-vars' ? <CheckCheck className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copiedSnippet === 'env-vars' ? 'Copied' : 'Copy'}</span>
+                    </button>
+                  </div>
+                  <pre className="p-3 bg-black border border-zinc-800 rounded-lg text-xs font-mono text-emerald-300 overflow-x-auto">
+{`# Define environment variables for headless cron automation
+export API_BASE_URL="http://localhost:3000"
+export GOOGLE_SERVICE_ACCOUNT_JSON="$(cat /path/to/service-account.json 2>/dev/null || echo '')"
+export PIPELINE_TARGET_URLS="https://careerpulseai.net,https://careerpulseai.net/resume-builder"
+export PIPELINE_SITEMAP_URL="https://careerpulseai.net/sitemap.xml"
+export LOG_DIR="/var/log/indexing-pipeline"`}
+                  </pre>
+                </div>
+
+                {/* Bash Runner Script */}
+                <div className="p-5 bg-zinc-900/90 border border-zinc-800 rounded-xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Terminal className="w-4 h-4 text-cyan-400" />
+                      <h4 className="text-sm font-bold text-white font-mono uppercase">2. Bash Cron Wrapper (run_indexing_cron.sh)</h4>
+                    </div>
+                    <button
+                      onClick={() => handleCopySnippet(`#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
+export API_BASE_URL="\${API_BASE_URL:-http://localhost:3000}"
+export LOG_DIR="\${LOG_DIR:-/var/log/indexing-pipeline}"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/indexing_\$(date +'%Y%m%d_%H%M%S').log"
+
+echo "[$(date -u +'%Y-%m-%dT%H:%M:%SZ')] Starting automated SEO indexing pipeline..." | tee -a "$LOG_FILE"
+python3 "$SCRIPT_DIR/automated_indexing_pipeline.py" 2>&1 | tee -a "$LOG_FILE"
+echo "[$(date -u +'%Y-%m-%dT%H:%M:%SZ')] Pipeline completed successfully." | tee -a "$LOG_FILE"`, 'bash-script')}
+                      className="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-mono rounded flex items-center gap-1 transition-all cursor-pointer"
+                    >
+                      {copiedSnippet === 'bash-script' ? <CheckCheck className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copiedSnippet === 'bash-script' ? 'Copied' : 'Copy'}</span>
+                    </button>
+                  </div>
+                  <pre className="p-3 bg-black border border-zinc-800 rounded-lg text-xs font-mono text-cyan-300 overflow-x-auto">
+{`# 1. Make executable
+chmod +x ./generated/run_indexing_cron.sh
+
+# 2. Test execute immediately
+./generated/run_indexing_cron.sh`}
+                  </pre>
+                </div>
+
+                {/* Crontab Configuration Guide */}
+                <div className="p-5 bg-zinc-900/90 border border-zinc-800 rounded-xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-amber-400" />
+                      <h4 className="text-sm font-bold text-white font-mono uppercase">3. Production Crontab Schedules</h4>
+                    </div>
+                    <button
+                      onClick={() => handleCopySnippet(`# Edit crontab
+crontab -e
+
+# Run every 6 hours (00:00, 06:00, 12:00, 18:00)
+0 */6 * * * /path/to/generated/run_indexing_cron.sh >> /var/log/indexing-cron.log 2>&1
+
+# Run daily at 02:00 AM off-peak
+0 2 * * * /path/to/generated/run_indexing_cron.sh >> /var/log/indexing-cron.log 2>&1`, 'crontab-cmd')}
+                      className="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-mono rounded flex items-center gap-1 transition-all cursor-pointer"
+                    >
+                      {copiedSnippet === 'crontab-cmd' ? <CheckCheck className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copiedSnippet === 'crontab-cmd' ? 'Copied' : 'Copy'}</span>
+                    </button>
+                  </div>
+                  <pre className="p-3 bg-black border border-zinc-800 rounded-lg text-xs font-mono text-amber-300 overflow-x-auto">
+{`# Open crontab editor
+crontab -e
+
+# Append one of the following automated schedules:
+# Option A: Run 4 times daily (every 6 hours)
+0 */6 * * * /workspace/generated/run_indexing_cron.sh >> /var/log/indexing-cron.log 2>&1
+
+# Option B: Run once every night at 02:00 AM UTC
+0 2 * * * /workspace/generated/run_indexing_cron.sh >> /var/log/indexing-cron.log 2>&1`}
+                  </pre>
+                </div>
+              </div>
+            )}
+
+            {/* 11. GLOSSARY */}
             {activeTab === 'glossary' && (
               <div className="space-y-6 animate-in fade-in duration-200">
                 <div className="border-b border-zinc-800 pb-4">
