@@ -244,8 +244,10 @@ export type DashboardViewType =
   | 'bento'
   | 'wizards'
   | 'indexing_engine'
+  | 'traffic_engine'
   | 'submissions'
   | 'bulk_seo'
+  | 'backlink_counter'
   | 'schema_generator'
   | 'geo_grader'
   | 'competitor_radar'
@@ -257,6 +259,182 @@ export type DashboardViewType =
   | 'network'
   | 'audits'
   | 'settings';
+
+export interface BacklinkTargetMetric {
+  target: string;
+  domain: string;
+  status: 'SUCCESS' | 'ERROR';
+  is_sandbox?: boolean;
+  total_backlinks: number;
+  referring_domains: number;
+  referring_main_domains: number;
+  referring_ips: number;
+  dofollow_backlinks: number;
+  nofollow_backlinks: number;
+  dofollow_ratio: number;
+  authority_score: number;
+  error?: string;
+  crawled_at: string;
+}
+
+export interface RawBacklinkItem {
+  source_url: string;
+  target_url: string;
+  anchor_text: string;
+  domain_rank: number;
+  is_dofollow: boolean;
+  first_seen: string;
+  last_seen: string;
+  loss_status: 'ACTIVE' | 'LOST';
+}
+
+export interface DomainBacklinksManifest {
+  target: string;
+  domain: string;
+  status: 'SUCCESS' | 'ERROR';
+  is_sandbox?: boolean;
+  total_rows_returned: number;
+  backlinks: RawBacklinkItem[];
+  error?: string;
+}
+
+export interface BulkBacklinkListerReport {
+  status: string;
+  total_domains: number;
+  total_backlinks_extracted: number;
+  reports: Record<string, DomainBacklinksManifest>;
+}
+
+export interface GoogleUrlResult {
+  url: string;
+  engine: 'Google';
+  status: 'SUCCESS' | 'FAIL' | 'ERROR';
+  is_sandbox?: boolean;
+  code?: number;
+  msg?: string;
+  notify_time?: string;
+}
+
+export interface IndexNowResult {
+  engine: 'IndexNow';
+  status: 'SUCCESS' | 'FAIL' | 'ERROR';
+  code?: number;
+  target_count?: number;
+  msg?: string;
+}
+
+export interface InstantIndexingResponse {
+  status: 'SUCCESS' | 'ERROR';
+  total_urls: number;
+  indexnow_response: IndexNowResult;
+  google_summary: {
+    total: number;
+    success: number;
+    failed: number;
+  };
+  google_responses: GoogleUrlResult[];
+  error?: string;
+}
+
+export interface BulkBacklinkSummary {
+
+  total_targets: number;
+  successful_targets: number;
+  failed_targets: number;
+  summary: {
+    total_backlinks_sum: number;
+    total_referring_domains_sum: number;
+    total_referring_ips_sum: number;
+    avg_authority_score: number;
+    avg_dofollow_ratio: number;
+  };
+  results: BacklinkTargetMetric[];
+}
+
+export type TrafficEngineMode = 'DIRECT_TRAFFIC' | 'SERP_CTR' | 'DOMAIN_REDIRECT';
+export type ReferrerType = 'ORGANIC' | 'SOCIAL' | 'DIRECT' | 'CUSTOM';
+
+export interface TrafficCampaignClientItem {
+  id: string;
+  name: string;
+  engine_mode: TrafficEngineMode;
+  target_urls: string;
+  daily_volume: number;
+  completed_sessions: number;
+  bounce_rate_pct: number;
+  min_dwell_sec: number;
+  max_dwell_sec: number;
+  mobile_ratio_pct: number;
+  geo_country: string;
+  geo_state?: string;
+  geo_city?: string;
+  referrer_type: ReferrerType;
+  custom_referrers?: string;
+  sitemap_url?: string;
+  ga4_measurement_id?: string;
+  status: 'RUNNING' | 'PAUSED' | 'COMPLETED' | 'DRAFT';
+  concurrency_threads: number;
+  created_at: string;
+  last_run_at?: string;
+  config_json: string;
+}
+
+export interface SerpCtrJobClientItem {
+  id: string;
+  campaign_id: string;
+  keyword: string;
+  target_url: string;
+  search_engine: string;
+  max_serp_depth: number;
+  anti_pogo_sticking: number;
+  min_dwell_sec: number;
+  target_position?: number;
+  click_executed: number;
+  status: string;
+  geo_city?: string;
+  proxy_node?: string;
+  created_at: string;
+  completed_at?: string;
+  notes?: string;
+}
+
+export interface RedirectRouteClientItem {
+  id: string;
+  campaign_id: string;
+  source_domain: string;
+  destination_url: string;
+  redirect_type: number;
+  niche_tags?: string;
+  geo_filter_countries?: string;
+  device_filter: string;
+  total_forwarded_hits: number;
+  is_active: number;
+  created_at: string;
+  last_hit_at?: string;
+}
+
+export interface TrafficHealthReport {
+  status: string;
+  activeCampaignsCount: number;
+  totalCampaignsCount: number;
+  totalSessionsDelivered: number;
+  totalCtrClicksDelivered: number;
+  totalForwardedHits: number;
+  workerPool: {
+    activeWorkers: number;
+    maxCapacity: number;
+    cpuLoadPct: number;
+    ramUsageMb: number;
+    bandwidthSavingsPct: number;
+  };
+  proxyShield: {
+    totalResidentialNodes: number;
+    healthyNodes: number;
+    isolatedCooldownNodes: number;
+    evasionPatchesActive: string[];
+  };
+  timestamp: string;
+}
 
 export type UserRole = 'Owner' | 'Administrator' | 'Standard User' | 'Read-Only User';
 

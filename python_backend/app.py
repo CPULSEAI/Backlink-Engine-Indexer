@@ -281,6 +281,146 @@ async def process_job_async(submission_id: str, urls: List[str], req: Submission
         db.commit()
     db.close()
 
+# --- BULK BACKLINK & REFERRING DOMAIN COUNTER API ---
+class BulkBacklinkRequest(BaseModel):
+    targets: List[str]
+    api_login: Optional[str] = None
+    api_password: Optional[str] = None
+    max_concurrency: int = 20
+    use_sandbox: bool = False
+
+@app.post("/api/v1/backlinks/bulk-count")
+async def bulk_backlink_count(req: BulkBacklinkRequest):
+    """
+    High-Performance Bulk Backlink & Referring Domain Counter
+    Utilizes DataForSEO API with asyncio worker pools & fallback heuristics.
+    """
+    try:
+        from backlink_counter import BulkBacklinkCounterEngine
+        engine = BulkBacklinkCounterEngine(
+            api_login=req.api_login,
+            api_password=req.api_password,
+            use_sandbox=req.use_sandbox
+        )
+        results = await engine.process_bulk_targets(req.targets, max_concurrency=req.max_concurrency)
+        
+        # Calculate summary aggregate metrics
+        valid_results = [r for r in results if r.get("status") == "SUCCESS"]
+        total_backlinks = sum(r.get("total_backlinks", 0) for r in valid_results)
+        total_referring_domains = sum(r.get("referring_domains", 0) for r in valid_results)
+        total_referring_ips = sum(r.get("referring_ips", 0) for r in valid_results)
+        avg_auth = round(sum(r.get("authority_score", 0) for r in valid_results) / len(valid_results), 1) if valid_results else 0
+        avg_dofollow = round(sum(r.get("dofollow_ratio", 0) for r in valid_results) / len(valid_results), 1) if valid_results else 0
+
+        return {
+            "status": "SUCCESS",
+            "total_targets": len(req.targets),
+            "successful_targets": len(valid_results),
+            "failed_targets": len(results) - len(valid_results),
+            "summary": {
+                "total_backlinks_sum": total_backlinks,
+                "total_referring_domains_sum": total_referring_domains,
+                "total_referring_ips_sum": total_referring_ips,
+                "avg_authority_score": avg_auth,
+                "avg_dofollow_ratio": avg_dofollow
+            },
+            "results": results
+        }
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Bulk backlink processing error: {str(exc)}")
+
+@app.get("/api/v1/backlinks/sample")
+async def get_backlinks_sample():
+    """Returns sample benchmark backlink metrics for prompt demonstration."""
+    sample_domains = ["github.com", "stackoverflow.com", "openai.com", "python.org", "tiangolo.com"]
+    from backlink_counter import BulkBacklinkCounterEngine
+    engine = BulkBacklinkCounterEngine(use_sandbox=True)
+    results = await engine.process_bulk_targets(sample_domains, max_concurrency=5)
+    return {
+        "status": "SUCCESS",
+        "sample_domains": sample_domains,
+        "results": results
+    }
+
+# --- DETAILED / ITEMIZED RAW BACKLINK LISTER API ---
+class BulkBacklinkListRequest(BaseModel):
+    targets: List[str]
+    links_per_target: int = 25
+    api_login: Optional[str] = None
+    api_password: Optional[str] = None
+    max_concurrency: int = 5
+    use_sandbox: bool = False
+
+@app.post("/api/v1/backlinks/detailed-list")
+async def bulk_backlink_detailed_list(req: BulkBacklinkListRequest):
+    """
+    Queries DataForSEO v3/backlinks/backlinks/live to fetch granular itemized backlink rows
+    (Anchor Text, Source URL, Target URL, Rank, Dofollow status, and Loss status).
+    """
+    try:
+        from bulk_backlink_lister import BulkBacklinkListerEngine
+        lister = BulkBacklinkListerEngine(
+            api_login=req.api_login,
+            api_password=req.api_password,
+            use_sandbox=req.use_sandbox
+        )
+        reports = await lister.generate_bulk_reports(
+            targets=req.targets,
+            links_per_target=req.links_per_target,
+            max_concurrency=req.max_concurrency
+        )
+        total_extracted = sum(len(rep.get("backlinks", [])) for rep in reports.values())
+        return {
+            "status": "SUCCESS",
+            "total_domains": len(reports),
+            "total_backlinks_extracted": total_extracted,
+            "reports": reports
+        }
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Itemized backlink listing error: {str(exc)}")
+
+# --- INSTANT REAL-TIME INDEXATION DISPATCH PIPELINE ---
+class InstantIndexingRequest(BaseModel):
+    domain: str
+    urls: List[str]
+    indexnow_key: Optional[str] = None
+    google_oauth_token: Optional[str] = None
+
+@app.post("/api/v1/indexing/instant-dispatch")
+async def instant_indexing_dispatch(req: InstantIndexingRequest):
+    """
+    Real-time dual-protocol indexing pipeline:
+    Dispatches target URLs to Google Indexing API v3 and IndexNow (Bing/Yandex/Seznam).
+    """
+    try:
+        from instant_indexer import InstantIndexationPipeline
+        pipeline = InstantIndexationPipeline(
+            target_domain=req.domain,
+            indexnow_key=req.indexnow_key
+        )
+        telemetry = await pipeline.execute_realtime_indexing(
+            urls=req.urls,
+            google_oauth_token=req.google_oauth_token
+        )
+
+        # Update SQLite target status if URLs exist in DB
+        try:
+            db = get_db()
+            for url in req.urls:
+                db.execute(
+                    "UPDATE url_targets SET indexing_state = 'SUCCESS', last_dispatched = CURRENT_TIMESTAMP WHERE url = ?",
+                    (url,)
+                )
+            db.commit()
+            db.close()
+        except Exception:
+            pass
+
+        return telemetry
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Instant indexing error: {str(exc)}")
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)

@@ -34,6 +34,9 @@ import {
   X,
   Smartphone,
   CloudLightning,
+  TrendingUp,
+  MousePointer,
+  Link2,
 } from 'lucide-react';
 import { AuthSession, DashboardViewType } from '../types';
 
@@ -545,6 +548,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   )}
                 </button>
 
+                {/* Traffic & SERP CTR Generation Engine */}
+                <button
+                  onClick={() => handleNavClick(() => onChangeView('traffic_engine'))}
+                  className={`w-full flex items-center ${
+                    isCollapsed ? 'justify-center p-2.5' : 'space-x-3 px-3 py-2'
+                  } text-xs font-bold transition-all cursor-pointer border-2 border-black uppercase ${
+                    currentView === 'traffic_engine'
+                      ? 'bg-[#ff4d00] text-black shadow-[2px_2px_0_#000]'
+                      : 'bg-white text-black hover:bg-[#ff4d00] hover:text-black shadow-[2px_2px_0_#000]'
+                  }`}
+                  title="Traffic & SERP CTR Generation Engine (Chromium + SERP CTR + 301 Forwarding)"
+                >
+                  <TrendingUp className="w-4 h-4 text-black shrink-0" />
+                  {!isCollapsed && (
+                    <div className="flex items-center justify-between flex-1">
+                      <span>TRAFFIC &amp; SERP CTR</span>
+                      <span className="text-[9px] px-1.5 py-0.2 bg-black text-white border border-black font-bold">
+                        v3.0
+                      </span>
+                    </div>
+                  )}
+                </button>
+
                 {/* Bulk SEO URL Validator */}
                 <button
                   onClick={() => handleNavClick(() => onChangeView('bulk_seo'))}
@@ -563,6 +589,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <span>BULK SEO VALIDATOR</span>
                       <span className="text-[9px] px-1.5 py-0.2 bg-emerald-400 text-black border border-black font-bold">
                         50+
+                      </span>
+                    </div>
+                  )}
+                </button>
+
+                {/* Bulk Backlink & Referring Domain Counter */}
+                <button
+                  onClick={() => handleNavClick(() => onChangeView('backlink_counter'))}
+                  className={`w-full flex items-center ${
+                    isCollapsed ? 'justify-center p-2.5' : 'space-x-3 px-3 py-2'
+                  } text-xs font-bold transition-all cursor-pointer border-2 border-black uppercase ${
+                    currentView === 'backlink_counter'
+                      ? 'bg-indigo-600 text-white shadow-[2px_2px_0_#000]'
+                      : 'bg-white text-black hover:bg-indigo-600 hover:text-white shadow-[2px_2px_0_#000]'
+                  }`}
+                  title="Bulk Backlink & Referring Domain Counter (DataForSEO)"
+                >
+                  <Link2 className="w-4 h-4 text-indigo-400 shrink-0" />
+                  {!isCollapsed && (
+                    <div className="flex items-center justify-between flex-1">
+                      <span>BACKLINK COUNTER</span>
+                      <span className="text-[9px] px-1.5 py-0.2 bg-indigo-500 text-white border border-black font-bold">
+                        NEW
                       </span>
                     </div>
                   )}

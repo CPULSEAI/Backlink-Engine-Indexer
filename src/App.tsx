@@ -24,6 +24,7 @@ import { ConversionWizardBanner } from './components/ConversionWizardBanner';
 import { WizardsHubDashboard } from './components/WizardsHubDashboard';
 import { GoogleApiWizard } from './components/GoogleApiWizard';
 import { BulkSeoValidator } from './components/BulkSeoValidator';
+import { BulkBacklinkCounter } from './components/BulkBacklinkCounter';
 import { VisualSchemaGeneratorModal } from './components/VisualSchemaGeneratorModal';
 import { PeerNetworkStatusCard } from './components/PeerNetworkStatusCard';
 import { SitemapAuditModal } from './components/SitemapAuditModal';
@@ -34,6 +35,7 @@ import { DiagnosticsCenter } from './components/DiagnosticsCenter';
 import { ReportsExportCenter } from './components/ReportsExportCenter';
 import { LiveOperationsCenter } from './components/LiveOperationsCenter';
 import { IndexingEngineView } from './components/IndexingEngineView';
+import { TrafficEngineDashboard } from './components/TrafficEngineDashboard';
 import { UrlIndexingWizardModal } from './components/UrlIndexingWizardModal';
 import { AiAssistantWidget } from './components/AiAssistantWidget';
 import { DirectoryEntry, LogItem, SubmissionRecord, SystemSettings, AnalyticsData, AutonomousConfig, ApiHealthReport, WorkspaceSnapshot, DashboardViewType, AuthSession } from './types';
@@ -1020,11 +1022,30 @@ export default function App() {
             />
           )}
 
+          {/* VIEW: Traffic & SERP CTR Engine v3.0 */}
+          {currentView === 'traffic_engine' && (
+            <TrafficEngineDashboard
+              onOpenSettings={() => setIsSettingsOpen(true)}
+            />
+          )}
+
           {/* VIEW: Bulk SEO URL Validator */}
           {currentView === 'bulk_seo' && (
             <div className="space-y-6">
               <BulkSeoValidator
                 initialUrls={history.length > 0 && history[0].urlList ? history[0].urlList : ['https://careerpulseai.net']}
+              />
+            </div>
+          )}
+
+          {/* VIEW: Bulk Backlink & Referring Domain Counter */}
+          {currentView === 'backlink_counter' && (
+            <div className="space-y-6">
+              <BulkBacklinkCounter
+                onSelectDomainForAudit={(domain) => {
+                  setProfilerDomain(domain);
+                  setIsDomainProfilerOpen(true);
+                }}
               />
             </div>
           )}
@@ -1051,6 +1072,9 @@ export default function App() {
 
           {/* VIEW: Diagnostics & Error Center */}
           {currentView === 'diagnostics' && <DiagnosticsCenter />}
+
+          {/* VIEW: Smart URL Batcher & Scheduler */}
+          {currentView === 'scheduler' && <SmartBatchScheduler />}
 
           {/* VIEW: Enterprise Auth & RBAC */}
           {currentView === 'account' && <AuthAccountCenter />}

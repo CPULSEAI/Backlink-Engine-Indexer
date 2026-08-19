@@ -20,11 +20,16 @@ import {
   runScheduledJobNow,
   getSchedulerStatus,
 } from './server/scheduler.js';
+import { trafficManager } from './server/trafficEngine.js';
 import { runConversionAudit } from './server/conversionWizard.js';
 import { runClarityOverloadAudit } from './server/clarityOverloadAudit.js';
 import { runBulkValidation } from './server/bulkValidator.js';
 import { runSitemapAudit } from './server/sitemapCrawler.js';
 import { getStripe, isStripeConfigured } from './server/stripe.js';
+import { BulkBacklinkCounterService } from './server/backlinkCounter.js';
+import { BulkBacklinkListerService } from './server/backlinkLister.js';
+import { InstantIndexationService } from './server/instantIndexer.js';
+
 
 async function startServer() {
   const app = express();
@@ -42,6 +47,10 @@ async function startServer() {
     jobManager.registerClient(ws);
     ws.send(JSON.stringify({ event: 'connected', message: 'WebSocket connection established' }));
   });
+
+  // Initialize Traffic Generation & SERP CTR Manager daemon
+  trafficManager.setJobManager(jobManager);
+  trafficManager.initDaemon();
 
   // Helper to clean and normalize input URLs / domains, preventing double protocol issues (e.g. https://https://)
   function cleanUrlAndDomain(raw: string): { fullUrl: string; domain: string } {
@@ -258,6 +267,81 @@ async function startServer() {
       res.status(500).json({ error: err.message || 'Failed to reinstate proxy' });
     }
   });
+
+  // --- BULK BACKLINK & REFERRING DOMAIN COUNTER API (DataForSEO Engine) ---
+  app.post('/api/backlinks/bulk-count', async (req, res) => {
+    try {
+      const { targets = [], apiLogin, apiPassword, maxConcurrency = 20, useSandbox = false } = req.body;
+
+      if (!Array.isArray(targets) || targets.length === 0) {
+        return res.status(400).json({ error: 'Please provide an array of target URLs or domains.' });
+      }
+
+      const counterService = new BulkBacklinkCounterService(apiLogin, apiPassword, useSandbox);
+      const summary = await counterService.processBulkTargets(targets, Number(maxConcurrency) || 20);
+
+      res.json(summary);
+    } catch (err: any) {
+      console.error('[API Error] /api/backlinks/bulk-count:', err);
+      res.status(500).json({ error: err.message || 'Failed to process bulk backlink counters' });
+    }
+  });
+
+  app.get('/api/backlinks/sample', async (req, res) => {
+    try {
+      const sampleDomains = ['github.com', 'stackoverflow.com', 'openai.com', 'python.org', 'tiangolo.com'];
+      const counterService = new BulkBacklinkCounterService(undefined, undefined, true);
+      const summary = await counterService.processBulkTargets(sampleDomains, 5);
+      res.json(summary);
+    } catch (err: any) {
+      console.error('[API Error] /api/backlinks/sample:', err);
+      res.status(500).json({ error: err.message || 'Failed to fetch sample benchmark' });
+    }
+  });
+
+  // --- DETAILED RAW BACKLINK LISTER (DataForSEO v3/backlinks/backlinks/live) ---
+  app.post('/api/backlinks/detailed-list', async (req, res) => {
+    try {
+      const {
+        targets = [],
+        linksPerTarget = 25,
+        apiLogin,
+        apiPassword,
+        maxConcurrency = 5,
+        useSandbox = false,
+      } = req.body;
+
+      if (!Array.isArray(targets) || targets.length === 0) {
+        return res.status(400).json({ error: 'Please provide an array of target domains or URLs.' });
+      }
+
+      const lister = new BulkBacklinkListerService(apiLogin, apiPassword, useSandbox);
+      const report = await lister.generateBulkReports(targets, Number(linksPerTarget) || 25, Number(maxConcurrency) || 5);
+      res.json(report);
+    } catch (err: any) {
+      console.error('[API Error] /api/backlinks/detailed-list:', err);
+      res.status(500).json({ error: err.message || 'Failed to fetch detailed backlink list' });
+    }
+  });
+
+  // --- INSTANT REAL-TIME URL INDEXATION PIPELINE (Google + IndexNow) ---
+  app.post('/api/indexing/instant-dispatch', async (req, res) => {
+    try {
+      const { domain, urls = [], indexnowKey, googleToken } = req.body;
+
+      if (!Array.isArray(urls) || urls.length === 0) {
+        return res.status(400).json({ error: 'Please provide an array of target URLs to index.' });
+      }
+
+      const indexer = new InstantIndexationService(domain || 'example.com', indexnowKey);
+      const results = await indexer.executeRealtimeIndexing(urls, googleToken, 10);
+      res.json(results);
+    } catch (err: any) {
+      console.error('[API Error] /api/indexing/instant-dispatch:', err);
+      res.status(500).json({ error: err.message || 'Instant indexation dispatch failed' });
+    }
+  });
+
 
   // Cancel submission task
   app.post('/api/submissions/:id/cancel', (req, res) => {
@@ -2860,6 +2944,93 @@ Respond ONLY with a valid JSON object strictly matching this schema:
     } catch (err: any) {
       console.error('[API Error] /api/peer-network/stats:', err);
       res.status(500).json({ error: 'Failed to retrieve peer network stats' });
+    }
+  });
+
+  // --- ADVANCED TRAFFIC GENERATION & SERP CTR API ---
+  app.get('/api/traffic-campaigns', async (req, res) => {
+    try {
+      const campaigns = await trafficManager.getCampaigns();
+      res.json({ success: true, campaigns });
+    } catch (err: any) {
+      console.error('[API Error] GET /api/traffic-campaigns:', err);
+      res.status(500).json({ error: 'Failed to fetch traffic campaigns', details: err.message });
+    }
+  });
+
+  app.post('/api/traffic-campaigns', async (req, res) => {
+    try {
+      const payload = req.body;
+      if (!payload.targetUrls || !Array.isArray(payload.targetUrls) || payload.targetUrls.length === 0) {
+        return res.status(400).json({ error: 'At least one target URL is required' });
+      }
+      const campaign = await trafficManager.createCampaign(payload);
+      res.json({
+        success: true,
+        message: `Traffic campaign '${campaign.name}' deployed and queued successfully.`,
+        campaign,
+      });
+    } catch (err: any) {
+      console.error('[API Error] POST /api/traffic-campaigns:', err);
+      res.status(500).json({ error: 'Failed to deploy traffic campaign', details: err.message });
+    }
+  });
+
+  app.post('/api/traffic-campaigns/:id/toggle', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      await trafficManager.toggleCampaignStatus(id, status);
+      res.json({ success: true, message: `Campaign status updated to ${status}` });
+    } catch (err: any) {
+      res.status(500).json({ error: 'Failed to update campaign status', details: err.message });
+    }
+  });
+
+  app.delete('/api/traffic-campaigns/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      await trafficManager.deleteCampaign(id);
+      res.json({ success: true, message: 'Campaign deleted successfully' });
+    } catch (err: any) {
+      res.status(500).json({ error: 'Failed to delete campaign', details: err.message });
+    }
+  });
+
+  app.post('/api/traffic-campaigns/:id/burst', async (req, res) => {
+    try {
+      const { id } = req.params;
+      await trafficManager.executeCampaignBurst(id);
+      res.json({ success: true, message: 'Immediate session burst executed successfully' });
+    } catch (err: any) {
+      res.status(500).json({ error: 'Failed to execute burst', details: err.message });
+    }
+  });
+
+  app.get('/api/traffic/serp-jobs', async (req, res) => {
+    try {
+      const jobs = await trafficManager.getSerpJobs(100);
+      res.json({ success: true, jobs });
+    } catch (err: any) {
+      res.status(500).json({ error: 'Failed to fetch SERP CTR jobs', details: err.message });
+    }
+  });
+
+  app.get('/api/traffic/redirect-routes', async (req, res) => {
+    try {
+      const routes = await trafficManager.getRedirectRoutes();
+      res.json({ success: true, routes });
+    } catch (err: any) {
+      res.status(500).json({ error: 'Failed to fetch redirect routes', details: err.message });
+    }
+  });
+
+  app.get('/api/traffic-health', async (req, res) => {
+    try {
+      const health = await trafficManager.getHealthMetrics();
+      res.json({ success: true, health });
+    } catch (err: any) {
+      res.status(500).json({ error: 'Failed to retrieve traffic engine health', details: err.message });
     }
   });
 

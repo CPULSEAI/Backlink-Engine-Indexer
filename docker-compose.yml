@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # High-throughput FastAPI Orchestrator Layer
+  api_service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pulse_api_core
+    command: uvicorn python_backend.bulk_url_manager:app --host 0.0.0.0 --port 8000 --workers 4
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - SQLITE_DB_PATH=/app/backlink_indexer.sqlite
+      - REDIS_URL=redis://redis_broker:6379/0
+    depends_on:
+      - redis_broker
+    restart: always
+
+  # Redis Cluster Service for Asynchronous Worker State Coordination
+  redis_broker:
+    image: redis:7.2-alpine
+    container_name: pulse_redis_broker
+    command: redis-server --appendonly no --maxmemory 1gb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data_volume:/data
+    restart: always
+
+  # Distributed Background Pipeline Extraction Worker Nodes
+  extraction_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pulse_extraction_node
+    command: python3 -m python_backend.bulk_url_manager
+    volumes:
+      - .:/app
+    environment:
+      - SQLITE_DB_PATH=/app/backlink_indexer.sqlite
+      - REDIS_URL=redis://redis_broker:6379/0
+    depends_on:
+      - redis_broker
+    restart: always
+
+volumes:
+  redis_data_volume:
+    driver: local
