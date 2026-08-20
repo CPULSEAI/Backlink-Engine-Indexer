@@ -124,14 +124,16 @@ export const BulkBacklinkCounter: React.FC<BulkBacklinkCounterProps> = ({
   };
 
   // Run Macro Analysis
-  const handleRunMacroAnalysis = async (e?: React.FormEvent) => {
+  const handleRunMacroAnalysis = async (e?: React.FormEvent, customTargets?: string[]) => {
     if (e) e.preventDefault();
-    const lines = targetInput
-      .split('\n')
-      .map((l) => l.trim())
-      .filter((l) => l.length > 0 && !l.startsWith('#'));
+    const rawLines = customTargets && customTargets.length > 0
+      ? customTargets
+      : targetInput
+          .split('\n')
+          .map((l) => l.trim())
+          .filter((l) => l.length > 0 && !l.startsWith('#'));
 
-    if (lines.length === 0) {
+    if (rawLines.length === 0) {
       toast.error('Please enter at least one target domain or URL.');
       return;
     }
@@ -141,11 +143,11 @@ export const BulkBacklinkCounter: React.FC<BulkBacklinkCounterProps> = ({
     const startTime = Date.now();
     const timer = setInterval(() => setElapsedTimeMs(Date.now() - startTime), 100);
 
-    toast.loading(`Querying macro metrics for ${lines.length} domains...`, { id: 'backlink-action' });
+    toast.loading(`Querying macro metrics for ${rawLines.length} domains...`, { id: 'backlink-action' });
 
     try {
       const response = await axios.post('/api/backlinks/bulk-count', {
-        targets: lines,
+        targets: rawLines,
         apiLogin: apiLogin.trim() || undefined,
         apiPassword: apiPassword.trim() || undefined,
         maxConcurrency: concurrency,
@@ -165,14 +167,16 @@ export const BulkBacklinkCounter: React.FC<BulkBacklinkCounterProps> = ({
   };
 
   // Run Itemized Raw Backlinks Retrieval (DataForSEO v3/backlinks/backlinks/live)
-  const handleRunDetailedListing = async (e?: React.FormEvent) => {
+  const handleRunDetailedListing = async (e?: React.FormEvent, customTargets?: string[]) => {
     if (e) e.preventDefault();
-    const lines = targetInput
-      .split('\n')
-      .map((l) => l.trim())
-      .filter((l) => l.length > 0 && !l.startsWith('#'));
+    const rawLines = customTargets && customTargets.length > 0
+      ? customTargets
+      : targetInput
+          .split('\n')
+          .map((l) => l.trim())
+          .filter((l) => l.length > 0 && !l.startsWith('#'));
 
-    if (lines.length === 0) {
+    if (rawLines.length === 0) {
       toast.error('Please enter at least one target domain or URL.');
       return;
     }
@@ -188,7 +192,7 @@ export const BulkBacklinkCounter: React.FC<BulkBacklinkCounterProps> = ({
 
     try {
       const response = await axios.post('/api/backlinks/detailed-list', {
-        targets: lines,
+        targets: rawLines,
         linksPerTarget: linksPerTarget,
         apiLogin: apiLogin.trim() || undefined,
         apiPassword: apiPassword.trim() || undefined,
@@ -862,13 +866,22 @@ export const BulkBacklinkCounter: React.FC<BulkBacklinkCounterProps> = ({
                         <button
                           onClick={() => {
                             setTargetInput(row.domain || row.target);
-                            handleRunDetailedListing();
+                            handleRunDetailedListing(undefined, [row.domain || row.target]);
                           }}
                           className="px-2 py-1 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 rounded text-[10px] font-medium transition-all cursor-pointer"
                           title="Extract raw backlinks for this domain"
                         >
                           Raw Links
                         </button>
+                        {onSelectDomainForAudit && (
+                          <button
+                            onClick={() => onSelectDomainForAudit(row.domain || row.target)}
+                            className="px-2 py-1 bg-purple-600/20 hover:bg-purple-600/40 text-purple-300 border border-purple-500/30 rounded text-[10px] font-medium transition-all cursor-pointer"
+                            title="Audit in Domain Profiler"
+                          >
+                            Audit
+                          </button>
+                        )}
                         <button
                           onClick={() => handleRunInstantIndexing([`https://${row.domain || row.target}`])}
                           className="px-2 py-1 bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/30 rounded text-[10px] font-medium transition-all cursor-pointer"

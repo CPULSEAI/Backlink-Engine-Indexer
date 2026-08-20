@@ -297,6 +297,95 @@ export async function getDb(): Promise<Database> {
       -- System Metrics Time-Series Query Index
       CREATE INDEX IF NOT EXISTS idx_system_metrics_timestamp 
         ON system_metrics (timestamp DESC);
+
+      -- =========================================================================
+      -- XML SITEMAP BACKGROUND OBSERVER & NEW CONTENT DETECTION SCHEMA
+      -- =========================================================================
+      CREATE TABLE IF NOT EXISTS sitemap_monitored_targets (
+        id TEXT PRIMARY KEY,
+        domain TEXT NOT NULL,
+        sitemap_url TEXT NOT NULL,
+        is_active INTEGER DEFAULT 1,
+        check_interval_minutes INTEGER DEFAULT 15,
+        last_checked_at TEXT,
+        last_status TEXT DEFAULT 'PENDING',
+        discovered_urls_count INTEGER DEFAULT 0,
+        new_urls_pending_count INTEGER DEFAULT 0,
+        created_at TEXT NOT NULL,
+        error_message TEXT
+      );
+
+      CREATE TABLE IF NOT EXISTS sitemap_discovered_urls (
+        id TEXT PRIMARY KEY,
+        target_id TEXT NOT NULL,
+        domain TEXT NOT NULL,
+        url TEXT NOT NULL,
+        discovered_at TEXT NOT NULL,
+        is_new INTEGER DEFAULT 1,
+        last_indexed_at TEXT
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_sitemap_discovered_target 
+        ON sitemap_discovered_urls (target_id, url);
+
+      -- =========================================================================
+      -- PROOF OF EXECUTION (PoE) CRYPTOGRAPHIC AUDIT LAYER SCHEMA
+      -- =========================================================================
+      CREATE TABLE IF NOT EXISTS execution_jobs (
+        id TEXT PRIMARY KEY,
+        url TEXT NOT NULL,
+        action_type TEXT NOT NULL, -- 'GOOGLE_INDEXING' | 'INDEXNOW' | 'BACKLINK_SUBMISSION' | 'GEO_ANALYSIS' | 'SITEMAP_CRAWL'
+        status TEXT NOT NULL DEFAULT 'PENDING', -- 'PENDING' | 'VERIFIED' | 'FAILED' | 'UNVERIFIED'
+        worker_id TEXT NOT NULL DEFAULT 'worker-01',
+        created_at TEXT NOT NULL,
+        completed_at TEXT
+      );
+
+      CREATE TABLE IF NOT EXISTS execution_receipts (
+        receipt_id TEXT PRIMARY KEY,
+        job_id TEXT NOT NULL,
+        action_type TEXT NOT NULL,
+        url TEXT NOT NULL,
+        verification_status TEXT NOT NULL, -- 'CONFIRMED' | 'UNVERIFIED' | 'FAILED'
+        response_code INTEGER DEFAULT 200,
+        evidence_hash TEXT NOT NULL, -- SHA-256(request + response + timestamp + worker_id)
+        latency_ms INTEGER DEFAULT 0,
+        executed_at TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (job_id) REFERENCES execution_jobs(id) ON DELETE CASCADE
+      );
+
+      CREATE TABLE IF NOT EXISTS execution_evidence (
+        id TEXT PRIMARY KEY,
+        receipt_id TEXT NOT NULL,
+        endpoint TEXT NOT NULL,
+        request_headers TEXT,
+        request_payload TEXT,
+        response_headers TEXT,
+        response_payload TEXT,
+        source_of_truth TEXT NOT NULL, -- e.g. 'https://indexing.googleapis.com/v3/urlNotifications:publish'
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (receipt_id) REFERENCES execution_receipts(receipt_id) ON DELETE CASCADE
+      );
+
+      CREATE TABLE IF NOT EXISTS execution_audit_logs (
+        event_id TEXT PRIMARY KEY,
+        job_id TEXT,
+        receipt_id TEXT,
+        event_type TEXT NOT NULL, -- 'URL_INGESTION' | 'VALIDATION' | 'INDEXNOW_SUBMIT' | 'GOOGLE_SUBMIT' | 'REPORT_GENERATION'
+        details_json TEXT,
+        timestamp TEXT NOT NULL,
+        verification_status TEXT NOT NULL -- 'CONFIRMED' | 'UNVERIFIED' | 'FAILED'
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_poe_receipts_job 
+        ON execution_receipts (job_id);
+
+      CREATE INDEX IF NOT EXISTS idx_poe_evidence_receipt 
+        ON execution_evidence (receipt_id);
+
+      CREATE INDEX IF NOT EXISTS idx_poe_audit_timestamp 
+        ON execution_audit_logs (timestamp DESC);
     `);
   } catch (schemaErr) {
     console.error('[DB Error] Failed to verify / create schema:', schemaErr);

@@ -29,6 +29,18 @@ import { getStripe, isStripeConfigured } from './server/stripe.js';
 import { BulkBacklinkCounterService } from './server/backlinkCounter.js';
 import { BulkBacklinkListerService } from './server/backlinkLister.js';
 import { InstantIndexationService } from './server/instantIndexer.js';
+import { ProofOfExecutionService } from './server/poeService.js';
+import {
+  initSitemapObserverLoop,
+  getMonitoredTargets,
+  getDiscoveredUrls,
+  addMonitoredTarget,
+  updateMonitoredTarget,
+  deleteMonitoredTarget,
+  checkSitemapTarget,
+  checkAllMonitoredTargets,
+  acknowledgeNewDiscoveredUrls,
+} from './server/sitemapObserver.js';
 
 
 async function startServer() {
@@ -342,6 +354,71 @@ async function startServer() {
     }
   });
 
+
+  // --- PROOF OF EXECUTION (PoE) AUDIT RECEIPT API ---
+  app.get('/api/poe/receipts', async (req, res) => {
+    try {
+      const limit = Number(req.query.limit) || 50;
+      const receipts = await ProofOfExecutionService.getReceipts(limit);
+      res.json({ receipts });
+    } catch (err: any) {
+      console.error('[API Error] /api/poe/receipts:', err);
+      res.status(500).json({ error: err.message || 'Failed to fetch execution receipts' });
+    }
+  });
+
+  app.get('/api/poe/stats', async (req, res) => {
+    try {
+      const stats = await ProofOfExecutionService.getStats();
+      res.json(stats);
+    } catch (err: any) {
+      console.error('[API Error] /api/poe/stats:', err);
+      res.status(500).json({ error: err.message || 'Failed to fetch PoE stats' });
+    }
+  });
+
+  app.post('/api/poe/record-execution', async (req, res) => {
+    try {
+      const {
+        jobId,
+        url,
+        actionType,
+        workerId,
+        endpoint,
+        requestHeaders,
+        requestPayload,
+        responseHeaders,
+        responsePayload,
+        responseCode,
+        latencyMs,
+        sourceOfTruth,
+      } = req.body;
+
+      if (!jobId || !url || !actionType || !endpoint) {
+        return res.status(400).json({ error: 'Missing required execution evidence fields' });
+      }
+
+      const receipt = await ProofOfExecutionService.recordExecution({
+        jobId,
+        url,
+        actionType,
+        workerId,
+        endpoint,
+        requestHeaders,
+        requestPayload,
+        responseHeaders,
+        responsePayload,
+        responseCode: Number(responseCode) || 200,
+        latencyMs: Number(latencyMs) || 0,
+        sourceOfTruth: sourceOfTruth || endpoint,
+      });
+
+      res.json({ success: true, receipt });
+    } catch (err: any) {
+      console.error('[API Error] /api/poe/record-execution:', err);
+      res.status(500).json({ error: err.message || 'Failed to seal execution receipt' });
+    }
+  });
 
   // Cancel submission task
   app.post('/api/submissions/:id/cancel', (req, res) => {
@@ -3126,8 +3203,146 @@ Respond ONLY with a valid JSON object strictly matching this schema:
     }
   });
 
-  // Start background scheduler engine loop
+  // =========================================================================
+  // XML SITEMAP BACKGROUND OBSERVER ENDPOINTS
+  // =========================================================================
+
+  // Get all monitored sitemap targets + recent discovered URLs
+  app.get('/api/sitemap-observer/targets', async (req, res) => {
+    try {
+      const targets = await getMonitoredTargets();
+      const discoveredUrls = await getDiscoveredUrls();
+      const totalPendingNew = targets.reduce((sum, t) => sum + (t.new_urls_pending_count || 0), 0);
+
+      res.json({
+        success: true,
+        targets,
+        discoveredUrls,
+        totalTargets: targets.length,
+        activeTargets: targets.filter((t) => t.is_active).length,
+        totalDiscoveredUrls: discoveredUrls.length,
+        totalPendingNewUrls: totalPendingNew,
+      });
+    } catch (err: any) {
+      console.error('[API Error] /api/sitemap-observer/targets:', err);
+      res.status(500).json({ error: 'Failed to fetch monitored sitemap targets' });
+    }
+  });
+
+  // Add a new sitemap target
+  app.post('/api/sitemap-observer/targets', async (req, res) => {
+    try {
+      const { domainOrUrl, checkIntervalMinutes } = req.body;
+      if (!domainOrUrl || typeof domainOrUrl !== 'string') {
+        return res.status(400).json({ error: 'domainOrUrl is required' });
+      }
+
+      const target = await addMonitoredTarget(domainOrUrl, checkIntervalMinutes || 15);
+      res.json({ success: true, target });
+    } catch (err: any) {
+      console.error('[API Error] POST /api/sitemap-observer/targets:', err);
+      res.status(500).json({ error: err.message || 'Failed to add monitored target' });
+    }
+  });
+
+  // Update a sitemap target
+  app.put('/api/sitemap-observer/targets/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { is_active, check_interval_minutes, sitemap_url } = req.body;
+      const success = await updateMonitoredTarget(id, { is_active, check_interval_minutes, sitemap_url });
+      res.json({ success });
+    } catch (err: any) {
+      console.error('[API Error] PUT /api/sitemap-observer/targets/:id:', err);
+      res.status(500).json({ error: err.message || 'Failed to update monitored target' });
+    }
+  });
+
+  // Delete a sitemap target
+  app.delete('/api/sitemap-observer/targets/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const success = await deleteMonitoredTarget(id);
+      res.json({ success });
+    } catch (err: any) {
+      console.error('[API Error] DELETE /api/sitemap-observer/targets/:id:', err);
+      res.status(500).json({ error: 'Failed to delete monitored target' });
+    }
+  });
+
+  // Manually trigger immediate sitemap check
+  app.post('/api/sitemap-observer/check-now', async (req, res) => {
+    try {
+      const { targetId } = req.body;
+      if (targetId) {
+        const result = await checkSitemapTarget(targetId, true);
+        res.json({ success: true, result });
+      } else {
+        const result = await checkAllMonitoredTargets();
+        res.json({ success: true, result });
+      }
+    } catch (err: any) {
+      console.error('[API Error] /api/sitemap-observer/check-now:', err);
+      res.status(500).json({ error: err.message || 'Failed to execute sitemap observer check' });
+    }
+  });
+
+  // Auto-index newly discovered sitemap URLs
+  app.post('/api/sitemap-observer/auto-index-new', async (req, res) => {
+    try {
+      const { targetId, concurrencyLimit = 5 } = req.body;
+      const discovered = await getDiscoveredUrls(targetId);
+      const newUrls = discovered.filter((d) => d.is_new === 1).map((d) => d.url);
+
+      if (newUrls.length === 0) {
+        return res.json({ success: true, count: 0, message: 'No new pending URLs to index' });
+      }
+
+      // Start submission job for these URLs
+      const submissionId = `sitemap_auto_${Date.now()}`;
+      await jobManager.startJob({
+        submissionId,
+        targetUrls: newUrls,
+        features: {
+          generateBacklinks: true,
+          checkLiveConfirmation: true,
+          requestIndexing: true,
+          runGoogleIndexing: true,
+          runPingServices: true,
+        },
+        concurrencyLimit: Math.min(concurrencyLimit, 8),
+        proxyList: [],
+      });
+
+      // Acknowledge and mark as processed
+      await acknowledgeNewDiscoveredUrls(targetId);
+
+      res.json({
+        success: true,
+        submissionId,
+        urlsIndexedCount: newUrls.length,
+        urls: newUrls,
+      });
+    } catch (err: any) {
+      console.error('[API Error] /api/sitemap-observer/auto-index-new:', err);
+      res.status(500).json({ error: err.message || 'Failed to auto-index new sitemap URLs' });
+    }
+  });
+
+  // Acknowledge / clear notification for new URLs
+  app.post('/api/sitemap-observer/acknowledge', async (req, res) => {
+    try {
+      const { targetId } = req.body;
+      await acknowledgeNewDiscoveredUrls(targetId);
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: 'Failed to acknowledge new content' });
+    }
+  });
+
+  // Start background scheduler engine loop & sitemap observer loop
   initSchedulerLoop().catch((err) => console.error('Failed to initialize scheduler loop:', err));
+  initSitemapObserverLoop().catch((err) => console.error('Failed to initialize sitemap observer loop:', err));
 
   // --- VITE MIDDLEWARE ---
   if (process.env.NODE_ENV !== 'production') {

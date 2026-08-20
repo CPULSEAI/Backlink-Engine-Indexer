@@ -856,6 +856,42 @@ export interface OrganizationSchemaData {
   addressCountry?: string;
 }
 
+export interface MonitoredSitemapTarget {
+  id: string;
+  domain: string;
+  sitemap_url: string;
+  is_active: number;
+  check_interval_minutes: number;
+  last_checked_at: string | null;
+  last_status: 'SUCCESS' | 'ERROR' | 'CHECKING' | 'PENDING';
+  discovered_urls_count: number;
+  new_urls_pending_count: number;
+  created_at: string;
+  error_message?: string | null;
+}
+
+export interface DiscoveredSitemapUrl {
+  id: string;
+  target_id: string;
+  domain: string;
+  url: string;
+  discovered_at: string;
+  is_new: number;
+  last_indexed_at?: string | null;
+}
+
+export interface NewContentDetectedEvent {
+  targetId: string;
+  domain: string;
+  sitemapUrl: string;
+  newUrlsCount: number;
+  newUrls: string[];
+  totalDiscoveredCount: number;
+  detectedAt: string;
+  message: string;
+}
+
+
 
 
 

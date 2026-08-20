@@ -24,6 +24,7 @@ import { LogItem, SubmissionRecord } from '../types';
 import { CompareSubmissionsModal } from './CompareSubmissionsModal';
 import { HistoricalRankChartWidget } from './HistoricalRankChartWidget';
 import { RankingHistoryChart } from './RankingHistoryChart';
+import { TotalBacklinkCounter } from './TotalBacklinkCounter';
 
 interface ResultsTableProps {
   logs: LogItem[];
@@ -43,6 +44,20 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
   const [liveVerificationFilter, setLiveVerificationFilter] = useState<'ALL' | 'CONFIRMED' | 'FAILED' | 'PENDING'>('ALL');
   const [indexingFilter, setIndexingFilter] = useState<'ALL' | 'SUBMITTED' | 'PINGED' | 'PENDING'>('ALL');
   const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
+
+  // Compute unique domains from active logs for the Total Backlink Counter
+  const uniqueTargetDomains = React.useMemo(() => {
+    const doms = logs
+      .map((log) => {
+        try {
+          return new URL(log.targetUrl).hostname;
+        } catch {
+          return (log.targetUrl || '').replace(/^(https?:\/\/)+/i, '').split('/')[0];
+        }
+      })
+      .filter((d) => d && d.includes('.') && !d.includes('localhost'));
+    return Array.from(new Set(doms));
+  }, [logs]);
 
   // Row Expansion State
   const [expandedRowIds, setExpandedRowIds] = useState<Set<string>>(new Set());
@@ -314,6 +329,13 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
 
       {/* Ranking History Chart Component (Recharts + Interactive Legend + High-Res PNG Exporter + 30-day Trends) */}
       <RankingHistoryChart />
+
+      {/* Total Cumulative Backlink Counter (DataForSEO Real-time Engine) */}
+      <TotalBacklinkCounter
+        initialDomains={uniqueTargetDomains.length > 0 ? uniqueTargetDomains : undefined}
+        title="Total Cumulative Backlink Counter"
+        subtitle="Real-time multi-domain cumulative backlink count & referring authority for active campaign targets"
+      />
 
       {/* Quick Keyword Rank Overview Widget */}
       <HistoricalRankChartWidget logs={logs} history={history} />

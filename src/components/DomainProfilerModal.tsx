@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Globe, ShieldCheck, Sparkles, TrendingUp, AlertCircle, BarChart2, Layers, Award, CheckCircle2, ArrowRight, Loader2, Zap } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { TotalBacklinkCounter } from './TotalBacklinkCounter';
 
 interface DomainProfilerModalProps {
   isOpen: boolean;
@@ -200,6 +201,15 @@ export const DomainProfilerModal: React.FC<DomainProfilerModalProps> = ({ isOpen
                   {result.summaryAnalysis}
                 </p>
               </div>
+
+              {/* DataForSEO Cumulative Total Backlink Counter */}
+              <TotalBacklinkCounter
+                domain={result.domain}
+                variant="compact"
+                title={`Live Cumulative Backlink Count: ${result.domain}`}
+                subtitle="DataForSEO verified live crawl and link equity metrics"
+                allowManualInput={false}
+              />
 
               {/* 4 Score Badges Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

@@ -38,7 +38,7 @@ import { IndexingEngineView } from './components/IndexingEngineView';
 import { TrafficEngineDashboard } from './components/TrafficEngineDashboard';
 import { UrlIndexingWizardModal } from './components/UrlIndexingWizardModal';
 import { AiAssistantWidget } from './components/AiAssistantWidget';
-import { DirectoryEntry, LogItem, SubmissionRecord, SystemSettings, AnalyticsData, AutonomousConfig, ApiHealthReport, WorkspaceSnapshot, DashboardViewType, AuthSession } from './types';
+import { DirectoryEntry, LogItem, SubmissionRecord, SystemSettings, AnalyticsData, AutonomousConfig, ApiHealthReport, WorkspaceSnapshot, DashboardViewType, AuthSession, NewContentDetectedEvent } from './types';
 
 export default function App() {
   const [directories, setDirectories] = useState<DirectoryEntry[]>([]);
@@ -46,6 +46,7 @@ export default function App() {
   const [history, setHistory] = useState<SubmissionRecord[]>([]);
   const [wsConnected, setWsConnected] = useState(false);
   const [activeSubmissionId, setActiveSubmissionId] = useState<string | null>(null);
+  const [newContentAlert, setNewContentAlert] = useState<NewContentDetectedEvent | null>(null);
 
   // API Health Monitor State
   const [apiHealthReport, setApiHealthReport] = useState<ApiHealthReport | null>(null);
@@ -355,6 +356,37 @@ export default function App() {
           if (data.payload) {
             setApiHealthReport(data.payload);
           }
+        } else if (data.event === 'new_content_detected') {
+          const payload = data.payload as NewContentDetectedEvent;
+          setNewContentAlert(payload);
+          toast(
+            (t) => (
+              <div className="flex flex-col gap-1">
+                <span className="font-black text-amber-500 flex items-center gap-1.5 text-xs">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                  </span>
+                  New Content Detected
+                </span>
+                <span className="text-[11px] text-zinc-800 dark:text-zinc-200">
+                  {payload.newUrlsCount} new URL{payload.newUrlsCount > 1 ? 's' : ''} discovered in sitemap for <span className="font-bold">{payload.domain}</span>
+                </span>
+                <div className="flex items-center gap-2 mt-1">
+                  <button
+                    onClick={() => {
+                      toast.dismiss(t.id);
+                      setCurrentView('live_operations');
+                    }}
+                    className="px-2 py-0.5 bg-black text-white dark:bg-zinc-800 dark:text-cyan-400 font-bold rounded text-[10px] cursor-pointer"
+                  >
+                    Open Live Operations
+                  </button>
+                </div>
+              </div>
+            ),
+            { duration: 8000, icon: '🚨' }
+          );
         } else if (data.event === 'proxy_rotated') {
           const { reason, previousProxy, newProxy, attempt, remainingProxies } = data.payload || {};
           toast((t) => (
@@ -1058,8 +1090,8 @@ export default function App() {
             />
           )}
 
-          {/* VIEW: Live Operations & Verification Stream */}
-          {currentView === 'live_ops' && (
+          {/* VIEW: Live Operations & Sitemap Observer Stream */}
+          {(currentView === 'live_ops' || currentView === 'live_operations') && (
             <LiveOperationsCenter
               logs={logs}
               jobStatus={jobStatus}
@@ -1067,6 +1099,9 @@ export default function App() {
               history={history}
               onSelectSubmission={handleSelectSubmission}
               onExportCsv={handleExportCsv}
+              onStartIndexingJob={handleStartJob}
+              newContentAlert={newContentAlert}
+              onClearNewContentAlert={() => setNewContentAlert(null)}
             />
           )}
 
