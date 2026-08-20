@@ -22,13 +22,15 @@ import {
   Globe,
   Monitor,
   Copy,
+  BarChart3,
 } from 'lucide-react';
 import axios from 'axios';
 import { SystemDiagnosticItem, GuidedErrorTroubleshooting } from '../types';
 import toast from 'react-hot-toast';
+import { ApiIntegrationHealthDashboard } from './ApiIntegrationHealthDashboard';
 
 export const DiagnosticsCenter: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'health' | 'errors' | 'crashes'>('health');
+  const [activeTab, setActiveTab] = useState<'api-health' | 'health' | 'errors' | 'crashes'>('api-health');
   const [isPinging, setIsPinging] = useState(false);
   const [selectedErrorId, setSelectedErrorId] = useState<string | null>('err_01');
   const [selectedCrashId, setSelectedCrashId] = useState<string | null>(null);
@@ -232,6 +234,18 @@ export const DiagnosticsCenter: React.FC = () => {
       {/* Tabs */}
       <div className="flex items-center gap-2 border-b-4 border-black dark:border-zinc-700 pb-2 flex-wrap">
         <button
+          onClick={() => setActiveTab('api-health')}
+          className={`px-4 py-2 text-xs font-bold uppercase rounded-lg border-2 border-black dark:border-zinc-600 flex items-center gap-2 cursor-pointer transition-all ${
+            activeTab === 'api-health'
+              ? 'bg-black text-white dark:bg-zinc-800 dark:text-cyan-400 shadow-[3px_3px_0_#ff4d00]'
+              : 'bg-white dark:bg-zinc-900 text-black dark:text-zinc-200 hover:bg-zinc-100 shadow-[2px_2px_0_#000]'
+          }`}
+        >
+          <BarChart3 className="w-3.5 h-3.5 text-[#ff4d00]" />
+          <span>API &amp; Proxy Integration Trends</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('health')}
           className={`px-4 py-2 text-xs font-bold uppercase rounded-lg border-2 border-black dark:border-zinc-600 flex items-center gap-2 cursor-pointer transition-all ${
             activeTab === 'health'
@@ -270,6 +284,11 @@ export const DiagnosticsCenter: React.FC = () => {
           <span>Runtime Crash Vault ({crashLogs.length})</span>
         </button>
       </div>
+
+      {/* TAB 0: API Integration Health Dashboard Widget */}
+      {activeTab === 'api-health' && (
+        <ApiIntegrationHealthDashboard />
+      )}
 
       {/* TAB 1: System Health Grid */}
       {activeTab === 'health' && (

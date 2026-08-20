@@ -38,6 +38,7 @@ import { IndexingEngineView } from './components/IndexingEngineView';
 import { TrafficEngineDashboard } from './components/TrafficEngineDashboard';
 import { UrlIndexingWizardModal } from './components/UrlIndexingWizardModal';
 import { AiAssistantWidget } from './components/AiAssistantWidget';
+import { ConfirmationModal, ConfirmationModalProps } from './components/ConfirmationModal';
 import { DirectoryEntry, LogItem, SubmissionRecord, SystemSettings, AnalyticsData, AutonomousConfig, ApiHealthReport, WorkspaceSnapshot, DashboardViewType, AuthSession, NewContentDetectedEvent } from './types';
 
 export default function App() {
@@ -47,6 +48,25 @@ export default function App() {
   const [wsConnected, setWsConnected] = useState(false);
   const [activeSubmissionId, setActiveSubmissionId] = useState<string | null>(null);
   const [newContentAlert, setNewContentAlert] = useState<NewContentDetectedEvent | null>(null);
+
+  // Global Confirmation Modal State for Destructive Actions
+  const [confirmationState, setConfirmationState] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    confirmButtonText?: string;
+    cancelButtonText?: string;
+    severity?: 'danger' | 'warning' | 'info';
+    actionType?: 'cancel_job' | 'clear_logs' | 'reset_settings' | 'delete' | 'generic';
+    impactItems?: string[];
+    requireConfirmationPhrase?: string;
+    onConfirm: () => void | Promise<void>;
+  }>({
+    isOpen: false,
+    title: '',
+    description: '',
+    onConfirm: () => {},
+  });
 
   // API Health Monitor State
   const [apiHealthReport, setApiHealthReport] = useState<ApiHealthReport | null>(null);
@@ -604,11 +624,52 @@ export default function App() {
     }
   };
 
+  const requestStopAutonomous = () => {
+    setConfirmationState({
+      isOpen: true,
+      title: 'Stop Autonomous Campaign?',
+      description: 'Are you sure you want to stop the autonomous background indexing loop? Any queued URL batches will be cancelled.',
+      severity: 'warning',
+      actionType: 'cancel_job',
+      confirmButtonText: 'Stop Autonomous Loop',
+      impactItems: [
+        'Automatic 100k campaign background looping will immediately halt',
+        'In-flight requests will finish or be aborted',
+        'State will revert to manual dispatch mode',
+      ],
+      onConfirm: async () => {
+        handleStopAutonomous();
+        setConfirmationState((prev) => ({ ...prev, isOpen: false }));
+      },
+    });
+  };
+
   const handleStopAutonomous = () => {
     setIsAutonomousActive(false);
     autonomousRef.current.active = false;
     handleCancelJob();
     toast.error('Autonomous continuous mode stopped.');
+  };
+
+  const requestCancelJob = () => {
+    if (!activeSubmissionId) return;
+    setConfirmationState({
+      isOpen: true,
+      title: 'Cancel Active Indexing Pipeline?',
+      description: 'Are you sure you want to abort the active submission and indexing job? In-flight worker requests to search engines and directories will be halted.',
+      severity: 'danger',
+      actionType: 'cancel_job',
+      confirmButtonText: 'Abort & Cancel Job',
+      impactItems: [
+        'Active Google Indexing API batch requests will be stopped',
+        'IndexNow and directory pinging workers will be terminated',
+        'The job status will be marked as Cancelled in the SQLite database',
+      ],
+      onConfirm: async () => {
+        await handleCancelJob();
+        setConfirmationState((prev) => ({ ...prev, isOpen: false }));
+      },
+    });
   };
 
   const handleCancelJob = async () => {
@@ -1089,8 +1150,8 @@ export default function App() {
               autonomousTargetGoal={autonomousTargetGoal}
               autonomousBatchCount={autonomousBatchCount}
               onStartJob={handleStartJob}
-              onCancelJob={handleCancelJob}
-              onStopAutonomous={handleStopAutonomous}
+              onCancelJob={requestCancelJob}
+              onStopAutonomous={requestStopAutonomous}
               progressPercent={progressPercent}
               completedTasks={completedTasks}
               totalTasks={totalTasks}
@@ -1337,6 +1398,21 @@ export default function App() {
             concurrencyLimit: 4,
           });
         }}
+      />
+
+      {/* Global Destructive Action Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={confirmationState.isOpen}
+        onClose={() => setConfirmationState((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmationState.onConfirm}
+        title={confirmationState.title}
+        description={confirmationState.description}
+        confirmButtonText={confirmationState.confirmButtonText}
+        cancelButtonText={confirmationState.cancelButtonText}
+        severity={confirmationState.severity}
+        actionType={confirmationState.actionType}
+        impactItems={confirmationState.impactItems}
+        requireConfirmationPhrase={confirmationState.requireConfirmationPhrase}
       />
 
       {/* AI Copilot Float Widget */}

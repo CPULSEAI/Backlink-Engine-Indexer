@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import {
   RadarChart,
@@ -8,7 +8,17 @@ import {
   Radar,
   ResponsiveContainer,
   Legend,
-  Tooltip
+  Tooltip,
+  ComposedChart,
+  Bar,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ScatterChart,
+  Scatter,
+  ZAxis,
+  Cell
 } from 'recharts';
 import {
   Target,
@@ -26,7 +36,12 @@ import {
   Copy,
   Check,
   Lightbulb,
-  Sliders
+  Sliders,
+  Layers,
+  Search,
+  PieChart,
+  ArrowUpRight,
+  Filter
 } from 'lucide-react';
 
 interface ClusterData {
@@ -37,6 +52,23 @@ interface ClusterData {
   industryAvgScore: number;
   intent: 'Commercial' | 'Informational' | 'Transactional' | 'GEO Focus';
   gapLevel: 'High Gap' | 'Moderate' | 'Lead';
+  monthlyVolume: number;
+  trafficOpportunity: number;
+  keywordCount: number;
+}
+
+export interface OrganicKeywordGapItem {
+  id: string;
+  keyword: string;
+  cluster: string;
+  intent: 'Commercial' | 'Informational' | 'Transactional' | 'GEO Focus';
+  searchVolume: number;
+  keywordDifficulty: number; // 0 - 100%
+  userRank: number | null; // null = Not ranking in top 100
+  compARank: number;
+  compBRank: number;
+  estimatedTrafficGain: number;
+  actionPriority: 'HIGH' | 'MEDIUM' | 'OPPORTUNITY';
 }
 
 interface KeywordGapRadarProps {
@@ -159,7 +191,9 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
   const [selectedCluster, setSelectedCluster] = useState<ClusterData | null>(null);
   const [isCompetitorAnalysisOpen, setIsCompetitorAnalysisOpen] = useState<boolean>(true);
   const [benchmarkMode, setBenchmarkMode] = useState<'comparative' | 'solo'>('comparative');
-  const [appliedFixes, setAppliedFixes] = useState<Record<string, boolean>>({});
+  const [viewLayer, setViewLayer] = useState<'radar' | 'gap_overlap' | 'scatter_map'>('gap_overlap');
+  const [keywordSearchQuery, setKeywordSearchQuery] = useState<string>('');
+  const [intentFilter, setIntentFilter] = useState<string>('ALL');
 
   const cleanUserDomain = userDomain.trim().replace(/^(https?:\/\/)+/i, '').replace(/\/+$/, '') || 'organic-skincare.com';
   const competitorAnalysis = deriveCompetitorsAndPriorityUrls(userDomain);
@@ -188,6 +222,9 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
       industryAvgScore: 54,
       intent: 'GEO Focus',
       gapLevel: 'High Gap',
+      monthlyVolume: 38500,
+      trafficOpportunity: 14200,
+      keywordCount: 142,
     },
     {
       cluster: 'Directory Indexing',
@@ -197,6 +234,9 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
       industryAvgScore: 60,
       intent: 'Transactional',
       gapLevel: 'Lead',
+      monthlyVolume: 22000,
+      trafficOpportunity: 3400,
+      keywordCount: 88,
     },
     {
       cluster: 'Technical Crawlability',
@@ -206,6 +246,9 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
       industryAvgScore: 64,
       intent: 'Informational',
       gapLevel: 'High Gap',
+      monthlyVolume: 19400,
+      trafficOpportunity: 8600,
+      keywordCount: 64,
     },
     {
       cluster: 'Commercial Prompts',
@@ -215,6 +258,9 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
       industryAvgScore: 58,
       intent: 'Commercial',
       gapLevel: 'High Gap',
+      monthlyVolume: 49000,
+      trafficOpportunity: 21500,
+      keywordCount: 210,
     },
     {
       cluster: 'Schema & Entities',
@@ -224,6 +270,9 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
       industryAvgScore: 52,
       intent: 'GEO Focus',
       gapLevel: 'Moderate',
+      monthlyVolume: 16800,
+      trafficOpportunity: 6200,
+      keywordCount: 52,
     },
     {
       cluster: 'Backlink Velocity',
@@ -233,11 +282,13 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
       industryAvgScore: 62,
       intent: 'Transactional',
       gapLevel: 'Lead',
+      monthlyVolume: 28000,
+      trafficOpportunity: 4100,
+      keywordCount: 115,
     },
   ]);
 
   const handleRecalculate = () => {
-    // Generate domain-specific deterministic variance
     let hash = 0;
     const str = `${userDomain}-${compA}-${compB}`;
     for (let i = 0; i < str.length; i++) {
@@ -257,6 +308,9 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
         if (maxComp - var1 > 25) gapLevel = 'High Gap';
         else if (maxComp - var1 > 10) gapLevel = 'Moderate';
 
+        const vol = 12000 + (Math.abs(hash + idx * 37) % 38000);
+        const opp = gapLevel === 'High Gap' ? Math.round(vol * 0.42) : gapLevel === 'Moderate' ? Math.round(vol * 0.22) : Math.round(vol * 0.08);
+
         return {
           ...item,
           userDomainScore: var1,
@@ -264,10 +318,137 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
           competitorBScore: var3,
           industryAvgScore: avg,
           gapLevel,
+          monthlyVolume: vol,
+          trafficOpportunity: opp,
         };
       })
     );
+    toast.success('Recalculated organic keyword overlap matrix & traffic opportunities!');
   };
+
+  // Generate granular individual organic keyword opportunities for target domain
+  const organicKeywords: OrganicKeywordGapItem[] = useMemo(() => {
+    const root = cleanUserDomain.split('.')[0] || 'brand';
+    return [
+      {
+        id: 'kw-1',
+        keyword: `best natural ${root} routine`,
+        cluster: 'Commercial Prompts',
+        intent: 'Commercial',
+        searchVolume: 14500,
+        keywordDifficulty: 38,
+        userRank: 18,
+        compARank: 2,
+        compBRank: 4,
+        estimatedTrafficGain: 4200,
+        actionPriority: 'HIGH',
+      },
+      {
+        id: 'kw-2',
+        keyword: `organic ${root} certification directory`,
+        cluster: 'Directory Indexing',
+        intent: 'Transactional',
+        searchVolume: 8200,
+        keywordDifficulty: 24,
+        userRank: 6,
+        compARank: 8,
+        compBRank: 12,
+        estimatedTrafficGain: 1850,
+        actionPriority: 'OPPORTUNITY',
+      },
+      {
+        id: 'kw-3',
+        keyword: `${root} near me local search`,
+        cluster: 'AI Search & GEO',
+        intent: 'GEO Focus',
+        searchVolume: 22400,
+        keywordDifficulty: 44,
+        userRank: null,
+        compARank: 1,
+        compBRank: 3,
+        estimatedTrafficGain: 7800,
+        actionPriority: 'HIGH',
+      },
+      {
+        id: 'kw-4',
+        keyword: `how to check ${root} crawlability errors`,
+        cluster: 'Technical Crawlability',
+        intent: 'Informational',
+        searchVolume: 6100,
+        keywordDifficulty: 32,
+        userRank: 24,
+        compARank: 3,
+        compBRank: 7,
+        estimatedTrafficGain: 2100,
+        actionPriority: 'MEDIUM',
+      },
+      {
+        id: 'kw-5',
+        keyword: `top rated ${root} pricing comparison`,
+        cluster: 'Commercial Prompts',
+        intent: 'Commercial',
+        searchVolume: 18900,
+        keywordDifficulty: 52,
+        userRank: 31,
+        compARank: 2,
+        compBRank: 1,
+        estimatedTrafficGain: 6400,
+        actionPriority: 'HIGH',
+      },
+      {
+        id: 'kw-6',
+        keyword: `structured data schema for ${root}`,
+        cluster: 'Schema & Entities',
+        intent: 'GEO Focus',
+        searchVolume: 5400,
+        keywordDifficulty: 28,
+        userRank: 14,
+        compARank: 4,
+        compBRank: 5,
+        estimatedTrafficGain: 1600,
+        actionPriority: 'MEDIUM',
+      },
+      {
+        id: 'kw-7',
+        keyword: `high authority backlink sources for ${root}`,
+        cluster: 'Backlink Velocity',
+        intent: 'Transactional',
+        searchVolume: 9600,
+        keywordDifficulty: 41,
+        userRank: 4,
+        compARank: 9,
+        compBRank: 11,
+        estimatedTrafficGain: 2800,
+        actionPriority: 'OPPORTUNITY',
+      },
+      {
+        id: 'kw-8',
+        keyword: `ai entity citations for ${root} brands`,
+        cluster: 'AI Search & GEO',
+        intent: 'GEO Focus',
+        searchVolume: 12100,
+        keywordDifficulty: 35,
+        userRank: null,
+        compARank: 3,
+        compBRank: 2,
+        estimatedTrafficGain: 5100,
+        actionPriority: 'HIGH',
+      },
+    ];
+  }, [cleanUserDomain]);
+
+  const filteredKeywords = useMemo(() => {
+    return organicKeywords.filter((item) => {
+      const matchesSearch = item.keyword.toLowerCase().includes(keywordSearchQuery.toLowerCase()) ||
+        item.cluster.toLowerCase().includes(keywordSearchQuery.toLowerCase());
+      const matchesIntent = intentFilter === 'ALL' || item.intent === intentFilter;
+      return matchesSearch && matchesIntent;
+    });
+  }, [organicKeywords, keywordSearchQuery, intentFilter]);
+
+  const totalTrafficOpportunity = useMemo(() => {
+    return clusterData.reduce((acc, curr) => acc + curr.trafficOpportunity, 0);
+  }, [clusterData]);
 
   const highGapClusters = clusterData.filter((c) => c.gapLevel === 'High Gap' || c.gapLevel === 'Moderate');
 
@@ -281,7 +462,7 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
     ) / clusterData.length
   );
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomRadarTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload as ClusterData;
       return (
@@ -297,8 +478,34 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
             <div className="text-zinc-700">Industry Avg Benchmark: {data.industryAvgScore}% Visibility</div>
           )}
           <div className="text-zinc-500 text-[10px] mt-1 pt-1 border-t border-black">
-            Intent Type: <span className="text-black font-bold">{data.intent}</span> | Gap: <span className="text-[#ff4d00] font-bold">{data.gapLevel}</span>
+            Traffic Opportunity: <strong className="text-emerald-600">+{data.trafficOpportunity.toLocaleString()} visits/mo</strong>
           </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const CustomComposedTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white border-2 border-black p-3 shadow-[4px_4px_0_#000] text-xs font-mono-brutal space-y-1.5 min-w-[220px] text-black">
+          <div className="font-black uppercase text-[#ff4d00] border-b border-black pb-1">
+            {label}
+          </div>
+          {payload.map((entry: any, index: number) => {
+            const isTraffic = entry.name.includes('Traffic');
+            return (
+              <div key={index} className="flex items-center justify-between gap-3 text-[11px]">
+                <span style={{ color: entry.color }} className="font-bold">
+                  {entry.name}:
+                </span>
+                <span className="font-extrabold text-black">
+                  {entry.value} {isTraffic ? 'visits/mo' : '%'}
+                </span>
+              </div>
+            );
+          })}
         </div>
       );
     }
@@ -325,6 +532,49 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
         </div>
 
         <div className="flex flex-wrap items-center gap-2 font-mono-brutal text-xs">
+          {/* View Layer Selector */}
+          <div className="flex items-center bg-[#f2efeb] p-1 border-2 border-black shadow-[2px_2px_0_#000]">
+            <button
+              type="button"
+              onClick={() => setViewLayer('gap_overlap')}
+              className={`flex items-center gap-1.5 px-3 py-1 uppercase text-xs font-bold transition-all ${
+                viewLayer === 'gap_overlap'
+                  ? 'bg-[#ff4d00] text-black shadow-[1px_1px_0_#000]'
+                  : 'text-black hover:bg-white'
+              }`}
+              title="Recharts Organic Keyword Overlap & Traffic Opportunity Matrix"
+            >
+              <BarChart2 className="w-3.5 h-3.5" />
+              <span>GAP MATRIX</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewLayer('scatter_map')}
+              className={`flex items-center gap-1.5 px-3 py-1 uppercase text-xs font-bold transition-all ${
+                viewLayer === 'scatter_map'
+                  ? 'bg-black text-white shadow-[1px_1px_0_#000]'
+                  : 'text-black hover:bg-white'
+              }`}
+              title="Keyword Difficulty vs Search Volume Opportunity Scatter"
+            >
+              <PieChart className="w-3.5 h-3.5" />
+              <span>OPPORTUNITY SCATTER</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewLayer('radar')}
+              className={`flex items-center gap-1.5 px-3 py-1 uppercase text-xs font-bold transition-all ${
+                viewLayer === 'radar'
+                  ? 'bg-black text-white shadow-[1px_1px_0_#000]'
+                  : 'text-black hover:bg-white'
+              }`}
+              title="6-Axis SERP & GEO Cluster Radar"
+            >
+              <Target className="w-3.5 h-3.5" />
+              <span>RADAR POLYGON</span>
+            </button>
+          </div>
+
           {/* Competitive Benchmarking Mode Toggle */}
           <div className="flex items-center bg-[#f2efeb] p-1 border-2 border-black shadow-[2px_2px_0_#000]">
             <button
@@ -337,7 +587,6 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
               }`}
               title="Focus purely on your domain metrics & baseline benchmark gap"
             >
-              <BarChart2 className="w-3.5 h-3.5" />
               <span>MY DOMAIN</span>
             </button>
             <button
@@ -345,12 +594,11 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
               onClick={() => setBenchmarkMode('comparative')}
               className={`flex items-center gap-1.5 px-3 py-1 uppercase text-xs font-bold transition-all ${
                 benchmarkMode === 'comparative'
-                  ? 'bg-[#ff4d00] text-black shadow-[1px_1px_0_#000]'
+                  ? 'bg-black text-white shadow-[1px_1px_0_#000]'
                   : 'text-black hover:bg-white'
               }`}
               title="Compare side-by-side against Top 3 Direct Competitors"
             >
-              <Users className="w-3.5 h-3.5" />
               <span>3-WAY BENCHMARK</span>
             </button>
           </div>
@@ -420,25 +668,33 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
       </div>
 
       {/* Mode Indicator & Summary KPIs */}
-      <div className="bg-[#f2efeb] border-2 border-black p-3 flex flex-wrap items-center justify-between gap-3 text-xs font-mono-brutal shadow-[2px_2px_0_#000]">
+      <div className="bg-[#f2efeb] border-2 border-black p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs font-mono-brutal shadow-[2px_2px_0_#000]">
         <div className="flex items-center gap-2">
-          <span className="text-zinc-600 uppercase">ACTIVE BENCHMARK VIEW:</span>
-          <span className="px-2 py-0.5 bg-black text-white text-[11px] font-bold uppercase">
-            {benchmarkMode === 'solo' ? 'MY DOMAIN METRICS' : '3-WAY COMPARATIVE'}
+          <span className="text-zinc-600 uppercase">ACTIVE LAYER:</span>
+          <span className="px-2 py-0.5 bg-[#ff4d00] text-black text-[11px] font-black uppercase border border-black">
+            {viewLayer === 'gap_overlap'
+              ? 'RECHARTS ORGANIC OVERLAP & TRAFFIC GAP'
+              : viewLayer === 'scatter_map'
+              ? 'KD% VS SEARCH VOLUME SCATTER'
+              : 'SERP & GEO RADAR POLYGON'}
           </span>
         </div>
 
         <div className="flex items-center gap-4 text-[11px]">
           <div>
-            <span className="text-zinc-600 uppercase">AVG VISIBILITY:</span>{' '}
+            <span className="text-zinc-600 uppercase">EST. TRAFFIC GAP:</span>{' '}
+            <strong className="text-emerald-700 font-extrabold">+{totalTrafficOpportunity.toLocaleString()} visits/mo</strong>
+          </div>
+          <div>
+            <span className="text-zinc-600 uppercase">YOUR VISIBILITY:</span>{' '}
             <strong className="text-black font-bold">{avgUserScore}%</strong>
           </div>
           <div>
-            <span className="text-zinc-600 uppercase">{benchmarkMode === 'solo' ? 'BENCHMARK:' : 'TOP RIVAL AVG:'}</span>{' '}
+            <span className="text-zinc-600 uppercase">RIVAL AVG:</span>{' '}
             <strong className="text-black font-bold">{avgCompetitorScore}%</strong>
           </div>
           <div>
-            <span className="text-zinc-600 uppercase">GAP DELTA:</span>{' '}
+            <span className="text-zinc-600 uppercase">NET DELTA:</span>{' '}
             <strong className={avgUserScore < avgCompetitorScore ? 'text-[#ff4d00]' : 'text-black'}>
               {avgUserScore >= avgCompetitorScore ? '+' : ''}{avgUserScore - avgCompetitorScore}%
             </strong>
@@ -496,7 +752,7 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
                   <tr className="hover:bg-[#f2efeb] transition-colors">
                     <td className="p-2.5 border-r-2 border-black font-bold whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
-                        <ExternalLink className="w-3.5 h-3.5 text-[#ff4d00] shrink-0" />
+                        <ExternalLink className="w-3.5 h-3.5 text-[#ff4d00]" />
                         <span>{compA}</span>
                       </div>
                     </td>
@@ -515,7 +771,7 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
                   <tr className="hover:bg-[#f2efeb] transition-colors">
                     <td className="p-2.5 border-r-2 border-black font-bold whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
-                        <ExternalLink className="w-3.5 h-3.5 text-[#ff4d00] shrink-0" />
+                        <ExternalLink className="w-3.5 h-3.5 text-[#ff4d00]" />
                         <span>{compB}</span>
                       </div>
                     </td>
@@ -535,185 +791,437 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
               </table>
             </div>
           </div>
+        </div>
+      )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono-brutal">
-            {/* Section 1: Top 3 Direct Competitors */}
-            <div className="bg-white border-2 border-black p-3.5 shadow-[2px_2px_0_#000] space-y-2">
-              <div className="flex items-center justify-between text-black font-bold text-[11px] uppercase border-b border-black pb-1">
-                <span className="flex items-center gap-1.5">
-                  <Target className="w-3.5 h-3.5 text-[#ff4d00]" />
-                  1. DIRECT COMPETITORS
-                </span>
-                <span className="text-[10px] text-zinc-600 font-bold">SAME SOLUTION</span>
+      {/* LAYER 1: Recharts Organic Overlap & Traffic Opportunity Matrix */}
+      {viewLayer === 'gap_overlap' && (
+        <div className="space-y-4">
+          <div className="bg-[#f2efeb] border-2 border-black p-4 rounded-xl shadow-[3px_3px_0_#000]">
+            <div className="flex items-center justify-between pb-2 border-b border-black mb-3">
+              <div className="flex items-center gap-2">
+                <BarChart2 className="w-4 h-4 text-[#ff4d00]" />
+                <h3 className="text-xs font-black uppercase text-black font-mono-brutal">
+                  ORGANIC KEYWORD OVERLAP &amp; TRAFFIC POTENTIAL ({userDomain} vs {compA} &amp; {compB})
+                </h3>
               </div>
-              <ul className="space-y-2 text-zinc-800 text-[11px] leading-relaxed font-sans">
-                <li className="bg-[#f2efeb] p-2 border border-black">
-                  <strong className="font-mono-brutal text-black">Ahrefs / Semrush:</strong> High historical backlink index depth (30B+ pages) and established domain trust.
-                </li>
-                <li className="bg-[#f2efeb] p-2 border border-black">
-                  <strong className="font-mono-brutal text-black">Serpstat / {compA}:</strong> Direct rival in directory submission velocity and automated link indexing.
-                </li>
-              </ul>
+              <span className="text-[10px] font-bold text-zinc-600 uppercase">
+                BARS: VISIBILITY % | LINE: EST. TRAFFIC GAIN (VISITS/MO)
+              </span>
             </div>
 
-            {/* Section 2: Top 2 Indirect Competitors */}
-            <div className="bg-white border-2 border-black p-3.5 shadow-[2px_2px_0_#000] space-y-2">
-              <div className="flex items-center justify-between text-black font-bold text-[11px] uppercase border-b border-black pb-1">
-                <span className="flex items-center gap-1.5">
-                  <TrendingUp className="w-3.5 h-3.5 text-[#ff4d00]" />
-                  2. INDIRECT COMPETITORS
-                </span>
-                <span className="text-[10px] text-zinc-600 font-bold">ALTERNATE</span>
-              </div>
-              <ul className="space-y-2 text-zinc-800 text-[11px] leading-relaxed font-sans">
-                <li className="bg-[#f2efeb] p-2 border border-black">
-                  <strong className="font-mono-brutal text-black">Manual PR Growth Agencies:</strong> Manual outreach and white-glove directory submissions.
-                </li>
-                <li className="bg-[#f2efeb] p-2 border border-black">
-                  <strong className="font-mono-brutal text-black">Programmatic SEO Frameworks:</strong> Static generated pages to capture long-tail search traffic.
-                </li>
-              </ul>
+            <div className="h-80 sm:h-96">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={clusterData} margin={{ top: 15, right: 30, left: 0, bottom: 25 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#d4d4d8" opacity={0.6} />
+                  <XAxis
+                    dataKey="cluster"
+                    stroke="#000000"
+                    fontSize={10}
+                    tickLine={false}
+                    interval={0}
+                    angle={-15}
+                    textAnchor="end"
+                    fontFamily="'Space Mono', monospace"
+                  />
+                  <YAxis
+                    yAxisId="left"
+                    stroke="#000000"
+                    fontSize={10}
+                    unit="%"
+                    domain={[0, 100]}
+                    tickLine={false}
+                    fontFamily="'Space Mono', monospace"
+                  />
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    stroke="#10b981"
+                    fontSize={10}
+                    tickLine={false}
+                    unit=" visits"
+                    fontFamily="'Space Mono', monospace"
+                  />
+                  <Tooltip content={<CustomComposedTooltip />} />
+                  <Legend
+                    wrapperStyle={{ fontSize: '11px', paddingTop: '10px', fontFamily: "'Space Mono', monospace" }}
+                    formatter={(value) => <span className="text-black font-bold">{value}</span>}
+                  />
+                  <Bar
+                    yAxisId="left"
+                    dataKey="userDomainScore"
+                    name={`${userDomain} (Your Domain)`}
+                    fill="#ff4d00"
+                    radius={[3, 3, 0, 0]}
+                  />
+                  {benchmarkMode === 'comparative' ? (
+                    <>
+                      <Bar
+                        yAxisId="left"
+                        dataKey="competitorAScore"
+                        name={`${compA} (Competitor A)`}
+                        fill="#18181b"
+                        radius={[3, 3, 0, 0]}
+                      />
+                      <Bar
+                        yAxisId="left"
+                        dataKey="competitorBScore"
+                        name={`${compB} (Competitor B)`}
+                        fill="#71717a"
+                        radius={[3, 3, 0, 0]}
+                      />
+                    </>
+                  ) : (
+                    <Bar
+                      yAxisId="left"
+                      dataKey="industryAvgScore"
+                      name="Industry Benchmark"
+                      fill="#71717a"
+                      radius={[3, 3, 0, 0]}
+                    />
+                  )}
+                  <Line
+                    yAxisId="right"
+                    type="monotone"
+                    dataKey="trafficOpportunity"
+                    name="Potential Monthly Traffic Opportunity"
+                    stroke="#10b981"
+                    strokeWidth={3}
+                    dot={{ fill: '#10b981', r: 5, stroke: '#000', strokeWidth: 1.5 }}
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>
       )}
 
-      {/* Grid Layout: Radar Chart + Gap Action Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
-        {/* Radar Chart Column */}
-        <div className="lg:col-span-7 bg-[#f2efeb] border-2 border-black p-3 h-72 sm:h-80 relative flex items-center justify-center shadow-[3px_3px_0_#000]">
-          <ResponsiveContainer width="100%" height="100%">
-            <RadarChart cx="50%" cy="50%" outerRadius="70%" data={clusterData}>
-              <PolarGrid stroke="#000000" strokeWidth={1} />
-              <PolarAngleAxis dataKey="cluster" stroke="#000000" fontSize={10} tickLine={false} fontFamily="'Space Mono', monospace" />
-              <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#000000" fontSize={9} />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend
-                wrapperStyle={{ fontSize: '11px', paddingTop: '5px', fontFamily: "'Space Mono', monospace" }}
-                formatter={(value) => <span className="text-black font-bold">{value}</span>}
-              />
-              <Radar
-                name={userDomain}
-                dataKey="userDomainScore"
-                stroke="#ff4d00"
-                fill="#ff4d00"
-                fillOpacity={0.5}
-                strokeWidth={2.5}
-              />
-              {benchmarkMode === 'comparative' ? (
-                <>
+      {/* LAYER 2: KD% vs Search Volume Scatter Map */}
+      {viewLayer === 'scatter_map' && (
+        <div className="space-y-4">
+          <div className="bg-[#f2efeb] border-2 border-black p-4 rounded-xl shadow-[3px_3px_0_#000]">
+            <div className="flex items-center justify-between pb-2 border-b border-black mb-3">
+              <div className="flex items-center gap-2">
+                <PieChart className="w-4 h-4 text-[#ff4d00]" />
+                <h3 className="text-xs font-black uppercase text-black font-mono-brutal">
+                  KEYWORD DIFFICULTY (KD%) VS. SEARCH VOLUME OPPORTUNITY DISTRIBUTION
+                </h3>
+              </div>
+              <span className="text-[10px] font-bold text-zinc-600 uppercase">
+                X: KD (0-100%) | Y: MONTHLY VOLUME | BUBBLE: TRAFFIC GAIN
+              </span>
+            </div>
+
+            <div className="h-80 sm:h-96">
+              <ResponsiveContainer width="100%" height="100%">
+                <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 10 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#d4d4d8" opacity={0.6} />
+                  <XAxis
+                    type="number"
+                    dataKey="keywordDifficulty"
+                    name="Keyword Difficulty"
+                    unit="%"
+                    domain={[10, 80]}
+                    stroke="#000000"
+                    fontSize={10}
+                    fontFamily="'Space Mono', monospace"
+                  />
+                  <YAxis
+                    type="number"
+                    dataKey="searchVolume"
+                    name="Search Volume"
+                    unit=" /mo"
+                    stroke="#000000"
+                    fontSize={10}
+                    fontFamily="'Space Mono', monospace"
+                  />
+                  <ZAxis type="number" dataKey="estimatedTrafficGain" range={[100, 600]} name="Est. Traffic Gain" />
+                  <Tooltip
+                    cursor={{ strokeDasharray: '3 3' }}
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload as OrganicKeywordGapItem;
+                        return (
+                          <div className="bg-white border-2 border-black p-3 shadow-[3px_3px_0_#000] text-xs font-mono-brutal space-y-1 text-black">
+                            <p className="font-black uppercase text-[#ff4d00]">{data.keyword}</p>
+                            <div className="text-zinc-700">Cluster: <strong className="text-black">{data.cluster}</strong></div>
+                            <div className="text-zinc-700">Search Volume: <strong className="text-black">{data.searchVolume.toLocaleString()}/mo</strong></div>
+                            <div className="text-zinc-700">Keyword Difficulty: <strong className="text-black">{data.keywordDifficulty}%</strong></div>
+                            <div className="text-emerald-700 font-bold">Est. Traffic Gain: +{data.estimatedTrafficGain.toLocaleString()} visits/mo</div>
+                            <div className="text-[10px] text-zinc-500 pt-1 border-t border-black">
+                              Your Rank: {data.userRank ? `#${data.userRank}` : 'Unranked (>100)'} vs Rival Rank #{data.compARank}
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Scatter name="High Opportunity Keywords" data={organicKeywords}>
+                    {organicKeywords.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.actionPriority === 'HIGH' ? '#ff4d00' : entry.actionPriority === 'MEDIUM' ? '#18181b' : '#10b981'}
+                        stroke="#000000"
+                        strokeWidth={1.5}
+                      />
+                    ))}
+                  </Scatter>
+                </ScatterChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* LAYER 3: Classic 6-Axis SERP & GEO Polygon Radar */}
+      {viewLayer === 'radar' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+          {/* Radar Chart Column */}
+          <div className="lg:col-span-7 bg-[#f2efeb] border-2 border-black p-3 h-72 sm:h-80 relative flex items-center justify-center shadow-[3px_3px_0_#000]">
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart cx="50%" cy="50%" outerRadius="70%" data={clusterData}>
+                <PolarGrid stroke="#000000" strokeWidth={1} />
+                <PolarAngleAxis dataKey="cluster" stroke="#000000" fontSize={10} tickLine={false} fontFamily="'Space Mono', monospace" />
+                <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#000000" fontSize={9} />
+                <Tooltip content={<CustomRadarTooltip />} />
+                <Legend
+                  wrapperStyle={{ fontSize: '11px', paddingTop: '5px', fontFamily: "'Space Mono', monospace" }}
+                  formatter={(value) => <span className="text-black font-bold">{value}</span>}
+                />
+                <Radar
+                  name={userDomain}
+                  dataKey="userDomainScore"
+                  stroke="#ff4d00"
+                  fill="#ff4d00"
+                  fillOpacity={0.5}
+                  strokeWidth={2.5}
+                />
+                {benchmarkMode === 'comparative' ? (
+                  <>
+                    <Radar
+                      name={compA}
+                      dataKey="competitorAScore"
+                      stroke="#000000"
+                      fill="#000000"
+                      fillOpacity={0.2}
+                      strokeWidth={1.5}
+                    />
+                    <Radar
+                      name={compB}
+                      dataKey="competitorBScore"
+                      stroke="#71717a"
+                      fill="#71717a"
+                      fillOpacity={0.2}
+                      strokeWidth={1.5}
+                    />
+                  </>
+                ) : (
                   <Radar
-                    name={compA}
-                    dataKey="competitorAScore"
+                    name="Industry Benchmark Target"
+                    dataKey="industryAvgScore"
                     stroke="#000000"
                     fill="#000000"
-                    fillOpacity={0.2}
+                    fillOpacity={0.15}
                     strokeWidth={1.5}
+                    strokeDasharray="4 4"
                   />
-                  <Radar
-                    name={compB}
-                    dataKey="competitorBScore"
-                    stroke="#71717a"
-                    fill="#71717a"
-                    fillOpacity={0.2}
-                    strokeWidth={1.5}
-                  />
-                </>
-              ) : (
-                <Radar
-                  name="Industry Benchmark Target"
-                  dataKey="industryAvgScore"
-                  stroke="#000000"
-                  fill="#000000"
-                  fillOpacity={0.15}
-                  strokeWidth={1.5}
-                  strokeDasharray="4 4"
-                />
-              )}
-            </RadarChart>
-          </ResponsiveContainer>
-        </div>
+                )}
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
 
-        {/* High-Intent Gap Alerts & Action Items */}
-        <div className="lg:col-span-5 space-y-3 font-mono-brutal">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-black uppercase tracking-wider flex items-center gap-1.5">
-              <ShieldAlert className="w-4 h-4 text-[#ff4d00]" />
-              <span>{benchmarkMode === 'solo' ? 'VISIBILITY GAPS' : 'COMPETITIVE GAPS'}</span>
+          {/* High-Intent Gap Alerts & Action Items */}
+          <div className="lg:col-span-5 space-y-3 font-mono-brutal">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-black uppercase tracking-wider flex items-center gap-1.5">
+                <ShieldAlert className="w-4 h-4 text-[#ff4d00]" />
+                <span>{benchmarkMode === 'solo' ? 'VISIBILITY GAPS' : 'COMPETITIVE GAPS'}</span>
+              </h3>
+              <span className="text-[10px] text-black bg-[#ff4d00] px-2 py-0.5 font-bold uppercase border border-black">
+                {highGapClusters.length} GAPS DETECTED
+              </span>
+            </div>
+
+            <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+              {clusterData.map((cluster, idx) => {
+                const topRivalScore = Math.max(cluster.competitorAScore, cluster.competitorBScore);
+
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => setSelectedCluster(cluster)}
+                    className={`p-3 border-2 border-black text-xs cursor-pointer transition-all shadow-[2px_2px_0_#000] ${
+                      cluster.gapLevel === 'High Gap'
+                        ? 'bg-[#ffe8dd] hover:bg-white'
+                        : cluster.gapLevel === 'Moderate'
+                        ? 'bg-[#fff5eb] hover:bg-white'
+                        : 'bg-[#f2efeb] hover:bg-white'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-black flex items-center gap-1.5 uppercase">
+                        {cluster.cluster}
+                        <span className="text-[9px] px-1.5 py-0.2 bg-black text-white font-bold">
+                          {cluster.intent}
+                        </span>
+                      </span>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 uppercase border border-black ${
+                          cluster.gapLevel === 'High Gap'
+                            ? 'bg-[#ff4d00] text-black'
+                            : cluster.gapLevel === 'Moderate'
+                            ? 'bg-black text-white'
+                            : 'bg-white text-black'
+                        }`}
+                      >
+                        {benchmarkMode === 'solo'
+                          ? `${cluster.userDomainScore}% vs ${cluster.industryAvgScore}%`
+                          : (cluster.gapLevel === 'Lead' ? 'LEADING (+)' : `${cluster.userDomainScore}% vs ${topRivalScore}%`)}
+                      </span>
+                    </div>
+
+                    <div className="mt-1.5 flex items-center justify-between text-[11px] text-zinc-700">
+                      {benchmarkMode === 'comparative' ? (
+                        <span>
+                          RIVALS: <span className="font-bold text-black">{cluster.competitorAScore}%</span> | <span className="font-bold text-black">{cluster.competitorBScore}%</span>
+                        </span>
+                      ) : (
+                        <span>
+                          DELTA: <strong className="text-black">
+                            {cluster.userDomainScore >= cluster.industryAvgScore ? '+' : ''}{cluster.userDomainScore - cluster.industryAvgScore}%
+                          </strong>
+                        </span>
+                      )}
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onOpenContentGrader) {
+                            onOpenContentGrader(`https://${userDomain}`, cluster.cluster);
+                          }
+                        }}
+                        className="text-[#ff4d00] hover:text-black font-bold flex items-center gap-1 text-[10px] uppercase underline cursor-pointer"
+                      >
+                        <span>OPTIMIZE</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Actionable Organic Keyword Opportunity Drilldown Table */}
+      <div className="bg-white border-2 border-black p-4 space-y-3 shadow-[3px_3px_0_#000]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b-2 border-black">
+          <div className="flex items-center gap-2">
+            <Search className="w-4 h-4 text-[#ff4d00]" />
+            <h3 className="text-xs font-black uppercase text-black font-mono-brutal">
+              ORGANIC KEYWORD OPPORTUNITY DRILLDOWN &amp; ACTION MATRIX
             </h3>
-            <span className="text-[10px] text-black bg-[#ff4d00] px-2 py-0.5 font-bold uppercase border border-black">
-              {highGapClusters.length} GAPS DETECTED
+            <span className="text-[10px] font-bold bg-[#ff4d00] text-black px-2 py-0.5 border border-black uppercase">
+              {filteredKeywords.length} KEYWORDS
             </span>
           </div>
 
-          <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-            {clusterData.map((cluster, idx) => {
-              const topRivalScore = Math.max(cluster.competitorAScore, cluster.competitorBScore);
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              type="text"
+              value={keywordSearchQuery}
+              onChange={(e) => setKeywordSearchQuery(e.target.value)}
+              placeholder="Search keyword or cluster..."
+              className="bg-[#f2efeb] border border-black px-2.5 py-1 text-xs text-black font-bold focus:outline-none focus:bg-white"
+            />
 
-              return (
-                <div
-                  key={idx}
-                  onClick={() => setSelectedCluster(cluster)}
-                  className={`p-3 border-2 border-black text-xs cursor-pointer transition-all shadow-[2px_2px_0_#000] ${
-                    cluster.gapLevel === 'High Gap'
-                      ? 'bg-[#ffe8dd] hover:bg-white'
-                      : cluster.gapLevel === 'Moderate'
-                      ? 'bg-[#fff5eb] hover:bg-white'
-                      : 'bg-[#f2efeb] hover:bg-white'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-black flex items-center gap-1.5 uppercase">
-                      {cluster.cluster}
-                      <span className="text-[9px] px-1.5 py-0.2 bg-black text-white font-bold">
-                        {cluster.intent}
-                      </span>
+            <select
+              value={intentFilter}
+              onChange={(e) => setIntentFilter(e.target.value)}
+              className="bg-[#f2efeb] border border-black px-2 py-1 text-xs text-black font-bold focus:outline-none uppercase"
+            >
+              <option value="ALL">ALL INTENTS</option>
+              <option value="Commercial">COMMERCIAL</option>
+              <option value="GEO Focus">GEO FOCUS</option>
+              <option value="Transactional">TRANSACTIONAL</option>
+              <option value="Informational">INFORMATIONAL</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto border-2 border-black">
+          <table className="w-full text-left border-collapse text-xs font-mono-brutal">
+            <thead className="bg-black text-white font-mono-brutal text-[11px] uppercase">
+              <tr className="border-b-2 border-black">
+                <th scope="col" className="p-2.5 border-r border-zinc-700 font-bold">ORGANIC KEYWORD</th>
+                <th scope="col" className="p-2.5 border-r border-zinc-700 font-bold">CLUSTER</th>
+                <th scope="col" className="p-2.5 border-r border-zinc-700 font-bold text-right">SEARCH VOL</th>
+                <th scope="col" className="p-2.5 border-r border-zinc-700 font-bold text-center">KD%</th>
+                <th scope="col" className="p-2.5 border-r border-zinc-700 font-bold text-center">YOUR RANK</th>
+                <th scope="col" className="p-2.5 border-r border-zinc-700 font-bold text-center">RIVAL RANKS</th>
+                <th scope="col" className="p-2.5 border-r border-zinc-700 font-bold text-right">TRAFFIC GAIN</th>
+                <th scope="col" className="p-2.5 font-bold text-center">ACTION</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y-2 divide-black bg-white">
+              {filteredKeywords.map((item) => (
+                <tr key={item.id} className="hover:bg-[#f2efeb] transition-colors">
+                  <td className="p-2.5 border-r-2 border-black font-bold text-zinc-900 select-all">
+                    {item.keyword}
+                  </td>
+                  <td className="p-2.5 border-r-2 border-black text-zinc-700 whitespace-nowrap">
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 bg-[#f2efeb] border border-black rounded">
+                      {item.cluster}
                     </span>
+                  </td>
+                  <td className="p-2.5 border-r-2 border-black text-right font-bold text-zinc-900">
+                    {item.searchVolume.toLocaleString()}
+                  </td>
+                  <td className="p-2.5 border-r-2 border-black text-center font-bold">
                     <span
-                      className={`text-[10px] font-bold px-2 py-0.5 uppercase border border-black ${
-                        cluster.gapLevel === 'High Gap'
-                          ? 'bg-[#ff4d00] text-black'
-                          : cluster.gapLevel === 'Moderate'
-                          ? 'bg-black text-white'
-                          : 'bg-white text-black'
+                      className={`text-[10px] px-1.5 py-0.5 border border-black rounded ${
+                        item.keywordDifficulty > 45 ? 'bg-amber-100 text-amber-900' : 'bg-emerald-100 text-emerald-900'
                       }`}
                     >
-                      {benchmarkMode === 'solo'
-                        ? `${cluster.userDomainScore}% vs ${cluster.industryAvgScore}%`
-                        : (cluster.gapLevel === 'Lead' ? 'LEADING (+)' : `${cluster.userDomainScore}% vs ${topRivalScore}%`)}
+                      {item.keywordDifficulty}%
                     </span>
-                  </div>
-
-                  <div className="mt-1.5 flex items-center justify-between text-[11px] text-zinc-700">
-                    {benchmarkMode === 'comparative' ? (
-                      <span>
-                        RIVALS: <span className="font-bold text-black">{cluster.competitorAScore}%</span> | <span className="font-bold text-black">{cluster.competitorBScore}%</span>
-                      </span>
+                  </td>
+                  <td className="p-2.5 border-r-2 border-black text-center font-bold">
+                    {item.userRank ? (
+                      <span className="text-zinc-800">#{item.userRank}</span>
                     ) : (
-                      <span>
-                        DELTA: <strong className="text-black">
-                          {cluster.userDomainScore >= cluster.industryAvgScore ? '+' : ''}{cluster.userDomainScore - cluster.industryAvgScore}%
-                        </strong>
+                      <span className="text-rose-600 font-extrabold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-300">
+                        NOT RANKING
                       </span>
                     )}
-
+                  </td>
+                  <td className="p-2.5 border-r-2 border-black text-center font-bold text-zinc-800 whitespace-nowrap">
+                    #{item.compARank} <span className="text-zinc-400">|</span> #{item.compBRank}
+                  </td>
+                  <td className="p-2.5 border-r-2 border-black text-right font-extrabold text-emerald-700">
+                    +{item.estimatedTrafficGain.toLocaleString()} /mo
+                  </td>
+                  <td className="p-2.5 text-center whitespace-nowrap">
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
+                      onClick={() => {
                         if (onOpenContentGrader) {
-                          onOpenContentGrader(`https://${userDomain}`, cluster.cluster);
+                          onOpenContentGrader(`https://${userDomain}`, item.keyword);
+                        } else {
+                          toast.success(`Targeting opportunity: ${item.keyword}`);
                         }
                       }}
-                      className="text-[#ff4d00] hover:text-black font-bold flex items-center gap-1 text-[10px] uppercase underline cursor-pointer"
+                      className="px-2.5 py-1 bg-[#ff4d00] hover:bg-black text-black hover:text-white font-bold uppercase text-[10px] border border-black rounded shadow-[1px_1px_0_#000] cursor-pointer transition-all inline-flex items-center gap-1"
                     >
                       <span>OPTIMIZE</span>
                       <ArrowRight className="w-3 h-3" />
                     </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
