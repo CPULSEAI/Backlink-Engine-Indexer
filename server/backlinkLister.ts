@@ -28,16 +28,18 @@ export interface BulkBacklinkListerReport {
   reports: Record<string, DomainBacklinksManifest>;
 }
 
+// Global cooldown tracking for DataForSEO Lister API balance / quota limits
+let dataForSeoListerCooldownUntil = 0;
+let dataForSeoListerCooldownReason = '';
+
 export class BulkBacklinkListerService {
   private apiLogin: string;
   private apiPassword: string;
-  private useSandbox: boolean;
   private apiUrl = 'https://api.dataforseo.com/v3/backlinks/backlinks/live';
 
-  constructor(apiLogin?: string, apiPassword?: string, useSandbox: boolean = false) {
+  constructor(apiLogin?: string, apiPassword?: string) {
     this.apiLogin = apiLogin || process.env.DATAFORSEO_LOGIN || '';
     this.apiPassword = apiPassword || process.env.DATAFORSEO_PASSWORD || '';
-    this.useSandbox = useSandbox || (!this.apiLogin || !this.apiPassword);
   }
 
   public cleanTargetDomain(rawUrl: string): string {
@@ -47,61 +49,6 @@ export class BulkBacklinkListerService {
     return cleaned.toLowerCase();
   }
 
-  private generateSyntheticBacklinks(targetDomain: string, limit: number = 100): DomainBacklinksManifest {
-    const clean = this.cleanTargetDomain(targetDomain);
-    const anchors = [
-      `Official ${clean.charAt(0).toUpperCase() + clean.slice(1)}`,
-      'API Documentation',
-      'Open Source Project Repository',
-      'Learn More & Get Started',
-      `Why ${clean} is fast and reliable`,
-      'Enterprise Reference Architecture',
-      'Source Code on GitHub',
-      'Developer Community Discussion',
-      'Download Latest Package',
-      'Full v3 Release Notes & Benchmarks',
-      'Integration Quickstart Guide',
-      'Case Studies & Whitepapers'
-    ];
-
-    const referringDomains = [
-      'github.com', 'stackoverflow.com', 'medium.com', 'dev.to',
-      'reddit.com', 'news.ycombinator.com', 'techcrunch.com',
-      'slashdot.org', 'wikipedia.org', 'producthunt.com', 'hashnode.dev',
-      'dzone.com', 'infoq.com', 'freecodecamp.org'
-    ];
-
-    const count = Math.min(limit, 25);
-    const backlinks: RawBacklinkItem[] = [];
-
-    for (let i = 0; i < count; i++) {
-      const refDom = referringDomains[i % referringDomains.length];
-      const isDofollow = (i % 4 !== 0);
-      const isLost = (i % 8 === 0);
-      const rank = Math.max(25, 96 - (i * 3));
-
-      backlinks.push({
-        source_url: `https://${refDom}/articles/${clean}-performance-analysis-${100 + i}`,
-        target_url: `https://${clean}/docs/v2/getting-started-${i + 1}`,
-        anchor_text: anchors[i % anchors.length],
-        domain_rank: rank,
-        is_dofollow: isDofollow,
-        first_seen: '2023-03-12T14:22:11Z',
-        last_seen: '2026-08-15T09:11:45Z',
-        loss_status: isLost ? 'LOST' : 'ACTIVE'
-      });
-    }
-
-    return {
-      target: targetDomain,
-      domain: clean,
-      status: 'SUCCESS',
-      is_sandbox: true,
-      total_rows_returned: backlinks.length,
-      backlinks
-    };
-  }
-
   public async fetchDetailedBacklinks(targetDomain: string, limit: number = 100): Promise<DomainBacklinksManifest> {
     const cleanTarget = this.cleanTargetDomain(targetDomain);
     if (!cleanTarget) {
@@ -109,15 +56,21 @@ export class BulkBacklinkListerService {
         target: targetDomain,
         domain: '',
         status: 'ERROR',
-        error: 'Invalid or empty target domain',
+        error: 'Invalid or empty target domain provided.',
         total_rows_returned: 0,
         backlinks: []
       };
     }
 
-    if (this.useSandbox || !this.apiLogin || !this.apiPassword) {
-      await new Promise((res) => setTimeout(res, 50));
-      return this.generateSyntheticBacklinks(targetDomain, limit);
+    if (!this.apiLogin || !this.apiPassword) {
+      return {
+        target: targetDomain,
+        domain: cleanTarget,
+        status: 'ERROR',
+        error: 'DataForSEO API credentials (DATAFORSEO_LOGIN / DATAFORSEO_PASSWORD) are not configured. Real API authentication is required.',
+        total_rows_returned: 0,
+        backlinks: []
+      };
     }
 
     try {
@@ -142,15 +95,27 @@ export class BulkBacklinkListerService {
       );
 
       if (response.status !== 200) {
-        console.warn(`[DataForSEO Lister] HTTP ${response.status} for ${cleanTarget}. Falling back to benchmark backlinks.`);
-        return this.generateSyntheticBacklinks(targetDomain, limit);
+        return {
+          target: targetDomain,
+          domain: cleanTarget,
+          status: 'ERROR',
+          error: `DataForSEO API returned HTTP status ${response.status}`,
+          total_rows_returned: 0,
+          backlinks: []
+        };
       }
 
       const tasks = response.data?.tasks || [];
       if (!tasks.length || tasks[0]?.status_code !== 20000) {
-        const msg = tasks[0]?.status_message || 'API task verification failed';
-        console.warn(`[DataForSEO Lister] API status ${tasks[0]?.status_code}: ${msg} for ${cleanTarget}. Falling back to benchmark backlinks.`);
-        return this.generateSyntheticBacklinks(targetDomain, limit);
+        const errorMsg = tasks[0]?.status_message || `DataForSEO Task status: ${tasks[0]?.status_code || 'Unknown'}`;
+        return {
+          target: targetDomain,
+          domain: cleanTarget,
+          status: 'ERROR',
+          error: errorMsg,
+          total_rows_returned: 0,
+          backlinks: []
+        };
       }
 
       const result = tasks[0]?.result?.[0] || {};
@@ -175,8 +140,16 @@ export class BulkBacklinkListerService {
         backlinks
       };
     } catch (err: any) {
-      console.warn(`[DataForSEO Lister] Live request failed for ${cleanTarget}: ${err?.message}. Falling back to benchmark backlinks.`);
-      return this.generateSyntheticBacklinks(targetDomain, limit);
+      const statusCode = err?.response?.status;
+      const apiMessage = err?.response?.data?.tasks?.[0]?.status_message || err?.message || 'DataForSEO live API connection failed';
+      return {
+        target: targetDomain,
+        domain: cleanTarget,
+        status: 'ERROR',
+        error: statusCode ? `HTTP ${statusCode}: ${apiMessage}` : apiMessage,
+        total_rows_returned: 0,
+        backlinks: []
+      };
     }
   }
 

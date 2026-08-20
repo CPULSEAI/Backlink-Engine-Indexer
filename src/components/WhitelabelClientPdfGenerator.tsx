@@ -60,7 +60,7 @@ export const WhitelabelClientPdfGenerator: React.FC<WhitelabelClientPdfGenerator
 
   // Stats calculation
   const totalSubmissions = history.length > 0 ? history.length : 148;
-  const verifiedLinks = history.length > 0 ? history.filter((h) => h.status === 'COMPLETED').length : 146;
+  const verifiedLinks = history.length > 0 ? history.filter((h) => h.status === 'Completed').length : 146;
   const successRate = totalSubmissions > 0 ? Math.round((verifiedLinks / totalSubmissions) * 100) : 98;
 
   const colorPresets = [

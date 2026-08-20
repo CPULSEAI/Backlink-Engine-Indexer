@@ -203,9 +203,12 @@ export default function App() {
   });
 
   const wsRef = useRef<WebSocket | null>(null);
+  const isMountedRef = useRef<boolean>(true);
+  const reconnectTimeoutRef = useRef<any>(null);
 
   // Fetch initial directories, history, settings, analytics, and api health
   useEffect(() => {
+    isMountedRef.current = true;
     fetchDirectories();
     fetchHistory();
     fetchSettings();
@@ -214,7 +217,18 @@ export default function App() {
     connectWebSocket();
 
     return () => {
-      if (wsRef.current) wsRef.current.close();
+      isMountedRef.current = false;
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      if (wsRef.current) {
+        wsRef.current.onclose = null;
+        wsRef.current.onerror = null;
+        wsRef.current.onmessage = null;
+        wsRef.current.onopen = null;
+        wsRef.current.close();
+        wsRef.current = null;
+      }
     };
   }, []);
 
@@ -299,165 +313,202 @@ export default function App() {
   };
 
   const connectWebSocket = () => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    if (!isMountedRef.current) return;
 
-    const ws = new WebSocket(wsUrl);
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
 
-    ws.onopen = () => {
-      setWsConnected(true);
-    };
-
-    ws.onmessage = (event) => {
+    if (wsRef.current) {
       try {
-        const data = JSON.parse(event.data);
-        if (data.event === 'submission_started') {
-          setJobStatus('Processing');
-          setProgressPercent(0);
-          setCompletedTasks(0);
-          setTotalTasks(data.payload.totalTasks);
-          setConfirmedCount(0);
-          setIndexedCount(0);
-          setLogs([]);
-        } else if (data.event === 'log_update') {
-          const { progress, completedTasks, totalTasks, log } = data.payload;
-          setProgressPercent(progress);
-          setCompletedTasks(completedTasks);
-          setTotalTasks(totalTasks);
-
-          if (log.liveVerification.includes('Confirmed')) {
-            setConfirmedCount((prev) => prev + 1);
-          }
-          if (log.googleIndexing === 'Submitted' || log.pingStatus === 'Success') {
-            setIndexedCount((prev) => prev + 1);
-          }
-
-          // Update Autonomous Continuous Progress Milestone
-          if (autonomousRef.current.active) {
-            if (autonomousRef.current.metric === 'tasks') {
-              autonomousRef.current.accumulated += 1;
-              setAutonomousAccumulatedCount(autonomousRef.current.accumulated);
-            } else if (
-              autonomousRef.current.metric === 'confirmed' &&
-              log.liveVerification.includes('Confirmed')
-            ) {
-              autonomousRef.current.accumulated += 1;
-              setAutonomousAccumulatedCount(autonomousRef.current.accumulated);
-            }
-          }
-
-          setLogs((prevLogs) => {
-            if (prevLogs.some((l) => l.id === log.id)) {
-              return prevLogs.map((l) => (l.id === log.id ? log : l));
-            }
-            return [log, ...prevLogs];
-          });
-        } else if (data.event === 'api_health_update') {
-          if (data.payload) {
-            setApiHealthReport(data.payload);
-          }
-        } else if (data.event === 'new_content_detected') {
-          const payload = data.payload as NewContentDetectedEvent;
-          setNewContentAlert(payload);
-          toast(
-            (t) => (
-              <div className="flex flex-col gap-1">
-                <span className="font-black text-amber-500 flex items-center gap-1.5 text-xs">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                  </span>
-                  New Content Detected
-                </span>
-                <span className="text-[11px] text-zinc-800 dark:text-zinc-200">
-                  {payload.newUrlsCount} new URL{payload.newUrlsCount > 1 ? 's' : ''} discovered in sitemap for <span className="font-bold">{payload.domain}</span>
-                </span>
-                <div className="flex items-center gap-2 mt-1">
-                  <button
-                    onClick={() => {
-                      toast.dismiss(t.id);
-                      setCurrentView('live_operations');
-                    }}
-                    className="px-2 py-0.5 bg-black text-white dark:bg-zinc-800 dark:text-cyan-400 font-bold rounded text-[10px] cursor-pointer"
-                  >
-                    Open Live Operations
-                  </button>
-                </div>
-              </div>
-            ),
-            { duration: 8000, icon: '🚨' }
-          );
-        } else if (data.event === 'proxy_rotated') {
-          const { reason, previousProxy, newProxy, attempt, remainingProxies } = data.payload || {};
-          toast((t) => (
-            <div className="flex flex-col gap-1">
-              <span className="font-bold text-amber-400">🛡️ Proxy Shield Auto-Rotated</span>
-              <span className="text-[11px] text-zinc-300">Trigger: {reason}</span>
-              <span className="text-[10px] font-mono text-zinc-400">Switched to: {newProxy || 'Next node'} (Attempt {attempt}, {remainingProxies} left in pool)</span>
-            </div>
-          ), { duration: 5000, icon: '🔄' });
-        } else if (data.event === 'retry_scheduled') {
-          const { targetUrl, directoryName, attempt, maxRetries, delayMs, error } = data.payload || {};
-          toast((t) => (
-            <div className="flex flex-col gap-0.5">
-              <span className="font-bold text-amber-400 text-xs">⏳ Intelligent Retry Scheduled (Attempt {attempt}/{maxRetries})</span>
-              <span className="text-[11px] text-zinc-300 truncate max-w-xs">{directoryName}: {targetUrl}</span>
-              <span className="text-[10px] font-mono text-amber-300">Backoff delay: {(delayMs / 1000).toFixed(1)}s &bull; Reason: {error}</span>
-            </div>
-          ), { duration: 4000, icon: '⏱️' });
-        } else if (data.event === 'retry_executed') {
-          const { targetUrl, directoryName, attempt } = data.payload || {};
-          toast((t) => (
-            <div className="flex flex-col gap-0.5">
-              <span className="font-bold text-emerald-400 text-xs">🚀 Exponential Backoff Retry Executing</span>
-              <span className="text-[11px] text-zinc-300 truncate max-w-xs">{directoryName}: {targetUrl}</span>
-              <span className="text-[10px] font-mono text-zinc-400">Attempt #{attempt} re-dispatched to worker pool</span>
-            </div>
-          ), { duration: 3000, icon: '⚡' });
-        } else if (data.event === 'submission_finished') {
-          const isCancelled = data.payload.status === 'Cancelled';
-          setJobStatus(isCancelled ? 'Cancelled' : 'Completed');
-          setProgressPercent(100);
-          fetchHistory();
-          fetchAnalytics();
-
-          if (isCancelled) {
-            toast.error('Submission job was cancelled.');
-          } else {
-            toast.success('Submission job completed successfully!');
-          }
-
-          // Autonomous Continuous Mode Check & Loop Trigger
-          if (autonomousRef.current.active && !isCancelled) {
-            if (autonomousRef.current.accumulated >= autonomousRef.current.target) {
-              setIsAutonomousActive(false);
-              autonomousRef.current.active = false;
-              toast.success(`Autonomous goal of ${autonomousRef.current.target} reached!`);
-            } else if (lastJobConfigRef.current) {
-              const nextBatch = autonomousRef.current.batchCount + 1;
-              autonomousRef.current.batchCount = nextBatch;
-              setAutonomousBatchCount(nextBatch);
-
-              // Continuous Submission Auto-Loop Delay
-              setTimeout(() => {
-                if (autonomousRef.current.active && lastJobConfigRef.current) {
-                  handleStartJob(lastJobConfigRef.current, true);
-                }
-              }, 1200);
-            }
-          }
-        }
-      } catch (e) {
-        console.error('WebSocket parsing error', e);
+        wsRef.current.onclose = null;
+        wsRef.current.onerror = null;
+        wsRef.current.close();
+      } catch {
+        // Safe ignore
       }
-    };
+      wsRef.current = null;
+    }
 
-    ws.onclose = () => {
-      setWsConnected(false);
-      setTimeout(connectWebSocket, 3000);
-    };
+    try {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws`;
 
-    wsRef.current = ws;
+      const ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        if (!isMountedRef.current) {
+          ws.close();
+          return;
+        }
+        setWsConnected(true);
+      };
+
+      ws.onerror = () => {
+        if (isMountedRef.current) {
+          setWsConnected(false);
+        }
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.event === 'submission_started') {
+            setJobStatus('Processing');
+            setProgressPercent(0);
+            setCompletedTasks(0);
+            setTotalTasks(data.payload.totalTasks);
+            setConfirmedCount(0);
+            setIndexedCount(0);
+            setLogs([]);
+          } else if (data.event === 'log_update') {
+            const { progress, completedTasks, totalTasks, log } = data.payload;
+            setProgressPercent(progress);
+            setCompletedTasks(completedTasks);
+            setTotalTasks(totalTasks);
+
+            if (log.liveVerification.includes('Confirmed')) {
+              setConfirmedCount((prev) => prev + 1);
+            }
+            if (log.googleIndexing === 'Submitted' || log.pingStatus === 'Success') {
+              setIndexedCount((prev) => prev + 1);
+            }
+
+            // Update Autonomous Continuous Progress Milestone
+            if (autonomousRef.current.active) {
+              if (autonomousRef.current.metric === 'tasks') {
+                autonomousRef.current.accumulated += 1;
+                setAutonomousAccumulatedCount(autonomousRef.current.accumulated);
+              } else if (
+                autonomousRef.current.metric === 'confirmed' &&
+                log.liveVerification.includes('Confirmed')
+              ) {
+                autonomousRef.current.accumulated += 1;
+                setAutonomousAccumulatedCount(autonomousRef.current.accumulated);
+              }
+            }
+
+            setLogs((prevLogs) => {
+              if (prevLogs.some((l) => l.id === log.id)) {
+                return prevLogs.map((l) => (l.id === log.id ? log : l));
+              }
+              return [log, ...prevLogs];
+            });
+          } else if (data.event === 'api_health_update') {
+            if (data.payload) {
+              setApiHealthReport(data.payload);
+            }
+          } else if (data.event === 'new_content_detected') {
+            const payload = data.payload as NewContentDetectedEvent;
+            setNewContentAlert(payload);
+            toast(
+              (t) => (
+                <div className="flex flex-col gap-1">
+                  <span className="font-black text-amber-500 flex items-center gap-1.5 text-xs">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                    </span>
+                    New Content Detected
+                  </span>
+                  <span className="text-[11px] text-zinc-800 dark:text-zinc-200">
+                    {payload.newUrlsCount} new URL{payload.newUrlsCount > 1 ? 's' : ''} discovered in sitemap for <span className="font-bold">{payload.domain}</span>
+                  </span>
+                  <div className="flex items-center gap-2 mt-1">
+                    <button
+                      onClick={() => {
+                        toast.dismiss(t.id);
+                        setCurrentView('live_operations');
+                      }}
+                      className="px-2 py-0.5 bg-black text-white dark:bg-zinc-800 dark:text-cyan-400 font-bold rounded text-[10px] cursor-pointer"
+                    >
+                      Open Live Operations
+                    </button>
+                  </div>
+                </div>
+              ),
+              { duration: 8000, icon: '🚨' }
+            );
+          } else if (data.event === 'proxy_rotated') {
+            const { reason, previousProxy, newProxy, attempt, remainingProxies } = data.payload || {};
+            toast((t) => (
+              <div className="flex flex-col gap-1">
+                <span className="font-bold text-amber-400">🛡️ Proxy Shield Auto-Rotated</span>
+                <span className="text-[11px] text-zinc-300">Trigger: {reason}</span>
+                <span className="text-[10px] font-mono text-zinc-400">Switched to: {newProxy || 'Next node'} (Attempt {attempt}, {remainingProxies} left in pool)</span>
+              </div>
+            ), { duration: 5000, icon: '🔄' });
+          } else if (data.event === 'retry_scheduled') {
+            const { targetUrl, directoryName, attempt, maxRetries, delayMs, error } = data.payload || {};
+            toast((t) => (
+              <div className="flex flex-col gap-0.5">
+                <span className="font-bold text-amber-400 text-xs">⏳ Intelligent Retry Scheduled (Attempt {attempt}/{maxRetries})</span>
+                <span className="text-[11px] text-zinc-300 truncate max-w-xs">{directoryName}: {targetUrl}</span>
+                <span className="text-[10px] font-mono text-amber-300">Backoff delay: {(delayMs / 1000).toFixed(1)}s &bull; Reason: {error}</span>
+              </div>
+            ), { duration: 4000, icon: '⏱️' });
+          } else if (data.event === 'retry_executed') {
+            const { targetUrl, directoryName, attempt } = data.payload || {};
+            toast((t) => (
+              <div className="flex flex-col gap-0.5">
+                <span className="font-bold text-emerald-400 text-xs">🚀 Exponential Backoff Retry Executing</span>
+                <span className="text-[11px] text-zinc-300 truncate max-w-xs">{directoryName}: {targetUrl}</span>
+                <span className="text-[10px] font-mono text-zinc-400">Attempt #{attempt} re-dispatched to worker pool</span>
+              </div>
+            ), { duration: 3000, icon: '⚡' });
+          } else if (data.event === 'submission_finished') {
+            const isCancelled = data.payload.status === 'Cancelled';
+            setJobStatus(isCancelled ? 'Cancelled' : 'Completed');
+            setProgressPercent(100);
+            fetchHistory();
+            fetchAnalytics();
+
+            if (isCancelled) {
+              toast.error('Submission job was cancelled.');
+            } else {
+              toast.success('Submission job completed successfully!');
+            }
+
+            // Autonomous Continuous Mode Check & Loop Trigger
+            if (autonomousRef.current.active && !isCancelled) {
+              if (autonomousRef.current.accumulated >= autonomousRef.current.target) {
+                setIsAutonomousActive(false);
+                autonomousRef.current.active = false;
+                toast.success(`Autonomous goal of ${autonomousRef.current.target} reached!`);
+              } else if (lastJobConfigRef.current) {
+                const nextBatch = autonomousRef.current.batchCount + 1;
+                autonomousRef.current.batchCount = nextBatch;
+                setAutonomousBatchCount(nextBatch);
+
+                // Continuous Submission Auto-Loop Delay
+                setTimeout(() => {
+                  if (autonomousRef.current.active && lastJobConfigRef.current) {
+                    handleStartJob(lastJobConfigRef.current, true);
+                  }
+                }, 1200);
+              }
+            }
+          }
+        } catch (e) {
+          console.error('WebSocket parsing error', e);
+        }
+      };
+
+      ws.onclose = () => {
+        if (!isMountedRef.current) return;
+        setWsConnected(false);
+        reconnectTimeoutRef.current = setTimeout(connectWebSocket, 4000);
+      };
+
+      wsRef.current = ws;
+    } catch (err) {
+      console.warn('Could not establish WebSocket connection:', err);
+      if (isMountedRef.current) {
+        setWsConnected(false);
+        reconnectTimeoutRef.current = setTimeout(connectWebSocket, 4000);
+      }
+    }
   };
 
   const handleStartJob = async (

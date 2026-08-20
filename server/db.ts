@@ -386,6 +386,26 @@ export async function getDb(): Promise<Database> {
 
       CREATE INDEX IF NOT EXISTS idx_poe_audit_timestamp 
         ON execution_audit_logs (timestamp DESC);
+
+      -- =========================================================================
+      -- CLIENT RUNTIME CRASH & DIAGNOSTICS LOGS SCHEMA
+      -- Real-time telemetry captured from Global Error Boundary without mock fallbacks
+      -- =========================================================================
+      CREATE TABLE IF NOT EXISTS client_crash_logs (
+        id TEXT PRIMARY KEY,
+        timestamp TEXT NOT NULL,
+        error_name TEXT NOT NULL,
+        message TEXT NOT NULL,
+        stack TEXT,
+        component_stack TEXT,
+        url TEXT NOT NULL,
+        user_agent TEXT NOT NULL,
+        metadata_json TEXT,
+        created_at TEXT NOT NULL
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_client_crash_timestamp
+        ON client_crash_logs (timestamp DESC);
     `);
   } catch (schemaErr) {
     console.error('[DB Error] Failed to verify / create schema:', schemaErr);

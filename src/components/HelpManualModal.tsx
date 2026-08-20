@@ -36,6 +36,7 @@ import {
   Flame,
 } from 'lucide-react';
 import { generateUserManualPdf } from '../utils/generateManualPdf';
+import { TechnicalSystemDocs } from './TechnicalSystemDocs';
 
 interface ChangelogFeature {
   module: string;
@@ -82,6 +83,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
     | 'server-automation'
     | 'glossary'
     | 'changelog'
+    | 'system-docs'
   >('intro');
 
   // Dynamic backend changelog state
@@ -239,6 +241,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
     { id: 'server-automation', label: '10. Server-Side Automation (Cron)', icon: Server },
     { id: 'glossary', label: '11. Glossary', icon: FileText },
     { id: 'changelog', label: '12. Live Updates & Changelog', icon: Activity },
+    { id: 'system-docs', label: '13. Master System Architecture & Future Analysis', icon: Cpu },
   ];
 
   return (
@@ -2028,6 +2031,13 @@ crontab -e
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* TAB 13: MASTER SYSTEM ARCHITECTURE & FUTURE ANALYSIS */}
+            {activeTab === 'system-docs' && (
+              <div className="h-full">
+                <TechnicalSystemDocs />
               </div>
             )}
 

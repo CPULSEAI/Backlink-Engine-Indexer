@@ -33,6 +33,7 @@ export interface SubmissionRecord {
   completed_directories: number;
   confirmed_count: number;
   indexed_count: number;
+  urlList?: string[];
 }
 
 export interface SystemSettings {
@@ -54,6 +55,7 @@ export interface ApiEndpointHealth {
   lastChecked: string;
   quotaUsed?: number;
   quotaTotal?: number;
+  activeEndpoints?: number;
 }
 
 export interface DisabledProxyInfo {
@@ -226,10 +228,12 @@ export interface CroAuditResult {
 export interface AuthSession {
   email: string;
   token: string;
-  expiresAt: number;
-  role: 'admin' | 'user';
-  rememberMe: boolean;
-  authorizedAt: string;
+  expiresAt?: number;
+  role?: 'admin' | 'user';
+  rememberMe?: boolean;
+  authorizedAt?: string;
+  isAuthorized?: boolean;
+  authorizedDomains?: string[];
 }
 
 export interface AuthConfig {
@@ -253,6 +257,8 @@ export type DashboardViewType =
   | 'geo_grader'
   | 'competitor_radar'
   | 'live_operations'
+  | 'live_ops'
+  | 'account'
   | 'scheduler'
   | 'cro_wizard'
   | 'reports'
@@ -571,13 +577,16 @@ export interface ActiveSession {
 
 export interface LoginHistoryItem {
   id: string;
-  user_email: string;
-  login_time: string;
-  device: string;
-  ip_address: string;
+  user_email?: string;
+  login_time?: string;
+  timestamp?: string;
+  device?: string;
+  ip_address?: string;
+  ip?: string;
   location: string;
   status: 'SUCCESS' | 'FAILED' | 'BLOCKED' | 'MFA_ENABLED' | 'MFA_DISABLED' | string;
-  mfa_used: number | boolean;
+  mfa_used?: number | boolean;
+  method?: string;
 }
 
 export interface StripeSubscriptionDetails {
@@ -890,6 +899,19 @@ export interface NewContentDetectedEvent {
   totalDiscoveredCount: number;
   detectedAt: string;
   message: string;
+}
+
+// --- CLIENT CRASH DIAGNOSTICS & ERROR LOGGING ---
+export interface ClientCrashReport {
+  id?: string;
+  timestamp: string;
+  message: string;
+  stack?: string;
+  componentStack?: string;
+  url: string;
+  userAgent: string;
+  errorName?: string;
+  metadata?: Record<string, any>;
 }
 
 

@@ -229,12 +229,14 @@ export const SmartBatchScheduler: React.FC<SmartBatchSchedulerProps> = ({
   // WebSocket / Simulation Live Loop
   useEffect(() => {
     let ws: WebSocket | null = null;
+    let isMounted = true;
+
     try {
-      const wsUrl = window.location.protocol === 'https:' ? `wss://${window.location.host}/api/v1/telemetry/ws` : `ws://${window.location.host}/api/v1/telemetry/ws`;
+      const wsUrl = window.location.protocol === 'https:' ? `wss://${window.location.host}/ws` : `ws://${window.location.host}/ws`;
       ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
-        setWsConnected(true);
+        if (isMounted) setWsConnected(true);
       };
 
       ws.onmessage = (event) => {
@@ -260,13 +262,13 @@ export const SmartBatchScheduler: React.FC<SmartBatchSchedulerProps> = ({
       };
 
       ws.onerror = () => {
-        setWsConnected(false);
+        if (isMounted) setWsConnected(false);
       };
       ws.onclose = () => {
-        setWsConnected(false);
+        if (isMounted) setWsConnected(false);
       };
     } catch {
-      setWsConnected(false);
+      if (isMounted) setWsConnected(false);
     }
 
     // High-frequency telemetry heartbeat simulation for smooth UI rendering
@@ -309,8 +311,19 @@ export const SmartBatchScheduler: React.FC<SmartBatchSchedulerProps> = ({
     }, 1200);
 
     return () => {
-      if (ws) ws.close();
+      isMounted = false;
       clearInterval(heartbeat);
+      if (ws) {
+        try {
+          ws.onclose = null;
+          ws.onerror = null;
+          ws.onmessage = null;
+          ws.onopen = null;
+          ws.close();
+        } catch {
+          // Ignore
+        }
+      }
     };
   }, [isPaused]);
 

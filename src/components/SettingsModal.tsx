@@ -37,6 +37,7 @@ import {
   Calendar,
   Layers,
   Sparkles,
+  Download,
 } from 'lucide-react';
 import { AppSettings, ProxyHealth, DiagnosticSummary, ActiveSession, LoginHistoryItem, StripeSubscriptionDetails } from '../types';
 import toast from 'react-hot-toast';
@@ -63,7 +64,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     defaultConcurrency: 3,
   };
 
-  const [activeTab, setActiveTab] = useState<'diagnostic' | 'smart_retry' | 'google_api' | 'security' | 'billing'>('diagnostic');
+  const [activeTab, setActiveTab] = useState<'diagnostic' | 'smart_retry' | 'google_api' | 'security' | 'billing' | 'master_prompt'>('diagnostic');
+  const [copiedMasterPrompt, setCopiedMasterPrompt] = useState(false);
   const [proxyList, setProxyList] = useState(activeConfig.proxyList || '');
   const [googleJson, setGoogleJson] = useState(activeConfig.googleServiceAccountJson || '');
   const [defaultConcurrency, setDefaultConcurrency] = useState(activeConfig.defaultConcurrency || 3);
@@ -545,6 +547,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           >
             <CreditCard className="w-4 h-4 text-purple-400" />
             <span>Subscription &amp; Billing</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('master_prompt')}
+            className={`flex items-center space-x-2 px-4 py-2.5 text-xs font-bold rounded-t-xl transition-all cursor-pointer border-b-2 whitespace-nowrap ${
+              activeTab === 'master_prompt'
+                ? 'border-cyan-500 text-cyan-400 bg-zinc-900'
+                : 'border-transparent text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-cyan-400" />
+            <span>Master App Prompt (Recreator)</span>
           </button>
         </div>
 
@@ -1403,6 +1418,176 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <span>Download Invoices</span>
                   <ExternalLink className="w-3 h-3" />
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 6: MASTER APP PROMPT (RECREATOR BLUEPRINT) */}
+          {activeTab === 'master_prompt' && (
+            <div className="space-y-5">
+              {/* Header & 1-Click Action Callout */}
+              <div className="p-5 rounded-2xl bg-gradient-to-r from-cyan-950/40 via-zinc-900/90 to-indigo-950/40 border border-cyan-500/30 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-cyan-400">
+                      <Sparkles className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-zinc-100 flex items-center gap-2">
+                        <span>Master App Specification &amp; Recreator Prompt</span>
+                        <span className="text-[10px] font-mono uppercase bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded-full font-bold">
+                          1-Click Rebuild
+                        </span>
+                      </h4>
+                      <p className="text-xs text-zinc-400 mt-0.5">
+                        This blueprint encapsulates the complete system architecture, API contracts, verification pipelines, D3.js visualizers, and state engines required to reconstruct the entire application in any environment.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const promptText = `Act as an expert Full-Stack Systems Architect & Principal SEO Engineer. Recreate the complete enterprise "SearchPulse AI — Indexing, Backlink Verification & GEO Readiness Platform".
+
+CORE APPLICATION SPECIFICATIONS & ARCHITECTURE:
+1. Executive Value Proposition & Core Engine:
+   - High-throughput URL Indexing Dispatcher integrating Google Indexing API (OAuth2 JWT service account authentication), Bing IndexNow API, and Indexing Protocol relays with real-time SSE progress streaming.
+   - Live Backlink Counter & Audit Verification with DataForSEO live crawl metrics, verifying total backlinks, distinct referring domains, class-C subnet IPs, dofollow/nofollow distributions, and anchor relevance without simulation.
+   - Generative Engine Optimization (GEO) profiler analyzing LLM visibility scores, citation probability, and structured Schema markup.
+   - Mathematical D3.js 30-Day Backlink Growth Trend line chart with interactive cursor tracking, exact counts, referring domains, and velocity indicators.
+   - Comprehensive Proxy Health Diagnostic Center with automatic failure detection, latency measurement, and intelligent auto-rotation.
+   - Bulk SEO Validator evaluating Canonical URLs, OpenGraph, Title, Meta Descriptions, and H1-H6 tags.
+   - Visual Schema Generator producing compliant JSON-LD (FAQPage, Article, Organization, Product, JobPosting, LocalBusiness).
+   - 3-Way Competitor Keyword Gap Radar and LLM Citation Simulator.
+   - Stripe Subscription & Invoicing integration with live webhooks and Customer Portal.
+   - Production-grade Security Center with MFA, session management, and access key authorization.
+   - Complete Whitelabel PDF & CSV Executive Reporting Center.
+
+2. Key API Endpoints:
+   - POST /api/submit-urls: Batch index dispatcher with concurrency control and proxy pool routing.
+   - GET /api/backlink-count: Live backlink auditor returning verified backlink and referring domain totals.
+   - POST /api/profile-domain: Domain authority, GEO readiness, and toxicity scoring via Gemini and heuristics.
+   - GET /api/ranking-history: 30-day time series keyword rank positions and SERP delta statistics.
+   - POST /api/proxies/test: Health probe assessing latency and HTTP 204 connectivity across proxy nodes.
+   - POST /api/validate-seo: Full-page HTML metadata scanner evaluating SEO readiness and canonical tags.
+   - GET /api/changelog: Version history tracking updates and patches.
+   - POST /api/billing/*: Stripe Checkout and Customer Portal session creation.
+
+3. Design & Tech Stack:
+   - Frontend: React 18, Vite, TypeScript, Tailwind CSS, Lucide Icons, Recharts, D3.js math curves.
+   - Backend: Node.js, Express, Axios, Cheerio, Googleapis, Stripe SDK, Google Gen AI SDK.`;
+                        navigator.clipboard.writeText(promptText);
+                        setCopiedMasterPrompt(true);
+                        toast.success('Master App Recreator Prompt copied to clipboard!');
+                        setTimeout(() => setCopiedMasterPrompt(false), 3000);
+                      }}
+                      className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-1.5 shadow-lg shadow-cyan-600/20 active:scale-95 cursor-pointer"
+                    >
+                      {copiedMasterPrompt ? <Check className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4" />}
+                      <span>{copiedMasterPrompt ? 'Prompt Copied!' : 'Copy Master Prompt'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const promptText = `# SEARCHPULSE AI — MASTER SYSTEM SPECIFICATION & PROMPT
+============================================================
+Generated: 2026-08-20
+Target: Full-Stack Enterprise SEO & GEO Indexing Platform
+
+## 1. EXECUTIVE MISSION
+Build the complete, enterprise-grade SearchPulse AI platform integrating Google Indexing API, Bing IndexNow, live DataForSEO backlink counting, D3.js historical growth charts, GEO readiness auditing, and automated proxy pooling.
+
+## 2. BACKEND SERVICES (server.ts)
+- POST /api/submit-urls (Batch indexing engine with concurrency queue)
+- GET /api/backlink-count (Live backlink & referring domain counter)
+- POST /api/profile-domain (Domain Rating & Generative Engine Visibility)
+- GET /api/ranking-history (30-day keyword SERP position tracking)
+- POST /api/proxies/test (Bulk latency & HTTP probe diagnostics)
+- POST /api/validate-seo (Metadata, OpenGraph & Canonical validator)
+- POST /api/billing/create-checkout (Stripe Checkout sessions)
+- POST /api/billing/create-portal-session (Stripe Customer Portal)
+- GET /api/auth/security-overview (MFA & Session Management)
+
+## 3. FRONTEND ARCHITECTURE (src/components/)
+- IndexingEngineView, TotalBacklinkCounter, BulkBacklinkCounter
+- DomainProfilerModal, DomainBacklinkGrowthChart (D3.js 30-day velocity)
+- BulkSeoValidator, VisualSchemaGeneratorModal, LLmCitationSimulator
+- KeywordGapRadar, ProxyHealthHeatmap, ApiHealthMonitor
+- HelpManualModal, OnboardingWizardModal, ReportsExportCenter
+- SettingsModal with Proxy Node Manager & Master Prompt Generator
+`;
+                        const blob = new Blob([promptText], { type: 'text/markdown;charset=utf-8;' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'SearchPulse_Master_App_Recreator_Prompt.md';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        toast.success('Master Recreator Prompt downloaded as Markdown!');
+                      }}
+                      className="px-3.5 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-1.5 cursor-pointer"
+                      title="Download as Markdown file"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Download .md</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Master Prompt Code Inspector Box */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="text-zinc-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <Cpu className="w-4 h-4 text-cyan-400" />
+                    <span>Recreation Prompt Payload (Ready for LLM Ingestion)</span>
+                  </span>
+                  <span className="text-[10px] text-zinc-500 font-mono">
+                    Markdown / Plaintext Format
+                  </span>
+                </div>
+
+                <div className="bg-zinc-950 border border-zinc-800/90 rounded-2xl p-4 font-mono text-xs text-zinc-300 space-y-3 max-h-96 overflow-y-auto custom-scrollbar select-all">
+                  <div className="text-cyan-400 font-bold">
+                    # SEARCHPULSE AI — COMPLETE RECREATION MASTER PROMPT
+                  </div>
+                  <p className="text-zinc-400">
+                    Act as an expert Full-Stack Systems Architect &amp; Principal SEO Engineer. Recreate the complete enterprise "SearchPulse AI — Indexing, Backlink Verification &amp; GEO Readiness Platform".
+                  </p>
+                  
+                  <div className="space-y-1 text-zinc-300">
+                    <div className="text-indigo-300 font-bold">## Core System Features:</div>
+                    <div>1. Batch URL Indexing Engine (Google Indexing API OAuth2 service account + Bing IndexNow)</div>
+                    <div>2. Live Cumulative Backlink Counter &amp; Audit Verification (DataForSEO + crawl confirmation)</div>
+                    <div>3. Mathematical D3.js 30-Day Backlink Growth Trend &amp; Referring Domain Velocity line chart</div>
+                    <div>4. Domain Profiler with Gemini GEO (Generative Engine Optimization) and toxicity metrics</div>
+                    <div>5. Proxy Node Diagnostic Manager with latency testing, auto-rotation, and circuit-breaker</div>
+                    <div>6. Bulk SEO Validator (Metadata, OpenGraph, Canonical tags, H1-H6 density)</div>
+                    <div>7. Visual Schema Generator (JSON-LD validator for FAQPage, Article, LocalBusiness, JobPosting)</div>
+                    <div>8. Stripe Checkout &amp; Billing Customer Portal with webhook listeners</div>
+                    <div>9. Security Gatekeeper with MFA, active session revocation, and audit logs</div>
+                    <div>10. Whitelabel PDF/CSV Client Report Exporter &amp; Live Operations Hub</div>
+                  </div>
+
+                  <div className="space-y-1 text-zinc-300">
+                    <div className="text-emerald-400 font-bold">## Verification &amp; Anti-Fabrication Rules:</div>
+                    <div>- Never generate, simulate, estimate, infer, or fabricate backlink data.</div>
+                    <div>- All metrics are backed by connected real-data endpoints with explicit timestamps and source badges.</div>
+                    <div>- If an endpoint is unconfigured or unreachable, state "Verification could not be completed" rather than inventing placeholders.</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Deployment & Execution Guarantee Banner */}
+              <div className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/80 flex items-center justify-between text-xs font-mono">
+                <div className="flex items-center gap-2 text-zinc-400">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>Prompt is optimized for instant single-pass code generation and modular architecture bootstrapping.</span>
+                </div>
               </div>
             </div>
           )}

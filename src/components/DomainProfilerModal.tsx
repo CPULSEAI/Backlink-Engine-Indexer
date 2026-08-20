@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Globe, ShieldCheck, Sparkles, TrendingUp, AlertCircle, BarChart2, Layers, Award, CheckCircle2, ArrowRight, Loader2, Zap } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { TotalBacklinkCounter } from './TotalBacklinkCounter';
+import { DomainBacklinkGrowthChart } from './DomainBacklinkGrowthChart';
 
 interface DomainProfilerModalProps {
   isOpen: boolean;
@@ -272,6 +273,13 @@ export const DomainProfilerModal: React.FC<DomainProfilerModalProps> = ({ isOpen
                 </div>
 
               </div>
+
+              {/* 30-Day D3.js Backlink Growth Trend & Velocity Chart */}
+              <DomainBacklinkGrowthChart
+                domain={result.domain}
+                totalBacklinks={result.backlinkMetrics.totalBacklinks}
+                referringDomains={result.backlinkMetrics.referringDomains}
+              />
 
               {/* Industry Benchmark Comparison Bar */}
               <div className="bg-zinc-900/60 border border-zinc-800 p-4 rounded-xl space-y-3">

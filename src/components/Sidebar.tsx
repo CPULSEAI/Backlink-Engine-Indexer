@@ -47,14 +47,14 @@ interface SidebarProps {
   onToggleCollapse: () => void;
   isMobileOpen: boolean;
   onCloseMobile: () => void;
-  onOpenConversionWizard: () => void;
-  onOpenClarityWizard?: () => void;
+  onOpenConversionWizard: (url?: string) => void;
+  onOpenClarityWizard?: (url?: string) => void;
   onOpenGoogleApiWizard?: () => void;
   onOpenSchemaGenerator?: () => void;
   onOpenSitemapAudit?: () => void;
   onOpenOnboardingWizard: () => void;
   onOpenGeoBlueprint: () => void;
-  onOpenDomainProfiler: () => void;
+  onOpenDomainProfiler: (domain?: string) => void;
   onOpenAudit: () => void;
   onOpenScheduler: () => void;
   onOpenDirectories: () => void;

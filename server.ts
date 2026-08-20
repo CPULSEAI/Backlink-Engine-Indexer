@@ -53,7 +53,21 @@ async function startServer() {
   const server = http.createServer(app);
 
   // Attach WebSocket server for real-time progress streaming
-  const wss = new WebSocketServer({ server, path: '/ws' });
+  const wss = new WebSocketServer({ noServer: true });
+
+  server.on('upgrade', (request, socket, head) => {
+    try {
+      const parsedUrl = new URL(request.url || '', `http://${request.headers.host || 'localhost'}`);
+      const pathname = parsedUrl.pathname;
+      if (pathname === '/ws' || pathname === '/api/v1/telemetry/ws' || pathname === '/api/ws') {
+        wss.handleUpgrade(request, socket, head, (ws) => {
+          wss.emit('connection', ws, request);
+        });
+      }
+    } catch {
+      // Ignore malformed upgrade requests
+    }
+  });
 
   wss.on('connection', (ws) => {
     jobManager.registerClient(ws);
@@ -280,16 +294,115 @@ async function startServer() {
     }
   });
 
+  // --- GLOBAL ERROR BOUNDARY & CLIENT RUNTIME CRASH LOGGING ENDPOINTS ---
+  app.post('/api/diagnostics/log-crash', async (req, res) => {
+    try {
+      const {
+        errorName = 'RuntimeError',
+        message = 'Uncaught runtime exception',
+        stack = '',
+        componentStack = '',
+        url = '',
+        userAgent = '',
+        metadata = {},
+        timestamp = new Date().toISOString()
+      } = req.body || {};
+
+      const combined = `${message} ${stack} ${errorName}`.toLowerCase();
+      if (
+        combined.includes('websocket closed without opened') ||
+        combined.includes('failed to connect to websocket') ||
+        combined.includes('[vite] failed to connect') ||
+        combined.includes('resizeobserver loop')
+      ) {
+        // Benign client-side / dev environment error, do not treat as a system crash
+        return res.status(200).json({ success: true, ignored: true });
+      }
+
+      const crashId = `crash_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const db = await getDb();
+
+      db.run(
+        `INSERT INTO client_crash_logs 
+         (id, timestamp, error_name, message, stack, component_stack, url, user_agent, metadata_json, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          crashId,
+          timestamp,
+          String(errorName).slice(0, 150),
+          String(message).slice(0, 2000),
+          String(stack).slice(0, 8000),
+          String(componentStack).slice(0, 8000),
+          String(url).slice(0, 1000),
+          String(userAgent).slice(0, 500),
+          JSON.stringify(metadata),
+          new Date().toISOString()
+        ]
+      );
+      saveDb();
+
+      console.error(`[Client Crash Intercepted] ID: ${crashId} | Type: ${errorName} | Msg: ${message}`);
+
+      // Broadcast crash event to WebSocket diagnostics subscribers in real time
+      jobManager.broadcast('client_crash_event', {
+        id: crashId,
+        errorName,
+        message,
+        url,
+        timestamp,
+      });
+
+      res.status(200).json({ success: true, crashId, message: 'Crash logged to diagnostics vault.' });
+    } catch (err: any) {
+      console.error('[API Error] Failed to persist client crash telemetry:', err);
+      res.status(500).json({ error: 'Failed to record crash report' });
+    }
+  });
+
+  // Fetch recent client crash logs for the Diagnostics Center
+  app.get('/api/diagnostics/crashes', async (req, res) => {
+    try {
+      const db = await getDb();
+      const limit = Math.min(Number(req.query.limit) || 50, 100);
+      const queryRes = db.exec(`SELECT * FROM client_crash_logs ORDER BY timestamp DESC LIMIT ${limit}`);
+
+      if (!queryRes || queryRes.length === 0) {
+        return res.json({ success: true, crashes: [], total: 0 });
+      }
+
+      const columns = queryRes[0].columns;
+      const crashes = queryRes[0].values.map((row: any[]) => {
+        const item: Record<string, any> = {};
+        columns.forEach((col, idx) => {
+          item[col] = row[idx];
+        });
+        if (item.metadata_json) {
+          try {
+            item.metadata = JSON.parse(item.metadata_json);
+          } catch (e) {
+            item.metadata = {};
+          }
+        }
+        return item;
+      });
+
+      res.json({ success: true, crashes, total: crashes.length });
+    } catch (err: any) {
+      console.error('[API Error] /api/diagnostics/crashes:', err);
+      res.status(500).json({ error: 'Failed to retrieve crash logs' });
+    }
+  });
+
   // --- BULK BACKLINK & REFERRING DOMAIN COUNTER API (DataForSEO Engine) ---
   app.post('/api/backlinks/bulk-count', async (req, res) => {
     try {
-      const { targets = [], apiLogin, apiPassword, maxConcurrency = 20, useSandbox = false } = req.body;
+      const { targets = [], apiLogin, apiPassword, maxConcurrency = 20 } = req.body;
 
       if (!Array.isArray(targets) || targets.length === 0) {
         return res.status(400).json({ error: 'Please provide an array of target URLs or domains.' });
       }
 
-      const counterService = new BulkBacklinkCounterService(apiLogin, apiPassword, useSandbox);
+      const counterService = new BulkBacklinkCounterService(apiLogin, apiPassword);
       const summary = await counterService.processBulkTargets(targets, Number(maxConcurrency) || 20);
 
       res.json(summary);
@@ -302,7 +415,7 @@ async function startServer() {
   app.get('/api/backlinks/sample', async (req, res) => {
     try {
       const sampleDomains = ['github.com', 'stackoverflow.com', 'openai.com', 'python.org', 'tiangolo.com'];
-      const counterService = new BulkBacklinkCounterService(undefined, undefined, true);
+      const counterService = new BulkBacklinkCounterService(undefined, undefined);
       const summary = await counterService.processBulkTargets(sampleDomains, 5);
       res.json(summary);
     } catch (err: any) {
@@ -320,14 +433,13 @@ async function startServer() {
         apiLogin,
         apiPassword,
         maxConcurrency = 5,
-        useSandbox = false,
       } = req.body;
 
       if (!Array.isArray(targets) || targets.length === 0) {
         return res.status(400).json({ error: 'Please provide an array of target domains or URLs.' });
       }
 
-      const lister = new BulkBacklinkListerService(apiLogin, apiPassword, useSandbox);
+      const lister = new BulkBacklinkListerService(apiLogin, apiPassword);
       const report = await lister.generateBulkReports(targets, Number(linksPerTarget) || 25, Number(maxConcurrency) || 5);
       res.json(report);
     } catch (err: any) {

@@ -55,7 +55,7 @@ interface HeaderProps {
   onOpenDomainProfiler: () => void;
   onOpenHelpManual: () => void;
   onOpenWizard: () => void;
-  onOpenClarityWizard?: () => void;
+  onOpenClarityWizard?: (url?: string) => void;
   onOpenGoogleApiWizard?: () => void;
   onOpenScheduler?: () => void;
   onLockSession?: () => void;

@@ -113,11 +113,11 @@ export const IndexingEngineView: React.FC<IndexingEngineViewProps> = ({
         totalTasks={totalTasks}
         confirmedCount={confirmedCount}
         indexedCount={indexedCount}
-        status={jobStatus}
+        status={(jobStatus === 'Processing' || jobStatus === 'Completed' || jobStatus === 'Cancelled') ? jobStatus : 'Idle'}
         isAutonomousActive={isAutonomousActive}
         autonomousAccumulatedCount={autonomousAccumulatedCount}
         autonomousTargetGoal={autonomousTargetGoal}
-        autonomousMetric={autonomousMetric}
+        autonomousMetric={autonomousMetric === 'confirmed' ? 'confirmed' : 'tasks'}
         autonomousBatchCount={autonomousBatchCount}
         onStopAutonomous={onStopAutonomous}
       />
