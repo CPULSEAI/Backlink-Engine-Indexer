@@ -248,6 +248,7 @@ export type DashboardViewType =
   | 'submissions'
   | 'bulk_seo'
   | 'backlink_counter'
+  | 'backlink_discovery'
   | 'schema_generator'
   | 'geo_grader'
   | 'competitor_radar'

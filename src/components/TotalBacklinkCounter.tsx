@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   FileSpreadsheet,
+  HelpCircle,
 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -452,8 +453,18 @@ export const TotalBacklinkCounter: React.FC<TotalBacklinkCounterProps> = ({
                     <th className="p-2.5 font-bold uppercase">Domain Target</th>
                     <th className="p-2.5 font-bold uppercase">Total Backlinks</th>
                     <th className="p-2.5 font-bold uppercase">Ref Domains</th>
-                    <th className="p-2.5 font-bold uppercase">Dofollow %</th>
-                    <th className="p-2.5 font-bold uppercase">Authority Score</th>
+                    <th className="p-2.5 font-bold uppercase">
+                      <span className="inline-flex items-center gap-1 group relative cursor-help" title="Dofollow links pass PageRank link equity directly to your site to boost search engine rankings.">
+                        <span>Dofollow %</span>
+                        <HelpCircle className="w-3 h-3 text-zinc-400 group-hover:text-[#ff4d00]" />
+                      </span>
+                    </th>
+                    <th className="p-2.5 font-bold uppercase">
+                      <span className="inline-flex items-center gap-1 group relative cursor-help" title="Domain Authority (0-100) measures root domain trust and search ranking potential based on link equity.">
+                        <span>Authority Score</span>
+                        <HelpCircle className="w-3 h-3 text-zinc-400 group-hover:text-cyan-400" />
+                      </span>
+                    </th>
                     <th className="p-2.5 font-bold uppercase text-right">Actions</th>
                   </tr>
                 </thead>

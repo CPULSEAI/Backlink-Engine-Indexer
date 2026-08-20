@@ -35,7 +35,9 @@ import {
   Flame,
   CheckCheck,
   XCircle,
-  RefreshCw
+  RefreshCw,
+  HelpCircle,
+  Info
 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -52,6 +54,72 @@ interface BulkBacklinkCounterProps {
   embedded?: boolean;
   onSelectDomainForAudit?: (domain: string) => void;
 }
+
+interface HeaderTooltipProps {
+  label: string;
+  badge?: string;
+  description: string;
+  seoImpact: string;
+  align?: 'left' | 'center' | 'right';
+  className?: string;
+}
+
+const HeaderTooltip: React.FC<HeaderTooltipProps> = ({
+  label,
+  badge,
+  description,
+  seoImpact,
+  align = 'center',
+  className = '',
+}) => {
+  const alignClasses = {
+    left: 'left-0 translate-x-0',
+    center: 'left-1/2 -translate-x-1/2',
+    right: 'right-0 translate-x-0',
+  };
+
+  return (
+    <div className={`relative inline-flex items-center gap-1 group/tooltip cursor-help select-none ${className}`}>
+      <span className="hover:text-white transition-colors">{label}</span>
+      <HelpCircle className="w-3.5 h-3.5 text-slate-500 group-hover/tooltip:text-indigo-400 transition-colors shrink-0" />
+      
+      {/* Informative Tooltip Popup */}
+      <div
+        className={`absolute bottom-full mb-2.5 ${alignClasses[align]} hidden group-hover/tooltip:flex flex-col z-50 w-72 p-3 bg-slate-950/95 text-slate-200 text-left normal-case font-normal rounded-xl border border-slate-700 shadow-2xl shadow-black/90 backdrop-blur-md pointer-events-none transition-all`}
+      >
+        <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-1.5 mb-1.5">
+          <span className="text-[11px] font-bold text-white flex items-center gap-1.5">
+            <Info className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+            {label}
+          </span>
+          {badge && (
+            <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold font-mono bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              {badge}
+            </span>
+          )}
+        </div>
+        <p className="text-[11px] text-slate-300 leading-relaxed mb-2">
+          {description}
+        </p>
+        <div className="bg-slate-900/90 rounded-lg p-2 border border-slate-800/80">
+          <div className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-0.5 flex items-center gap-1">
+            <Zap className="w-2.5 h-2.5 text-amber-400" />
+            SEO Ranking Impact
+          </div>
+          <p className="text-[10px] text-slate-400 leading-snug">
+            {seoImpact}
+          </p>
+        </div>
+        {/* Pointer Caret */}
+        <div
+          className={`absolute top-full ${
+            align === 'center' ? 'left-1/2 -translate-x-1/2' : align === 'left' ? 'left-4' : 'right-4'
+          } w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-slate-700`}
+        />
+      </div>
+    </div>
+  );
+};
 
 type ViewTab = 'MACRO_COUNTER' | 'DETAILED_LISTER' | 'INSTANT_INDEXER';
 
@@ -554,7 +622,13 @@ export const BulkBacklinkCounter: React.FC<BulkBacklinkCounterProps> = ({
 
             <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-4">
               <div className="flex items-center justify-between text-slate-400 text-xs mb-1">
-                <span>Dofollow Ratio</span>
+                <HeaderTooltip
+                  label="Dofollow Ratio"
+                  badge="PageRank Link Equity"
+                  description="Proportion of inbound links passing unfiltered ranking equity without nofollow/sponsored attributes."
+                  seoImpact="Directly increases keyword search rankings and domain trust scores."
+                  align="left"
+                />
                 <TrendingUp className="w-4 h-4 text-amber-400" />
               </div>
               <div className="text-xl sm:text-2xl font-bold text-white tracking-tight">
@@ -565,7 +639,13 @@ export const BulkBacklinkCounter: React.FC<BulkBacklinkCounterProps> = ({
 
             <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-4">
               <div className="flex items-center justify-between text-slate-400 text-xs mb-1">
-                <span>Avg Domain Authority</span>
+                <HeaderTooltip
+                  label="Avg Domain Authority"
+                  badge="Score 0-100"
+                  description="Aggregated logarithmic trust rating evaluating ranking potential across all analysed root domains."
+                  seoImpact="Higher DA domains pass exponentially more ranking weight per backlink."
+                  align="right"
+                />
                 <ShieldCheck className="w-4 h-4 text-purple-400" />
               </div>
               <div className="text-xl sm:text-2xl font-bold text-white tracking-tight">
@@ -792,25 +872,67 @@ export const BulkBacklinkCounter: React.FC<BulkBacklinkCounterProps> = ({
                   </th>
                   <th onClick={() => { setSortField('total_backlinks'); setSortAsc(!sortAsc); }} className="p-3.5 cursor-pointer hover:text-white text-right">
                     <div className="flex items-center justify-end gap-1.5">
-                      <span>Total Backlinks</span>
+                      <HeaderTooltip
+                        label="Total Backlinks"
+                        badge="Gross Inbound Links"
+                        description="The aggregate volume of all discovered inbound hyperlinks pointing to this domain across all indexed web pages."
+                        seoImpact="Indicates overall backlink footprint and crawler coverage. Best paired with Referring Domains to guard against single-site link spam."
+                        align="center"
+                      />
                       <ArrowUpDown className="w-3 h-3 text-slate-500" />
                     </div>
                   </th>
                   <th onClick={() => { setSortField('referring_domains'); setSortAsc(!sortAsc); }} className="p-3.5 cursor-pointer hover:text-white text-right">
                     <div className="flex items-center justify-end gap-1.5">
-                      <span>Ref Domains</span>
+                      <HeaderTooltip
+                        label="Ref Domains"
+                        badge="Root Domains"
+                        description="The total count of unique, distinct root domains linking to this website."
+                        seoImpact="Search engine algorithms place higher trust in domain diversity than repetitive links from the same source domain."
+                        align="center"
+                      />
                       <ArrowUpDown className="w-3 h-3 text-slate-500" />
                     </div>
                   </th>
                   <th onClick={() => { setSortField('referring_ips'); setSortAsc(!sortAsc); }} className="p-3.5 cursor-pointer hover:text-white text-right">
                     <div className="flex items-center justify-end gap-1.5">
-                      <span>Ref IPs</span>
+                      <HeaderTooltip
+                        label="Ref IPs"
+                        badge="C-Class Subnets"
+                        description="The number of distinct Class-C network IP subnets and physical server clusters hosting the referring domains."
+                        seoImpact="High subnet diversity proves decentralized, organic backlink profiles, mitigating algorithmic flags for Private Blog Networks (PBNs)."
+                        align="center"
+                      />
                       <ArrowUpDown className="w-3 h-3 text-slate-500" />
                     </div>
                   </th>
-                  <th className="p-3.5">Dofollow Ratio</th>
-                  <th className="p-3.5 text-center">Authority</th>
-                  <th className="p-3.5 text-center">Status</th>
+                  <th className="p-3.5">
+                    <HeaderTooltip
+                      label="Dofollow Ratio"
+                      badge="PageRank Transmission"
+                      description="The percentage of backlinks without restrictive attributes (rel='nofollow', 'sponsored', or 'ugc')."
+                      seoImpact="Dofollow backlinks transmit algorithmic PageRank equity ('link juice') directly to your site, directly lifting search engine ranking positions."
+                      align="center"
+                    />
+                  </th>
+                  <th className="p-3.5 text-center">
+                    <HeaderTooltip
+                      label="Authority"
+                      badge="Score 0-100"
+                      description="A composite domain authority score (0–100 scale) predicting organic ranking potential based on quality, trust, and link topology."
+                      seoImpact="High authority links (DA 70+) accelerate crawl priority and keyword ranking velocity exponentially compared to low-tier links."
+                      align="center"
+                    />
+                  </th>
+                  <th className="p-3.5 text-center">
+                    <HeaderTooltip
+                      label="Status"
+                      badge="API Health"
+                      description="Real-time execution state of the backlink crawler for this target domain."
+                      seoImpact="Ensures real-time verification and confirms whether live metrics were extracted or estimated via benchmark engines."
+                      align="center"
+                    />
+                  </th>
                   <th className="p-3.5 text-right">Actions</th>
                 </tr>
               </thead>
@@ -989,12 +1111,52 @@ export const BulkBacklinkCounter: React.FC<BulkBacklinkCounterProps> = ({
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-950/80 border-b border-slate-800 text-slate-400 font-semibold select-none">
-                    <th className="p-3.5">Anchor Text</th>
-                    <th className="p-3.5">Source URL (url_from)</th>
+                    <th className="p-3.5">
+                      <HeaderTooltip
+                        label="Anchor Text"
+                        badge="Relevance Anchor"
+                        description="The clickable visible hyperlinked copy within the source webpage pointing to the destination URL."
+                        seoImpact="Anchor text passes topical relevance and keyword context to search crawlers. Natural anchor text distribution protects against Google Penguin penalties."
+                        align="left"
+                      />
+                    </th>
+                    <th className="p-3.5">
+                      <HeaderTooltip
+                        label="Source URL (url_from)"
+                        badge="Origin Webpage"
+                        description="The exact originating web page where the backlink was crawled and identified."
+                        seoImpact="Page-level authority, contextual relevance, and editorial placement within the source content determine how much link equity is transmitted."
+                        align="left"
+                      />
+                    </th>
                     <th className="p-3.5">Target Destination (url_to)</th>
-                    <th className="p-3.5 text-center">Power Rank</th>
-                    <th className="p-3.5 text-center">Link Type</th>
-                    <th className="p-3.5 text-center">State</th>
+                    <th className="p-3.5 text-center">
+                      <HeaderTooltip
+                        label="Power Rank"
+                        badge="Source Authority"
+                        description="Domain authority and trust score (0–100) of the referring website publishing the link."
+                        seoImpact="Higher Power Rank (DA 70+) source websites provide substantial ranking power and crawl priority to your target pages."
+                        align="center"
+                      />
+                    </th>
+                    <th className="p-3.5 text-center">
+                      <HeaderTooltip
+                        label="Link Type"
+                        badge="Dofollow vs Nofollow"
+                        description="Attribute status: Dofollow transmits PageRank link equity; Nofollow/UGC/Sponsored advises search bots not to transfer ranking credit."
+                        seoImpact="Dofollow links are the primary drivers of organic search keyword ascent. A healthy profile contains a balanced blend of both types."
+                        align="center"
+                      />
+                    </th>
+                    <th className="p-3.5 text-center">
+                      <HeaderTooltip
+                        label="State"
+                        badge="Link Liveness"
+                        description="Current existence state of the backlink (Active vs Lost)."
+                        seoImpact="Active links maintain search rankings; identifying Lost links triggers automated reclamation and redirect recovery workflows."
+                        align="center"
+                      />
+                    </th>
                     <th className="p-3.5 text-right">Quick Index</th>
                   </tr>
                 </thead>
