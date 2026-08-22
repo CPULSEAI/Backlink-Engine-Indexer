@@ -26,10 +26,14 @@ export async function sendDiagnosticsLog(report: Partial<ClientCrashReport>): Pr
     // Ignore benign environment, Vite HMR, and expected WebSocket disconnect blips
     if (
       combined.includes('websocket closed without opened') ||
+      combined.includes('closed without opened') ||
       combined.includes('failed to connect to websocket') ||
       combined.includes('[vite] failed to connect') ||
       combined.includes('vite:ws') ||
-      combined.includes('resizeobserver loop')
+      combined.includes('websocket is already in closing or closed state') ||
+      combined.includes('websocket connection to') ||
+      combined.includes('resizeobserver loop') ||
+      (combined.includes('network error') && combined.includes('peer-network'))
     ) {
       return false;
     }

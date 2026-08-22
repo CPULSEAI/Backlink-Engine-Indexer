@@ -6,14 +6,20 @@ import './index.css';
 
 // Global uncaught JavaScript error and promise rejection listeners with silent telemetry logging
 if (typeof window !== 'undefined') {
-  const isBenignError = (msg: string, stack: string = '') => {
-    const text = `${msg} ${stack}`.toLowerCase();
+  const isBenignError = (msg: any, stack: any = '') => {
+    const rawMsg = typeof msg === 'object' ? JSON.stringify(msg) : String(msg || '');
+    const rawStack = String(stack || '');
+    const text = `${rawMsg} ${rawStack}`.toLowerCase();
     return (
       text.includes('websocket closed without opened') ||
+      text.includes('closed without opened') ||
       text.includes('failed to connect to websocket') ||
       text.includes('[vite] failed to connect') ||
       text.includes('vite:ws') ||
-      text.includes('resizeobserver loop')
+      text.includes('websocket is already in closing or closed state') ||
+      text.includes('websocket connection to') ||
+      text.includes('resizeobserver loop') ||
+      text.includes('network error') && text.includes('peer-network')
     );
   };
 
@@ -39,15 +45,17 @@ if (typeof window !== 'undefined') {
 
   window.addEventListener('unhandledrejection', (event) => {
     const reason = event.reason;
-    const message = typeof reason === 'string' ? reason : reason?.message || 'Unhandled Promise Rejection';
+    const message = typeof reason === 'string' 
+      ? reason 
+      : reason?.message || (reason?.name ? `${reason.name}: ${reason.message || ''}` : String(reason || 'Unhandled Promise Rejection'));
     const stack = reason?.stack || '';
 
-    if (isBenignError(message, stack)) {
+    if (isBenignError(message, stack) || isBenignError(reason, '')) {
       return;
     }
 
     sendDiagnosticsLog({
-      errorName: 'UnhandledPromiseRejection',
+      errorName: reason?.name || 'UnhandledPromiseRejection',
       message,
       stack,
       metadata: {

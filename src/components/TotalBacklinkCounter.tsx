@@ -15,6 +15,7 @@ import {
   Info,
   CheckCircle2,
   AlertTriangle,
+  AlertCircle,
   FileSpreadsheet,
   HelpCircle,
 } from 'lucide-react';
@@ -306,6 +307,23 @@ export const TotalBacklinkCounter: React.FC<TotalBacklinkCounterProps> = ({
           </button>
         </div>
       </div>
+
+      {/* API Notice / Error Status Banner */}
+      {error && (
+        <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-500/60 rounded-xl text-xs font-mono flex items-start gap-2.5 text-amber-800 dark:text-amber-300">
+          <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="font-bold">Live Data Notice:</p>
+            <p className="text-[11px] mt-0.5 text-amber-700 dark:text-amber-400/90">{error}</p>
+          </div>
+          <button
+            onClick={() => fetchBacklinks()}
+            className="px-2 py-1 bg-amber-200 dark:bg-amber-900/60 hover:bg-amber-300 dark:hover:bg-amber-800 text-amber-900 dark:text-amber-200 rounded text-[10px] font-bold uppercase transition-colors shrink-0"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* Main Cumulative Scoreboard Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

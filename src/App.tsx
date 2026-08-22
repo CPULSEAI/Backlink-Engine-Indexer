@@ -242,11 +242,22 @@ export default function App() {
         clearTimeout(reconnectTimeoutRef.current);
       }
       if (wsRef.current) {
-        wsRef.current.onclose = null;
-        wsRef.current.onerror = null;
-        wsRef.current.onmessage = null;
-        wsRef.current.onopen = null;
-        wsRef.current.close();
+        const targetWs = wsRef.current;
+        targetWs.onclose = null;
+        targetWs.onerror = null;
+        targetWs.onmessage = null;
+        targetWs.onopen = null;
+        try {
+          if (targetWs.readyState === WebSocket.OPEN) {
+            targetWs.close(1000, 'App unmounting');
+          } else if (targetWs.readyState === WebSocket.CONNECTING) {
+            targetWs.onopen = () => {
+              try { targetWs.close(1000, 'App unmounting'); } catch {}
+            };
+          }
+        } catch {
+          // Safe ignore
+        }
         wsRef.current = null;
       }
     };
@@ -342,9 +353,18 @@ export default function App() {
 
     if (wsRef.current) {
       try {
-        wsRef.current.onclose = null;
-        wsRef.current.onerror = null;
-        wsRef.current.close();
+        const oldWs = wsRef.current;
+        oldWs.onclose = null;
+        oldWs.onerror = null;
+        oldWs.onmessage = null;
+        oldWs.onopen = null;
+        if (oldWs.readyState === WebSocket.OPEN) {
+          oldWs.close(1000, 'Reconnecting');
+        } else if (oldWs.readyState === WebSocket.CONNECTING) {
+          oldWs.onopen = () => {
+            try { oldWs.close(1000, 'Reconnecting'); } catch {}
+          };
+        }
       } catch {
         // Safe ignore
       }
@@ -624,7 +644,7 @@ export default function App() {
     }
   };
 
-  const requestStopAutonomous = () => {
+  const requestStopAutonomous = async () => {
     setConfirmationState({
       isOpen: true,
       title: 'Stop Autonomous Campaign?',
@@ -651,7 +671,7 @@ export default function App() {
     toast.error('Autonomous continuous mode stopped.');
   };
 
-  const requestCancelJob = () => {
+  const requestCancelJob = async () => {
     if (!activeSubmissionId) return;
     setConfirmationState({
       isOpen: true,

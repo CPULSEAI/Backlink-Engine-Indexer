@@ -315,11 +315,18 @@ export const SmartBatchScheduler: React.FC<SmartBatchSchedulerProps> = ({
       clearInterval(heartbeat);
       if (ws) {
         try {
-          ws.onclose = null;
-          ws.onerror = null;
-          ws.onmessage = null;
-          ws.onopen = null;
-          ws.close();
+          const targetWs = ws;
+          targetWs.onclose = null;
+          targetWs.onerror = null;
+          targetWs.onmessage = null;
+          targetWs.onopen = null;
+          if (targetWs.readyState === WebSocket.OPEN) {
+            targetWs.close(1000, 'Scheduler unmounting');
+          } else if (targetWs.readyState === WebSocket.CONNECTING) {
+            targetWs.onopen = () => {
+              try { targetWs.close(1000, 'Scheduler unmounting'); } catch {}
+            };
+          }
         } catch {
           // Ignore
         }

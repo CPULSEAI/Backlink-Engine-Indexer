@@ -174,7 +174,10 @@ export class BulkBacklinkCounterService {
       };
     } catch (err: any) {
       const statusCode = err?.response?.status;
-      const apiMessage = err?.response?.data?.tasks?.[0]?.status_message || err?.message || 'DataForSEO live API connection failed';
+      let apiMessage = err?.response?.data?.tasks?.[0]?.status_message || err?.message || 'DataForSEO live API connection failed';
+      if (statusCode === 402) {
+        apiMessage = 'DataForSEO Live API balance or quota exhausted (HTTP 402 Payment Required). Please top up your DataForSEO credits.';
+      }
       return {
         target: targetDomain,
         domain: cleanTarget,
