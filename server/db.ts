@@ -47,7 +47,8 @@ export async function getDb(): Promise<Database> {
         total_directories INTEGER DEFAULT 0,
         completed_directories INTEGER DEFAULT 0,
         confirmed_count INTEGER DEFAULT 0,
-        indexed_count INTEGER DEFAULT 0
+        indexed_count INTEGER DEFAULT 0,
+        priority TEXT DEFAULT 'Medium'
       );
 
       CREATE TABLE IF NOT EXISTS logs (
@@ -63,7 +64,8 @@ export async function getDb(): Promise<Database> {
         live_verification TEXT NOT NULL,
         google_indexing TEXT NOT NULL,
         ping_status TEXT NOT NULL,
-        notes TEXT
+        notes TEXT,
+        priority TEXT DEFAULT 'Medium'
       );
 
       CREATE TABLE IF NOT EXISTS users (
@@ -407,6 +409,14 @@ export async function getDb(): Promise<Database> {
       CREATE INDEX IF NOT EXISTS idx_client_crash_timestamp
         ON client_crash_logs (timestamp DESC);
     `);
+
+    // Safe column migrations for dynamic features
+    try {
+      db.run("ALTER TABLE submissions ADD COLUMN priority TEXT DEFAULT 'Medium'");
+    } catch (e) {}
+    try {
+      db.run("ALTER TABLE logs ADD COLUMN priority TEXT DEFAULT 'Medium'");
+    } catch (e) {}
   } catch (schemaErr) {
     console.error('[DB Error] Failed to verify / create schema:', schemaErr);
   }

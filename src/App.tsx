@@ -38,6 +38,7 @@ import { IndexingEngineView } from './components/IndexingEngineView';
 import { TrafficEngineDashboard } from './components/TrafficEngineDashboard';
 import { UrlIndexingWizardModal } from './components/UrlIndexingWizardModal';
 import { AiAssistantWidget } from './components/AiAssistantWidget';
+import { DailyPerformanceDigest } from './components/DailyPerformanceDigest';
 import { ConfirmationModal, ConfirmationModalProps } from './components/ConfirmationModal';
 import { DirectoryEntry, LogItem, SubmissionRecord, SystemSettings, AnalyticsData, AutonomousConfig, ApiHealthReport, WorkspaceSnapshot, DashboardViewType, AuthSession, NewContentDetectedEvent } from './types';
 
@@ -143,6 +144,8 @@ export default function App() {
   const [profilerDomain, setProfilerDomain] = useState('');
   const [graderUrl, setGraderUrl] = useState('');
   const [graderKeyword, setGraderKeyword] = useState('');
+  const [wizardsInitialTab, setWizardsInitialTab] = useState<'wizards' | 'citation-sim' | 'whitelabel-pdf' | 'bulk-seo' | 'funnel-map' | 'link-strategist'>('wizards');
+  const [linkStrategyUrl, setLinkStrategyUrl] = useState('https://careerpulseai.net');
 
   // --- DESKTOP BROWSER NOTIFICATION TRIGGER ---
   // Fires when apiHealthReport shows degradation below 80% to ensure immediate awareness of indexing pipeline issues
@@ -1093,7 +1096,16 @@ export default function App() {
               />
 
               {/* Keyword Gap Radar Component */}
-              <KeywordGapRadar onOpenContentGrader={handleOpenContentGrader} />
+              <KeywordGapRadar
+                onOpenContentGrader={handleOpenContentGrader}
+                onLaunchOutreachStrategy={(domain, _niche, _compA, _compB) => {
+                  const targetDomainUrl = domain.startsWith('http') ? domain : `https://${domain}`;
+                  setLinkStrategyUrl(targetDomainUrl);
+                  setWizardsInitialTab('link-strategist');
+                  setCurrentView('wizards');
+                  toast.success(`🚀 Discovered competitors transferred to AI Link Strategist & Outreach Suite!`);
+                }}
+              />
 
               {/* SmartBatchScheduler Component */}
               <SmartBatchScheduler onJobStarted={fetchHistory} />
@@ -1102,6 +1114,12 @@ export default function App() {
               <SeoFunnelTimeline
                 logs={logs}
                 activeSubmissionId={activeSubmissionId}
+              />
+
+              {/* Daily Performance Digest: 24-Hour Indexing Success Rates Trend Chart */}
+              <DailyPerformanceDigest
+                logs={logs}
+                onRefreshLogs={fetchHistory}
               />
 
               {/* 30-Day Submissions Success/Failure Ratio & AI Citation Monitor */}
@@ -1155,7 +1173,8 @@ export default function App() {
               autonomousAccumulatedCount={autonomousAccumulatedCount}
               autonomousTargetGoal={autonomousTargetGoal}
               history={history}
-              defaultUrl={history.length > 0 ? (history[0].urlList?.[0] || 'https://careerpulseai.net') : 'https://careerpulseai.net'}
+              initialTab={wizardsInitialTab}
+              defaultUrl={linkStrategyUrl || (history.length > 0 ? (history[0].urlList?.[0] || 'https://careerpulseai.net') : 'https://careerpulseai.net')}
               defaultAgencyName="Apex Enterprise Growth Labs"
             />
           )}

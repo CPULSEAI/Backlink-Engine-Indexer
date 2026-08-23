@@ -21,6 +21,7 @@ export interface LogItem {
   googleIndexing: string;
   pingStatus: string;
   notes?: string;
+  priority?: 'High' | 'Medium' | 'Low' | string;
   createdAt: string;
 }
 
@@ -33,7 +34,41 @@ export interface SubmissionRecord {
   completed_directories: number;
   confirmed_count: number;
   indexed_count: number;
+  priority?: 'High' | 'Medium' | 'Low' | string;
   urlList?: string[];
+}
+
+export interface HourlyPerformanceBucket {
+  hourLabel: string;
+  isoHour: string;
+  timestamp: string;
+  total: number;
+  confirmed: number;
+  failed: number;
+  googleIndexed: number;
+  successRate: number;
+  avgLatencyMs: number;
+}
+
+export interface DailyPerformanceDigestData {
+  timeRange: string;
+  generatedAt: string;
+  kpis: {
+    successRate24h: number;
+    totalSubmissions24h: number;
+    confirmed24h: number;
+    failed24h: number;
+    googlePushed24h: number;
+    avgLatencyMs: number;
+    peakHour: string;
+    trendDelta: number;
+    priorityBreakdown: {
+      high: number;
+      medium: number;
+      low: number;
+    };
+  };
+  hourlyTrend: HourlyPerformanceBucket[];
 }
 
 export interface SystemSettings {
@@ -914,9 +949,87 @@ export interface ClientCrashReport {
   metadata?: Record<string, any>;
 }
 
+// --- SEO LINK BUILDING STRATEGY & ASSET INTELLIGENCE ---
+export interface LinkableAssetIdea {
+  id: string;
+  title: string;
+  assetType: 'Interactive Tool' | 'Calculator' | 'Original Research / Data Study' | 'Comprehensive Pillar Guide' | 'Template / Resource Bundle' | 'Benchmark / Industry Index';
+  topicDescription: string;
+  whyItEarnsBacklinks: string;
+  targetLinkAudiences: string[];
+  estimatedLinkAcquisitionPotential: 'High' | 'Very High' | 'Exceptional';
+  implementationChecklist: string[];
+}
 
+export interface DirectCompetitorProfile {
+  name: string;
+  domain: string;
+  nicheRelevance: string;
+  authorityLevel: 'Authority Leader' | 'High Domain Rating' | 'Established Challenger';
+  whyTheyDominate: string;
+  linkableAssets: LinkableAssetIdea[];
+}
 
+export interface GoogleDorkQuery {
+  id: string;
+  query: string;
+  category: 'Guest Post' | 'Resource Page' | 'Partnership / Integration' | 'Roundup / Directory' | 'Broken Link Target';
+  explanation: string;
+  searchUrl: string;
+  proTip: string;
+}
 
+export interface OutreachEmailTemplate {
+  subjectLines: string[];
+  previewText?: string;
+  body: string;
+  pitchType: 'Resource Page Suggestion' | 'Guest Contribution / Co-Marketing' | 'Value-Add Asset Mention';
+  personalizationHooks: string[];
+  complianceAntiSpamTips: string[];
+  followUpSnippet: string;
+}
 
+export interface LinkBuildingStrategyResult {
+  targetUrl: string;
+  niche: string;
+  coreService: string;
+  generatedAt: string;
+  executiveSummary: string;
+  competitors: DirectCompetitorProfile[];
+  googleDorks: GoogleDorkQuery[];
+  outreachTemplate: OutreachEmailTemplate;
+  actionPlanNextSteps: string[];
+}
 
+// --- DAILY PERFORMANCE DIGEST & 24H INDEXING ANALYTICS ---
+export interface HourlyPerformanceBucket {
+  hourLabel: string; // e.g. "00:00", "04:00", "08:00", "12:00", "16:00", "20:00"
+  timestamp: string;
+  totalSubmissions: number;
+  confirmedSuccess: number;
+  failedSubmissions: number;
+  googleIndexed: number;
+  pingedCount: number;
+  successRate: number; // 0 to 100 %
+  avgLatencyMs: number;
+}
 
+export interface DailyPerformanceDigestData {
+  timeframe: string;
+  generatedAt: string;
+  total24hSubmissions: number;
+  total24hSuccess: number;
+  total24hFailed: number;
+  total24hIndexed: number;
+  overall24hSuccessRate: number;
+  hourlyTrends: HourlyPerformanceBucket[];
+  peakHour: string;
+  peakSuccessRate: number;
+  avgLatencyMs: number;
+  priorityDistribution: {
+    high: number;
+    medium: number;
+    low: number;
+  };
+  fastestDirectoryResponseMs: number;
+}

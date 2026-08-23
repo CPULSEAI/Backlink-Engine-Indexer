@@ -49,6 +49,7 @@ import {
   BulkBacklinkListerReport,
   InstantIndexingResponse
 } from '../types';
+import { LinkStrategyGeneratorCard } from './LinkStrategyGeneratorCard';
 
 interface BulkBacklinkCounterProps {
   embedded?: boolean;
@@ -121,7 +122,7 @@ const HeaderTooltip: React.FC<HeaderTooltipProps> = ({
   );
 };
 
-type ViewTab = 'MACRO_COUNTER' | 'DETAILED_LISTER' | 'INSTANT_INDEXER';
+type ViewTab = 'MACRO_COUNTER' | 'DETAILED_LISTER' | 'INSTANT_INDEXER' | 'STRATEGY_GENERATOR';
 
 export const BulkBacklinkCounter: React.FC<BulkBacklinkCounterProps> = ({
   embedded = false,
@@ -762,15 +763,25 @@ export const BulkBacklinkCounter: React.FC<BulkBacklinkCounterProps> = ({
               )}
               <span>3. Dispatch Instant Indexing</span>
             </button>
+
+            {/* 4. AI Link Building Strategist */}
+            <button
+              type="button"
+              onClick={() => setActiveTab('STRATEGY_GENERATOR')}
+              className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-lg text-xs shadow-lg shadow-amber-500/20 transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>4. AI Link Strategy & Outreach</span>
+            </button>
           </div>
         </div>
       </div>
 
       {/* 4. VIEW TABS NAVIGATION */}
-      <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
+      <div className="flex items-center gap-2 border-b border-slate-800 pb-2 overflow-x-auto">
         <button
           onClick={() => setActiveTab('MACRO_COUNTER')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 ${
             activeTab === 'MACRO_COUNTER'
               ? 'bg-indigo-600 text-white shadow-md'
               : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
@@ -782,7 +793,7 @@ export const BulkBacklinkCounter: React.FC<BulkBacklinkCounterProps> = ({
 
         <button
           onClick={() => setActiveTab('DETAILED_LISTER')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 ${
             activeTab === 'DETAILED_LISTER'
               ? 'bg-indigo-600 text-white shadow-md'
               : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
@@ -799,7 +810,7 @@ export const BulkBacklinkCounter: React.FC<BulkBacklinkCounterProps> = ({
 
         <button
           onClick={() => setActiveTab('INSTANT_INDEXER')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 ${
             activeTab === 'INSTANT_INDEXER'
               ? 'bg-emerald-600 text-white shadow-md'
               : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
@@ -812,6 +823,21 @@ export const BulkBacklinkCounter: React.FC<BulkBacklinkCounterProps> = ({
               {indexingResult.total_urls} URLs
             </span>
           )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab('STRATEGY_GENERATOR')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 ${
+            activeTab === 'STRATEGY_GENERATOR'
+              ? 'bg-amber-500 text-slate-950 font-black shadow-md'
+              : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+          }`}
+        >
+          <Sparkles className="w-4 h-4 text-amber-300" />
+          <span>AI Link Strategy & Outreach</span>
+          <span className="px-1.5 py-0.2 rounded bg-amber-400/30 text-amber-200 border border-amber-400/40 text-[10px] font-mono">
+            LIVE
+          </span>
         </button>
       </div>
 
@@ -1383,6 +1409,20 @@ export const BulkBacklinkCounter: React.FC<BulkBacklinkCounterProps> = ({
             </div>
           )}
         </div>
+      )}
+
+      {/* 5D. TAB CONTENT: AI SEO LINK STRATEGY & OUTREACH ENGINE */}
+      {activeTab === 'STRATEGY_GENERATOR' && (
+        <LinkStrategyGeneratorCard
+          initialUrl="https://careerpulseai.net"
+          initialNiche="AI Resume & Career Automation SaaS"
+          initialService="Automated AI resume builder, career trajectory optimizer, and interview coach"
+          onPushCompetitorsToCounter={(domains) => {
+            setTargetInput(domains.join('\n'));
+            setActiveTab('MACRO_COUNTER');
+            toast.success(`Loaded ${domains.length} competitor domains into Macro Counter!`);
+          }}
+        />
       )}
     </div>
   );

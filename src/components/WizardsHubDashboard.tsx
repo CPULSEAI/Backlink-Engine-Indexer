@@ -35,6 +35,7 @@ import { SubmissionHistoryItem } from '../types';
 import { LLmCitationSimulator } from './LLmCitationSimulator';
 import { WhitelabelClientPdfGenerator } from './WhitelabelClientPdfGenerator';
 import { BulkSeoValidator } from './BulkSeoValidator';
+import { LinkStrategyGeneratorCard } from './LinkStrategyGeneratorCard';
 
 interface WizardsHubDashboardProps {
   onOpenConversionWizard: (url?: string) => void;
@@ -56,7 +57,7 @@ interface WizardsHubDashboardProps {
   history?: SubmissionHistoryItem[];
   defaultUrl?: string;
   defaultAgencyName?: string;
-  initialTab?: 'wizards' | 'citation-sim' | 'whitelabel-pdf' | 'bulk-seo' | 'funnel-map';
+  initialTab?: 'wizards' | 'citation-sim' | 'whitelabel-pdf' | 'bulk-seo' | 'funnel-map' | 'link-strategist';
 }
 
 export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
@@ -81,7 +82,7 @@ export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
   defaultAgencyName = 'Apex Search Engine Partners',
   initialTab = 'wizards',
 }) => {
-  const [activeTab, setActiveTab] = useState<'wizards' | 'citation-sim' | 'whitelabel-pdf' | 'bulk-seo' | 'funnel-map'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'wizards' | 'citation-sim' | 'whitelabel-pdf' | 'bulk-seo' | 'funnel-map' | 'link-strategist'>(initialTab);
   const [simUrl, setSimUrl] = useState(defaultUrl);
   const [simKeyword, setSimKeyword] = useState('AI resume builder and automated backlink indexer for tech talent');
   const [quickCroUrl, setQuickCroUrl] = useState('');
@@ -89,6 +90,19 @@ export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
   const [quickProfilerDomain, setQuickProfilerDomain] = useState('');
   const [quickGraderUrl, setQuickGraderUrl] = useState('');
   const [quickGraderKeyword, setQuickGraderKeyword] = useState('');
+
+  // Sync tab when prop changes dynamically from parent navigation
+  React.useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
+
+  React.useEffect(() => {
+    if (defaultUrl) {
+      setSimUrl(defaultUrl);
+    }
+  }, [defaultUrl]);
 
   const handleLaunchCro = (e: React.FormEvent) => {
     e.preventDefault();
@@ -257,6 +271,20 @@ export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
           <span className="flex items-center gap-1.5">
             <Printer className="w-4 h-4 text-emerald-500" />
             <span>WHITELABEL PDF GENERATOR</span>
+          </span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('link-strategist')}
+          className={`px-4 py-2 text-xs font-black uppercase border-2 border-black transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'link-strategist'
+              ? 'bg-amber-400 text-black shadow-[2px_2px_0_#000]'
+              : 'bg-white dark:bg-zinc-800 text-black dark:text-zinc-200 hover:bg-zinc-100 shadow-[2px_2px_0_#000]'
+          }`}
+        >
+          <span className="flex items-center gap-1.5">
+            <Sparkles className="w-4 h-4 text-amber-500" />
+            <span>AI LINK STRATEGIST &amp; OUTREACH</span>
           </span>
         </button>
 
@@ -561,9 +589,56 @@ export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
         />
       )}
 
+      {/* TAB CONTENT: AI LINK STRATEGIST & OUTREACH ENGINE */}
+      {activeTab === 'link-strategist' && (
+        <LinkStrategyGeneratorCard
+          initialUrl={defaultUrl}
+          initialNiche="AI Resume & Career Automation SaaS"
+          initialService="Automated AI resume builder, career trajectory optimizer, and interview coach"
+        />
+      )}
+
       {/* TAB CONTENT: WIZARDS GRID */}
       {activeTab === 'wizards' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {/* CARD: AI SEO Link Building Strategist & Outreach Engine */}
+          <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 border-2 border-amber-500/50 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-5 hover:border-amber-400 transition-all group relative overflow-hidden md:col-span-2 lg:col-span-3">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[11px] font-mono font-black uppercase">
+                    PRO STRATEGY SUITE
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-mono">
+                    GEMINI 3.7 FLASH
+                  </span>
+                </div>
+                <h3 className="text-xl font-black text-zinc-100 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-amber-400" />
+                  <span>SEO Link Building Strategist &amp; Outreach Engine</span>
+                </h3>
+                <p className="text-xs text-zinc-300 max-w-2xl leading-relaxed">
+                  Identify 3 top direct competitors in your niche, suggest 2 high-converting "linkable assets" for each, generate 5 live Google Search Dorks for active guest posts &amp; resource opportunities, and draft personalized outreach emails.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('link-strategist')}
+                className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-zinc-950 font-black text-xs tracking-wide shadow-lg shadow-amber-500/20 flex items-center space-x-2 transition-all cursor-pointer active:scale-95 shrink-0"
+              >
+                <span>Launch Link Strategist Engine</span>
+                <ArrowRight className="w-4 h-4 text-zinc-950" />
+              </button>
+            </div>
+
+            <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-500 font-mono flex-wrap gap-2">
+              <span>Competitor Assets &bull; Google Dorks &bull; Outreach Templates</span>
+              <span className="text-amber-400 font-bold">Zero-Hallucination Blueprint</span>
+            </div>
+          </div>
           {/* CARD: Bulk SEO URL Validator & Hierarchy Grader */}
           <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 border-2 border-emerald-500/40 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-5 hover:border-emerald-500 transition-all group relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />

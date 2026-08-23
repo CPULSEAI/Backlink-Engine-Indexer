@@ -41,7 +41,8 @@ import {
   Search,
   PieChart,
   ArrowUpRight,
-  Filter
+  Filter,
+  Send
 } from 'lucide-react';
 
 interface ClusterData {
@@ -72,7 +73,11 @@ export interface OrganicKeywordGapItem {
 }
 
 interface KeywordGapRadarProps {
+  initialUserDomain?: string;
+  initialCompA?: string;
+  initialCompB?: string;
   onOpenContentGrader?: (url?: string, keyword?: string) => void;
+  onLaunchOutreachStrategy?: (userDomain: string, compA: string, compB: string, niche?: string) => void;
 }
 
 export interface CompetitorAnalysisResult {
@@ -85,120 +90,197 @@ export interface CompetitorAnalysisResult {
   nicheLabel: string;
 }
 
-export function deriveCompetitorsAndPriorityUrls(domainInput: string): CompetitorAnalysisResult {
-  const clean = (domainInput || '').trim().toLowerCase().replace(/^(https?:\/\/)+/i, '').replace(/\/+$/, '');
+export function deriveCompetitorsAndPriorityUrls(
+  domainInput: string,
+  customCompA?: string,
+  customCompB?: string
+): CompetitorAnalysisResult {
+  const cleanUser = (domainInput || '').trim().toLowerCase().replace(/^(https?:\/\/)+/i, '').replace(/\/+$/, '');
+  const cleanCompA = (customCompA || '').trim().toLowerCase().replace(/^(https?:\/\/)+/i, '').replace(/\/+$/, '');
+  const cleanCompB = (customCompB || '').trim().toLowerCase().replace(/^(https?:\/\/)+/i, '').replace(/\/+$/, '');
+
+  let baseNiche = 'AI Resume & Career Automation SaaS';
+  let defaultA = 'jobscan.co';
+  let defaultB = 'tealhq.com';
+  let defaultAUrl = 'https://jobscan.co/resume-scanner';
+  let defaultBUrl = 'https://tealhq.com/tools/ai-resume-builder';
+  let defaultAJust =
+    'Leading organic traffic magnet URL capturing high-volume queries for ATS resume optimization, keyword match analysis, and job score benchmarks.';
+  let defaultBJust =
+    'High-converting commercial landing page dominating organic search rankings for AI resume builders, job application trackers, and career trajectory tools.';
 
   if (
-    clean.includes('skincare') ||
-    clean.includes('organic') ||
-    clean.includes('beauty') ||
-    clean.includes('skin') ||
-    clean.includes('cosmetic') ||
-    clean.includes('glow')
+    cleanUser.includes('career') ||
+    cleanUser.includes('resume') ||
+    cleanUser.includes('job') ||
+    cleanUser.includes('talent') ||
+    cleanUser.includes('hire') ||
+    cleanUser.includes('pulse') ||
+    cleanUser.includes('interview') ||
+    cleanUser.includes('work')
   ) {
-    return {
-      compA: 'gloworganics.com',
-      compAUrl: 'https://gloworganics.com/collections/best-sellers',
-      compAJustification:
-        'High-volume organic search landing page capturing 45% of non-branded commercial intent queries for natural skincare with prime revenue potential.',
-      compB: 'purebotanicals.com',
-      compBUrl: 'https://purebotanicals.com/products/anti-aging-serum',
-      compBJustification:
-        'Top revenue-generating hero product URL with high transaction conversion rate and dominant AI search entity citations.',
-      nicheLabel: 'Organic Skincare & E-Commerce Store',
-    };
+    baseNiche = 'AI Resume & Career Automation SaaS';
+    defaultA = 'jobscan.co';
+    defaultB = 'tealhq.com';
+    defaultAUrl = 'https://jobscan.co/resume-scanner';
+    defaultBUrl = 'https://tealhq.com/tools/ai-resume-builder';
+    defaultAJust =
+      'Leading organic traffic magnet URL capturing high-volume queries for ATS resume optimization, keyword match analysis, and job score benchmarks.';
+    defaultBJust =
+      'High-converting commercial landing page dominating organic search rankings for AI resume builders, job application trackers, and career trajectory tools.';
+  } else if (
+    cleanUser.includes('skincare') ||
+    cleanUser.includes('organic') ||
+    cleanUser.includes('beauty') ||
+    cleanUser.includes('skin') ||
+    cleanUser.includes('cosmetic') ||
+    cleanUser.includes('glow')
+  ) {
+    baseNiche = 'Organic Skincare & E-Commerce Store';
+    defaultA = 'gloworganics.com';
+    defaultB = 'purebotanicals.com';
+    defaultAUrl = 'https://gloworganics.com/collections/best-sellers';
+    defaultBUrl = 'https://purebotanicals.com/products/anti-aging-serum';
+    defaultAJust =
+      'High-volume organic search landing page capturing 45% of non-branded commercial intent queries for natural skincare with prime revenue potential.';
+    defaultBJust =
+      'Top revenue-generating hero product URL with high transaction conversion rate and dominant AI search entity citations.';
+  } else if (
+    cleanUser.includes('seo') ||
+    cleanUser.includes('rank') ||
+    cleanUser.includes('index') ||
+    cleanUser.includes('serp') ||
+    cleanUser.includes('backlink') ||
+    cleanUser.includes('keyword') ||
+    cleanUser.includes('autosubmit')
+  ) {
+    baseNiche = 'SEO & Web Indexing Automation';
+    defaultA = 'serpflow.io';
+    defaultB = 'indexerpro.com';
+    defaultAUrl = 'https://serpflow.io/features/auto-indexing';
+    defaultBUrl = 'https://indexerpro.com/pricing';
+    defaultAJust =
+      'Primary direct competitor URL driving high-volume organic search traffic for automated directory submission pipelines.';
+    defaultBJust =
+      'High-converting commercial intent landing page targeting enterprise backlink indexing queries with high customer lifetime value.';
+  } else if (
+    cleanUser.includes('crypto') ||
+    cleanUser.includes('pay') ||
+    cleanUser.includes('fin') ||
+    cleanUser.includes('bank') ||
+    cleanUser.includes('money') ||
+    cleanUser.includes('wealth')
+  ) {
+    baseNiche = 'FinTech & Payment Infrastructure';
+    defaultA = 'finflow.io';
+    defaultB = 'wealthpulse.io';
+    defaultAUrl = 'https://finflow.io/products/payment-gateway';
+    defaultBUrl = 'https://wealthpulse.io/cashflow-engine';
+    defaultAJust =
+      'Leading commercial gateway URL capturing massive organic traffic for developer API payment integrations and cross-border settlement.';
+    defaultBJust =
+      'High-converting B2B treasury and cash flow management URL with dominant entity trust.';
+  } else if (
+    cleanUser.includes('fit') ||
+    cleanUser.includes('gym') ||
+    cleanUser.includes('health') ||
+    cleanUser.includes('workout') ||
+    cleanUser.includes('nutri')
+  ) {
+    baseNiche = 'Fitness & Health Nutrition';
+    defaultA = 'fitpulse.com';
+    defaultB = 'peaknutrition.io';
+    defaultAUrl = 'https://fitpulse.com/programs/hiit-workout';
+    defaultBUrl = 'https://peaknutrition.io/supplements/protein';
+    defaultAJust =
+      'Top organic search destination URL driving over 120k monthly visits for transactional fitness program signups.';
+    defaultBJust =
+      'Highest revenue-producing e-commerce URL commanding strong brand trust and top position for high-volume commercial intent queries.';
+  } else if (
+    cleanUser.includes('api') ||
+    cleanUser.includes('dev') ||
+    cleanUser.includes('code') ||
+    cleanUser.includes('cloud') ||
+    cleanUser.includes('test')
+  ) {
+    baseNiche = 'Developer Tools & API Infrastructure';
+    defaultA = 'postman.com';
+    defaultB = 'apiflow.dev';
+    defaultAUrl = 'https://postman.com/api-platform/api-testing';
+    defaultBUrl = 'https://apiflow.dev/features/mock-servers';
+    defaultAJust =
+      'Authoritative industry standard URL capturing developer search queries for automated API testing and schema validation.';
+    defaultBJust =
+      'Fast-growing developer tools page capturing commercial intent for schema testing and mock endpoints.';
+  } else {
+    const name = cleanUser.split('.')[0] || 'market';
+    const prefix = name.length > 2 ? name : 'industry';
+    baseNiche = `${prefix.charAt(0).toUpperCase() + prefix.slice(1)} Platform & Solutions`;
+    defaultA = `${prefix}flow.io`;
+    defaultB = `${prefix}pro.com`;
+    defaultAUrl = `https://${prefix}flow.io/solutions/enterprise-platform`;
+    defaultBUrl = `https://${prefix}pro.com/pricing-plans`;
+    defaultAJust = `High-volume organic search landing page for ${cleanUser || 'target domain'} competitors, capturing top commercial intent.`;
+    defaultBJust = `Top converting transaction URL commanding maximum brand value and strong search traffic potential.`;
   }
 
-  if (
-    clean.includes('seo') ||
-    clean.includes('rank') ||
-    clean.includes('index') ||
-    clean.includes('serp') ||
-    clean.includes('backlink') ||
-    clean.includes('keyword')
-  ) {
-    return {
-      compA: 'serpflow.io',
-      compAUrl: 'https://serpflow.io/features/auto-indexing',
-      compAJustification:
-        'Primary direct competitor URL driving high-volume organic search traffic for automated directory submission pipelines.',
-      compB: 'indexerpro.com',
-      compBUrl: 'https://indexerpro.com/pricing',
-      compBJustification:
-        'High-converting commercial intent landing page targeting enterprise backlink indexing queries with high customer lifetime value.',
-      nicheLabel: 'SEO & Web Indexing Automation',
-    };
+  // Determine final Comp A & Comp B domains
+  const finalCompA = cleanCompA || defaultA;
+  const finalCompB = cleanCompB || defaultB;
+
+  // Determine matching Priority URLs & Justifications for finalCompA and finalCompB
+  let compAUrl = defaultAUrl;
+  let compAJustification = defaultAJust;
+  if (cleanCompA && cleanCompA !== defaultA) {
+    const rootName = cleanUser.split('.')[0] || 'platform';
+    compAUrl = `https://${cleanCompA}/solutions/${rootName}-alternative`;
+    compAJustification = `Primary organic competitor URL for ${cleanCompA}, driving targeted search traffic and commercial conversions in the ${baseNiche} sector.`;
   }
 
-  if (
-    clean.includes('crypto') ||
-    clean.includes('pay') ||
-    clean.includes('fin') ||
-    clean.includes('bank') ||
-    clean.includes('money')
-  ) {
-    return {
-      compA: 'finflow.io',
-      compAUrl: 'https://finflow.io/products/payment-gateway',
-      compAJustification:
-        'Leading commercial gateway URL capturing massive organic traffic for developer API payment integrations and cross-border settlement.',
-      compB: 'paystack.com',
-      compBUrl: 'https://paystack.com/developer-docs',
-      compBJustification:
-        'Core developer documentation portal commanding top domain authority and high brand search trust across organic search engines.',
-      nicheLabel: 'FinTech & Payment Infrastructure',
-    };
+  let compBUrl = defaultBUrl;
+  let compBJustification = defaultBJust;
+  if (cleanCompB && cleanCompB !== defaultB) {
+    compBUrl = `https://${cleanCompB}/pricing-plans`;
+    compBJustification = `Top revenue-generating conversion and pricing URL for ${cleanCompB}, commanding strong domain trust and organic ranking equity.`;
   }
 
-  if (
-    clean.includes('fit') ||
-    clean.includes('gym') ||
-    clean.includes('health') ||
-    clean.includes('workout') ||
-    clean.includes('nutri')
-  ) {
-    return {
-      compA: 'fitpulse.com',
-      compAUrl: 'https://fitpulse.com/programs/hiit-workout',
-      compAJustification:
-        'Top organic search destination URL driving over 120k monthly visits for transactional fitness program signups.',
-      compB: 'peaknutrition.io',
-      compBUrl: 'https://peaknutrition.io/supplements/protein',
-      compBJustification:
-        'Highest revenue-producing e-commerce URL commanding strong brand trust and top position for high-volume commercial intent queries.',
-      nicheLabel: 'Fitness & Health Nutrition',
-    };
-  }
-
-  // General fallback based on domain input
-  const name = clean.split('.')[0] || 'brand';
-  const prefix = name.length > 2 ? name : 'market';
   return {
-    compA: `${prefix}flow.io`,
-    compAUrl: `https://${prefix}flow.io/solutions/enterprise-platform`,
-    compAJustification: `High-volume organic search landing page for ${clean || 'target domain'} competitors, capturing top non-branded commercial intent and driving core revenue growth.`,
-    compB: `${prefix}pro.com`,
-    compBUrl: `https://${prefix}pro.com/pricing-plans`,
-    compBJustification: `Top converting transaction URL commanding maximum brand value, high search traffic potential, and strong AI answer engine authority.`,
-    nicheLabel: `${prefix.charAt(0).toUpperCase() + prefix.slice(1)} Industry Sector`,
+    compA: finalCompA,
+    compAUrl,
+    compAJustification,
+    compB: finalCompB,
+    compBUrl,
+    compBJustification,
+    nicheLabel: baseNiche,
   };
 }
 
-export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentGrader }) => {
-  const [userDomain, setUserDomain] = useState<string>('organic-skincare.com');
-  const [compA, setCompA] = useState<string>('gloworganics.com');
-  const [compB, setCompB] = useState<string>('purebotanicals.com');
+export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({
+  initialUserDomain = 'careerpulseai.net',
+  initialCompA,
+  initialCompB,
+  onOpenContentGrader,
+  onLaunchOutreachStrategy,
+}) => {
+  const initialDerived = deriveCompetitorsAndPriorityUrls(initialUserDomain);
+  const [userDomain, setUserDomain] = useState<string>(initialUserDomain);
+  const [compA, setCompA] = useState<string>(initialCompA || initialDerived.compA);
+  const [compB, setCompB] = useState<string>(initialCompB || initialDerived.compB);
   const [selectedCluster, setSelectedCluster] = useState<ClusterData | null>(null);
   const [isCompetitorAnalysisOpen, setIsCompetitorAnalysisOpen] = useState<boolean>(true);
   const [benchmarkMode, setBenchmarkMode] = useState<'comparative' | 'solo'>('comparative');
-  const [viewLayer, setViewLayer] = useState<'radar' | 'gap_overlap' | 'scatter_map'>('gap_overlap');
+  const [viewLayer, setViewLayer] = useState<'gap_overlap' | 'scatter_map' | 'radar'>('gap_overlap');
   const [keywordSearchQuery, setKeywordSearchQuery] = useState<string>('');
   const [intentFilter, setIntentFilter] = useState<string>('ALL');
 
-  const cleanUserDomain = userDomain.trim().replace(/^(https?:\/\/)+/i, '').replace(/\/+$/, '') || 'organic-skincare.com';
-  const competitorAnalysis = deriveCompetitorsAndPriorityUrls(userDomain);
+  const cleanUserDomain = userDomain.trim().replace(/^(https?:\/\/)+/i, '').replace(/\/+$/, '') || 'careerpulseai.net';
 
-  // Automatically update Competitor A and Competitor B when userDomain changes
+  // Compute competitor analysis dynamically using userDomain, compA, and compB so they ALWAYS match!
+  const competitorAnalysis = useMemo(() => {
+    return deriveCompetitorsAndPriorityUrls(userDomain, compA, compB);
+  }, [userDomain, compA, compB]);
+
+  // Automatically update Competitor A and Competitor B defaults when userDomain changes
   const handleUserDomainChange = (newDomain: string) => {
     setUserDomain(newDomain);
     const derived = deriveCompetitorsAndPriorityUrls(newDomain);
@@ -211,6 +293,14 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
     setCompA(derived.compA);
     setCompB(derived.compB);
     toast.success(`Synced Top 2 Competitors for ${userDomain}: ${derived.compA} & ${derived.compB}`);
+  };
+
+  const handleTransferToOutreach = () => {
+    if (onLaunchOutreachStrategy) {
+      onLaunchOutreachStrategy(cleanUserDomain, compA, compB, competitorAnalysis.nicheLabel);
+    } else {
+      toast.success(`Prepared Outreach Campaign for ${userDomain} vs ${compA} & ${compB}!`);
+    }
   };
 
   const [clusterData, setClusterData] = useState<ClusterData[]>([
@@ -326,116 +416,446 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
     toast.success('Recalculated organic keyword overlap matrix & traffic opportunities!');
   };
 
-  // Generate granular individual organic keyword opportunities for target domain
+  // Generate granular individual organic keyword opportunities based on the detected niche and target domain
   const organicKeywords: OrganicKeywordGapItem[] = useMemo(() => {
     const root = cleanUserDomain.split('.')[0] || 'brand';
+    const nicheLower = competitorAnalysis.nicheLabel.toLowerCase();
+
+    if (nicheLower.includes('career') || nicheLower.includes('resume') || nicheLower.includes('job')) {
+      return [
+        {
+          id: 'kw-1',
+          keyword: `best ai resume builder for tech jobs`,
+          cluster: 'Commercial Prompts',
+          intent: 'Commercial',
+          searchVolume: 18500,
+          keywordDifficulty: 42,
+          userRank: 16,
+          compARank: 2,
+          compBRank: 4,
+          estimatedTrafficGain: 5600,
+          actionPriority: 'HIGH',
+        },
+        {
+          id: 'kw-2',
+          keyword: `ats resume keyword match optimizer`,
+          cluster: 'Directory Indexing',
+          intent: 'Transactional',
+          searchVolume: 12200,
+          keywordDifficulty: 35,
+          userRank: null,
+          compARank: 1,
+          compBRank: 3,
+          estimatedTrafficGain: 4800,
+          actionPriority: 'HIGH',
+        },
+        {
+          id: 'kw-3',
+          keyword: `${root} vs jobscan comparison review`,
+          cluster: 'AI Search & GEO',
+          intent: 'GEO Focus',
+          searchVolume: 9400,
+          keywordDifficulty: 28,
+          userRank: 8,
+          compARank: 2,
+          compBRank: 5,
+          estimatedTrafficGain: 3100,
+          actionPriority: 'OPPORTUNITY',
+        },
+        {
+          id: 'kw-4',
+          keyword: `how to pass greenhouse ats resume scanner`,
+          cluster: 'Technical Crawlability',
+          intent: 'Informational',
+          searchVolume: 14100,
+          keywordDifficulty: 38,
+          userRank: 22,
+          compARank: 3,
+          compBRank: 6,
+          estimatedTrafficGain: 4200,
+          actionPriority: 'MEDIUM',
+        },
+        {
+          id: 'kw-5',
+          keyword: `ai career trajectory forecast tool`,
+          cluster: 'Commercial Prompts',
+          intent: 'Commercial',
+          searchVolume: 7800,
+          keywordDifficulty: 29,
+          userRank: null,
+          compARank: 4,
+          compBRank: 2,
+          estimatedTrafficGain: 2900,
+          actionPriority: 'HIGH',
+        },
+        {
+          id: 'kw-6',
+          keyword: `structured schema for job seeker portfolio`,
+          cluster: 'Schema & Entities',
+          intent: 'GEO Focus',
+          searchVolume: 4600,
+          keywordDifficulty: 22,
+          userRank: 12,
+          compARank: 5,
+          compBRank: 7,
+          estimatedTrafficGain: 1400,
+          actionPriority: 'MEDIUM',
+        },
+        {
+          id: 'kw-7',
+          keyword: `high authority career coach backlink directories`,
+          cluster: 'Backlink Velocity',
+          intent: 'Transactional',
+          searchVolume: 6700,
+          keywordDifficulty: 31,
+          userRank: 5,
+          compARank: 9,
+          compBRank: 10,
+          estimatedTrafficGain: 1950,
+          actionPriority: 'OPPORTUNITY',
+        },
+        {
+          id: 'kw-8',
+          keyword: `llm entity citations for tech career coaches`,
+          cluster: 'AI Search & GEO',
+          intent: 'GEO Focus',
+          searchVolume: 8900,
+          keywordDifficulty: 34,
+          userRank: null,
+          compARank: 2,
+          compBRank: 3,
+          estimatedTrafficGain: 3600,
+          actionPriority: 'HIGH',
+        },
+      ];
+    }
+
+    if (nicheLower.includes('seo') || nicheLower.includes('index')) {
+      return [
+        {
+          id: 'kw-1',
+          keyword: `automated google indexing api submitter`,
+          cluster: 'Commercial Prompts',
+          intent: 'Commercial',
+          searchVolume: 16200,
+          keywordDifficulty: 40,
+          userRank: 14,
+          compARank: 1,
+          compBRank: 3,
+          estimatedTrafficGain: 5100,
+          actionPriority: 'HIGH',
+        },
+        {
+          id: 'kw-2',
+          keyword: `bulk backlink validator high da directories`,
+          cluster: 'Directory Indexing',
+          intent: 'Transactional',
+          searchVolume: 11400,
+          keywordDifficulty: 33,
+          userRank: 6,
+          compARank: 2,
+          compBRank: 5,
+          estimatedTrafficGain: 3800,
+          actionPriority: 'OPPORTUNITY',
+        },
+        {
+          id: 'kw-3',
+          keyword: `${root} vs serpflow indexing speed benchmark`,
+          cluster: 'AI Search & GEO',
+          intent: 'GEO Focus',
+          searchVolume: 8100,
+          keywordDifficulty: 26,
+          userRank: null,
+          compARank: 1,
+          compBRank: 4,
+          estimatedTrafficGain: 3400,
+          actionPriority: 'HIGH',
+        },
+        {
+          id: 'kw-4',
+          keyword: `how to index new backlinks in 24 hours`,
+          cluster: 'Technical Crawlability',
+          intent: 'Informational',
+          searchVolume: 13900,
+          keywordDifficulty: 36,
+          userRank: 19,
+          compARank: 3,
+          compBRank: 6,
+          estimatedTrafficGain: 4100,
+          actionPriority: 'MEDIUM',
+        },
+        {
+          id: 'kw-5',
+          keyword: `geo citation network for local enterprise seo`,
+          cluster: 'Commercial Prompts',
+          intent: 'Commercial',
+          searchVolume: 9200,
+          keywordDifficulty: 38,
+          userRank: 9,
+          compARank: 2,
+          compBRank: 1,
+          estimatedTrafficGain: 3600,
+          actionPriority: 'HIGH',
+        },
+        {
+          id: 'kw-6',
+          keyword: `json ld schema generator for saas landing pages`,
+          cluster: 'Schema & Entities',
+          intent: 'GEO Focus',
+          searchVolume: 6500,
+          keywordDifficulty: 24,
+          userRank: 8,
+          compARank: 4,
+          compBRank: 7,
+          estimatedTrafficGain: 1900,
+          actionPriority: 'MEDIUM',
+        },
+        {
+          id: 'kw-7',
+          keyword: `dofollow directory submission list 2026`,
+          cluster: 'Backlink Velocity',
+          intent: 'Transactional',
+          searchVolume: 14800,
+          keywordDifficulty: 44,
+          userRank: 3,
+          compARank: 8,
+          compBRank: 9,
+          estimatedTrafficGain: 4600,
+          actionPriority: 'OPPORTUNITY',
+        },
+        {
+          id: 'kw-8',
+          keyword: `ai search citations chatgpt perplexity seo`,
+          cluster: 'AI Search & GEO',
+          intent: 'GEO Focus',
+          searchVolume: 11000,
+          keywordDifficulty: 32,
+          userRank: null,
+          compARank: 2,
+          compBRank: 4,
+          estimatedTrafficGain: 4200,
+          actionPriority: 'HIGH',
+        },
+      ];
+    }
+
+    if (nicheLower.includes('skincare') || nicheLower.includes('beauty')) {
+      return [
+        {
+          id: 'kw-1',
+          keyword: `best natural organic skincare routine`,
+          cluster: 'Commercial Prompts',
+          intent: 'Commercial',
+          searchVolume: 24500,
+          keywordDifficulty: 48,
+          userRank: 18,
+          compARank: 2,
+          compBRank: 4,
+          estimatedTrafficGain: 7200,
+          actionPriority: 'HIGH',
+        },
+        {
+          id: 'kw-2',
+          keyword: `organic beauty brand certification directory`,
+          cluster: 'Directory Indexing',
+          intent: 'Transactional',
+          searchVolume: 8200,
+          keywordDifficulty: 24,
+          userRank: 6,
+          compARank: 8,
+          compBRank: 12,
+          estimatedTrafficGain: 1850,
+          actionPriority: 'OPPORTUNITY',
+        },
+        {
+          id: 'kw-3',
+          keyword: `anti aging serum with clean botanicals`,
+          cluster: 'AI Search & GEO',
+          intent: 'GEO Focus',
+          searchVolume: 22400,
+          keywordDifficulty: 44,
+          userRank: null,
+          compARank: 1,
+          compBRank: 3,
+          estimatedTrafficGain: 7800,
+          actionPriority: 'HIGH',
+        },
+        {
+          id: 'kw-4',
+          keyword: `how to verify cruelty free skincare ingredients`,
+          cluster: 'Technical Crawlability',
+          intent: 'Informational',
+          searchVolume: 6100,
+          keywordDifficulty: 32,
+          userRank: 24,
+          compARank: 3,
+          compBRank: 7,
+          estimatedTrafficGain: 2100,
+          actionPriority: 'MEDIUM',
+        },
+        {
+          id: 'kw-5',
+          keyword: `pure botanicals vs ${root} product comparison`,
+          cluster: 'Commercial Prompts',
+          intent: 'Commercial',
+          searchVolume: 11900,
+          keywordDifficulty: 36,
+          userRank: 11,
+          compARank: 2,
+          compBRank: 1,
+          estimatedTrafficGain: 3900,
+          actionPriority: 'HIGH',
+        },
+        {
+          id: 'kw-6',
+          keyword: `structured product schema for e commerce skincare`,
+          cluster: 'Schema & Entities',
+          intent: 'GEO Focus',
+          searchVolume: 5400,
+          keywordDifficulty: 28,
+          userRank: 14,
+          compARank: 4,
+          compBRank: 5,
+          estimatedTrafficGain: 1600,
+          actionPriority: 'MEDIUM',
+        },
+        {
+          id: 'kw-7',
+          keyword: `high authority beauty blog guest post opportunities`,
+          cluster: 'Backlink Velocity',
+          intent: 'Transactional',
+          searchVolume: 9600,
+          keywordDifficulty: 41,
+          userRank: 4,
+          compARank: 9,
+          compBRank: 11,
+          estimatedTrafficGain: 2800,
+          actionPriority: 'OPPORTUNITY',
+        },
+        {
+          id: 'kw-8',
+          keyword: `ai entity citations for dermatologist recommended serums`,
+          cluster: 'AI Search & GEO',
+          intent: 'GEO Focus',
+          searchVolume: 12100,
+          keywordDifficulty: 35,
+          userRank: null,
+          compARank: 3,
+          compBRank: 2,
+          estimatedTrafficGain: 5100,
+          actionPriority: 'HIGH',
+        },
+      ];
+    }
+
+    // Default domain keyword template
     return [
       {
         id: 'kw-1',
-        keyword: `best natural ${root} routine`,
+        keyword: `best ${root} solutions for enterprise`,
         cluster: 'Commercial Prompts',
         intent: 'Commercial',
-        searchVolume: 14500,
-        keywordDifficulty: 38,
-        userRank: 18,
+        searchVolume: 15400,
+        keywordDifficulty: 39,
+        userRank: 17,
         compARank: 2,
         compBRank: 4,
-        estimatedTrafficGain: 4200,
+        estimatedTrafficGain: 4800,
         actionPriority: 'HIGH',
       },
       {
         id: 'kw-2',
-        keyword: `organic ${root} certification directory`,
+        keyword: `${root} certified partner directory`,
         cluster: 'Directory Indexing',
         intent: 'Transactional',
-        searchVolume: 8200,
-        keywordDifficulty: 24,
+        searchVolume: 8900,
+        keywordDifficulty: 28,
         userRank: 6,
         compARank: 8,
         compBRank: 12,
-        estimatedTrafficGain: 1850,
+        estimatedTrafficGain: 2200,
         actionPriority: 'OPPORTUNITY',
       },
       {
         id: 'kw-3',
-        keyword: `${root} near me local search`,
+        keyword: `${root} vs ${compA} feature comparison`,
         cluster: 'AI Search & GEO',
         intent: 'GEO Focus',
-        searchVolume: 22400,
-        keywordDifficulty: 44,
+        searchVolume: 19800,
+        keywordDifficulty: 42,
         userRank: null,
         compARank: 1,
         compBRank: 3,
-        estimatedTrafficGain: 7800,
+        estimatedTrafficGain: 6900,
         actionPriority: 'HIGH',
       },
       {
         id: 'kw-4',
-        keyword: `how to check ${root} crawlability errors`,
+        keyword: `how to integrate ${root} api endpoints`,
         cluster: 'Technical Crawlability',
         intent: 'Informational',
-        searchVolume: 6100,
-        keywordDifficulty: 32,
-        userRank: 24,
+        searchVolume: 7400,
+        keywordDifficulty: 31,
+        userRank: 21,
         compARank: 3,
         compBRank: 7,
-        estimatedTrafficGain: 2100,
+        estimatedTrafficGain: 2400,
         actionPriority: 'MEDIUM',
       },
       {
         id: 'kw-5',
-        keyword: `top rated ${root} pricing comparison`,
+        keyword: `top rated ${root} pricing plans and roi`,
         cluster: 'Commercial Prompts',
         intent: 'Commercial',
-        searchVolume: 18900,
-        keywordDifficulty: 52,
-        userRank: 31,
+        searchVolume: 16500,
+        keywordDifficulty: 46,
+        userRank: 28,
         compARank: 2,
         compBRank: 1,
-        estimatedTrafficGain: 6400,
+        estimatedTrafficGain: 5800,
         actionPriority: 'HIGH',
       },
       {
         id: 'kw-6',
-        keyword: `structured data schema for ${root}`,
+        keyword: `structured software schema for ${root}`,
         cluster: 'Schema & Entities',
         intent: 'GEO Focus',
-        searchVolume: 5400,
-        keywordDifficulty: 28,
-        userRank: 14,
+        searchVolume: 5100,
+        keywordDifficulty: 25,
+        userRank: 11,
         compARank: 4,
         compBRank: 5,
-        estimatedTrafficGain: 1600,
+        estimatedTrafficGain: 1550,
         actionPriority: 'MEDIUM',
       },
       {
         id: 'kw-7',
-        keyword: `high authority backlink sources for ${root}`,
+        keyword: `high authority resource backlink sources for ${root}`,
         cluster: 'Backlink Velocity',
         intent: 'Transactional',
-        searchVolume: 9600,
-        keywordDifficulty: 41,
-        userRank: 4,
+        searchVolume: 9200,
+        keywordDifficulty: 38,
+        userRank: 5,
         compARank: 9,
         compBRank: 11,
-        estimatedTrafficGain: 2800,
+        estimatedTrafficGain: 2700,
         actionPriority: 'OPPORTUNITY',
       },
       {
         id: 'kw-8',
-        keyword: `ai entity citations for ${root} brands`,
+        keyword: `ai entity citations for ${root} platform`,
         cluster: 'AI Search & GEO',
         intent: 'GEO Focus',
-        searchVolume: 12100,
-        keywordDifficulty: 35,
+        searchVolume: 11800,
+        keywordDifficulty: 34,
         userRank: null,
         compARank: 3,
         compBRank: 2,
-        estimatedTrafficGain: 5100,
+        estimatedTrafficGain: 4900,
         actionPriority: 'HIGH',
       },
     ];
-  }, [cleanUserDomain]);
+  }, [cleanUserDomain, competitorAnalysis.nicheLabel, compA, compB]);
 
   const filteredKeywords = useMemo(() => {
     return organicKeywords.filter((item) => {
@@ -604,10 +1024,19 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
           </div>
 
           <button
-            onClick={() => setIsCompetitorAnalysisOpen(!isCompetitorAnalysisOpen)}
-            className="px-3 py-1.5 bg-[#ff4d00] hover:bg-[#ff5c14] border-2 border-black text-black text-xs font-bold uppercase transition-all flex items-center gap-1.5 shrink-0 shadow-[2px_2px_0_#000] cursor-pointer"
+            onClick={handleTransferToOutreach}
+            className="px-3 py-1.5 bg-[#ff4d00] hover:bg-black text-black hover:text-white border-2 border-black text-xs font-bold uppercase transition-all flex items-center gap-1.5 shrink-0 shadow-[2px_2px_0_#000] cursor-pointer"
+            title="Transfer discovered competitors to Outreach Email & Link Strategist Engine"
           >
-            <Sparkles className="w-3.5 h-3.5 text-black" />
+            <Send className="w-3.5 h-3.5" />
+            <span>OUTREACH ENGINE</span>
+          </button>
+
+          <button
+            onClick={() => setIsCompetitorAnalysisOpen(!isCompetitorAnalysisOpen)}
+            className="px-3 py-1.5 bg-black text-white hover:bg-zinc-800 border-2 border-black text-xs font-bold uppercase transition-all flex items-center gap-1.5 shrink-0 shadow-[2px_2px_0_#ff4d00] cursor-pointer"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-[#ff4d00]" />
             <span>AI STRATEGY</span>
           </button>
 
@@ -789,6 +1218,33 @@ export const KeywordGapRadar: React.FC<KeywordGapRadarProps> = ({ onOpenContentG
                   </tr>
                 </tbody>
               </table>
+            </div>
+
+            {/* Seamless Transition to Outreach Execution Suite Callout */}
+            <div className="bg-[#fff5eb] border-2 border-black p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-[2px_2px_0_#000]">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#ff4d00]" />
+                  <span className="font-bold text-black text-xs uppercase font-mono-brutal">
+                    READY TO OUTRANK {compA} &amp; {compB}?
+                  </span>
+                  <span className="text-[9px] px-1.5 py-0.2 bg-[#ff4d00] text-black font-bold border border-black uppercase">
+                    SEAMLESS PIPELINE
+                  </span>
+                </div>
+                <p className="text-[11px] text-zinc-700 font-mono-brutal">
+                  Transfer these priority competitors into the AI Link Strategist to extract linkable assets, search operators (Google Dorks), and personalized outreach pitches.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleTransferToOutreach}
+                className="px-4 py-2 bg-black hover:bg-[#ff4d00] text-white hover:text-black font-mono-brutal text-xs font-black uppercase border-2 border-black shadow-[2px_2px_0_#ff4d00] hover:shadow-[2px_2px_0_#000] transition-all cursor-pointer inline-flex items-center justify-center gap-2 shrink-0"
+              >
+                <Send className="w-3.5 h-3.5 text-[#ff4d00]" />
+                <span>LAUNCH OUTREACH PIPELINE &rarr;</span>
+              </button>
             </div>
           </div>
         </div>

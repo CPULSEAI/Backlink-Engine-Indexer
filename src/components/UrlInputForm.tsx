@@ -14,6 +14,8 @@ interface UrlInputFormProps {
   autonomousBatchCount?: number;
   onStartJob: (config: {
     targetUrls: string[];
+    priority?: 'High' | 'Medium' | 'Low' | string;
+    urlPriorities?: Record<string, string>;
     features: {
       generateBacklinks: boolean;
       checkLiveConfirmation: boolean;
@@ -63,17 +65,73 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
 
   const [showSeoScorecard, setShowSeoScorecard] = useState<boolean>(false);
 
+  const [batchPriority, setBatchPriority] = useState<'High' | 'Medium' | 'Low'>('High');
+  const [customUrlPriorities, setCustomUrlPriorities] = useState<Record<string, 'High' | 'Medium' | 'Low'>>({});
+  const [showPriorityManager, setShowPriorityManager] = useState<boolean>(true);
+
   // Regex check for domain/URL validity
   const URL_REGEX = /^(https?:\/\/)?([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,24}(:\d{1,5})?(\/[^\s]*)?$/i;
 
   // Memoize clean unique URLs from raw input
-  const uniqueUrls = useMemo(() => {
-    const cleaned = rawInput
+  const parsedUrlEntries = useMemo(() => {
+    const lines = rawInput
       .split(/[\n,;]+/)
       .map((line) => line.trim())
       .filter((line) => line.length > 0 && !line.startsWith('#') && !line.startsWith('//'));
-    return Array.from(new Set(cleaned));
+
+    const entries: { url: string; inlinePriority?: 'High' | 'Medium' | 'Low' }[] = [];
+    const seenUrls = new Set<string>();
+
+    lines.forEach((line) => {
+      // Check for inline priority tags e.g. "https://example.com [High]" or "https://example.com #priority=High"
+      let cleanUrl = line;
+      let inlinePrio: 'High' | 'Medium' | 'Low' | undefined = undefined;
+
+      const prioMatch = line.match(/\[(high|medium|low)\]|\b(high|medium|low)\b/i);
+      if (prioMatch) {
+        const found = (prioMatch[1] || prioMatch[2]).toLowerCase();
+        if (found === 'high') inlinePrio = 'High';
+        else if (found === 'medium') inlinePrio = 'Medium';
+        else if (found === 'low') inlinePrio = 'Low';
+        cleanUrl = line.replace(/\[(high|medium|low)\]/gi, '').trim();
+      }
+
+      if (cleanUrl && !seenUrls.has(cleanUrl)) {
+        seenUrls.add(cleanUrl);
+        entries.push({ url: cleanUrl, inlinePriority: inlinePrio });
+      }
+    });
+
+    return entries;
   }, [rawInput]);
+
+  const uniqueUrls = useMemo(() => {
+    return parsedUrlEntries.map((e) => e.url);
+  }, [parsedUrlEntries]);
+
+  // Compute effective priority for each URL
+  const getEffectivePriority = (url: string): 'High' | 'Medium' | 'Low' => {
+    if (customUrlPriorities[url]) return customUrlPriorities[url];
+    const foundEntry = parsedUrlEntries.find((e) => e.url === url);
+    if (foundEntry?.inlinePriority) return foundEntry.inlinePriority;
+    return batchPriority;
+  };
+
+  const handleSetAllPriorities = (prio: 'High' | 'Medium' | 'Low') => {
+    const updated: Record<string, 'High' | 'Medium' | 'Low'> = {};
+    uniqueUrls.forEach((u) => {
+      updated[u] = prio;
+    });
+    setBatchPriority(prio);
+    setCustomUrlPriorities(updated);
+    toast.success(`Updated all ${uniqueUrls.length} targets to ${prio.toUpperCase()} Priority`);
+  };
+
+  const handleToggleUrlPriority = (url: string) => {
+    const curr = getEffectivePriority(url);
+    const next: 'High' | 'Medium' | 'Low' = curr === 'High' ? 'Medium' : curr === 'Medium' ? 'Low' : 'High';
+    setCustomUrlPriorities((prev) => ({ ...prev, [url]: next }));
+  };
 
   const handleCleanInput = () => {
     let fixedCount = 0;
@@ -142,8 +200,15 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
         ? directories
         : directories.filter((d) => d.type.toUpperCase().includes(selectedCategory));
 
+    const resolvedUrlPriorities: Record<string, string> = {};
+    validatedUrls.forEach((u) => {
+      resolvedUrlPriorities[u] = getEffectivePriority(u);
+    });
+
     onStartJob({
       targetUrls: validatedUrls,
+      priority: batchPriority,
+      urlPriorities: resolvedUrlPriorities,
       features,
       selectedDirectoryIds: filteredDirs.map((d) => d.id),
       concurrencyLimit: concurrency,
@@ -216,15 +281,20 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
 
         {/* Textarea Input */}
         <div>
-          <label className="block text-xs font-mono-brutal font-bold text-black uppercase tracking-wider mb-2">
-            TARGET_WEBSITES_LIST <span className="text-zinc-600 font-normal">[ONE_PER_LINE]</span>
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-xs font-mono-brutal font-bold text-black uppercase tracking-wider">
+              TARGET_WEBSITES_LIST <span className="text-zinc-600 font-normal">[ONE_PER_LINE]</span>
+            </label>
+            <span className="text-[11px] font-mono-brutal text-zinc-500">
+              Tip: Append <code className="bg-zinc-100 px-1 border border-zinc-300 text-black font-bold">[High]</code>, <code className="bg-zinc-100 px-1 border border-zinc-300 text-black font-bold">[Medium]</code>, or <code className="bg-zinc-100 px-1 border border-zinc-300 text-black font-bold">[Low]</code> to custom tag
+            </span>
+          </div>
           <textarea
             rows={4}
             value={rawInput}
             onChange={(e) => setRawInput(e.target.value)}
             disabled={isProcessing}
-            placeholder="https://example.com&#10;https://mybrand.org&#10;https://techstartup.io"
+            placeholder="https://example.com [High]&#10;https://mybrand.org [Medium]&#10;https://techstartup.io [Low]"
             className="w-full bg-white border-4 border-black px-4 py-3 text-xs sm:text-sm text-black placeholder-zinc-400 focus:outline-none focus:border-black font-mono-brutal font-bold shadow-[4px_4px_0_#000] transition-all disabled:opacity-50"
           />
           <div className="flex items-center justify-between mt-2 text-xs font-mono-brutal font-bold">
@@ -238,6 +308,180 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
               </span>
             )}
           </div>
+        </div>
+
+        {/* Priority Assignment & Tagging Module */}
+        <div className="bg-[#f2efeb] border-4 border-black p-4 shadow-[4px_4px_0_#000] space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b-2 border-black pb-2">
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 bg-black text-white font-mono-brutal text-[10px] font-bold uppercase">
+                [PRIORITY ROUTING]
+              </span>
+              <span className="text-xs font-mono-brutal font-bold text-black uppercase tracking-wider">
+                SUBMISSION PRIORITY &amp; CRAWLER ALLOCATION
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-mono-brutal font-bold text-zinc-600 uppercase">SET ALL:</span>
+              <button
+                type="button"
+                onClick={() => handleSetAllPriorities('High')}
+                className="px-2 py-0.5 text-[10px] font-mono-brutal font-bold uppercase bg-[#ff4d00] text-black border border-black hover:opacity-90 transition-all cursor-pointer"
+                title="Set all URLs to High Priority"
+              >
+                🔥 HIGH
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSetAllPriorities('Medium')}
+                className="px-2 py-0.5 text-[10px] font-mono-brutal font-bold uppercase bg-amber-400 text-black border border-black hover:opacity-90 transition-all cursor-pointer"
+                title="Set all URLs to Medium Priority"
+              >
+                ⚡ MED
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSetAllPriorities('Low')}
+                className="px-2 py-0.5 text-[10px] font-mono-brutal font-bold uppercase bg-zinc-300 text-black border border-black hover:opacity-90 transition-all cursor-pointer"
+                title="Set all URLs to Low Priority"
+              >
+                🌱 LOW
+              </button>
+            </div>
+          </div>
+
+          {/* Global Batch Priority Selector */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div
+              onClick={() => {
+                setBatchPriority('High');
+                handleSetAllPriorities('High');
+              }}
+              className={`p-2.5 border-2 border-black cursor-pointer transition-all ${
+                batchPriority === 'High'
+                  ? 'bg-black text-white shadow-[3px_3px_0_#ff4d00]'
+                  : 'bg-white text-black hover:bg-zinc-100 shadow-[2px_2px_0_#000]'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono-brutal font-bold flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#ff4d00] border border-black" />
+                  HIGH PRIORITY
+                </span>
+                <span className={`text-[10px] font-mono-brutal font-bold px-1.5 py-0.5 border ${
+                  batchPriority === 'High' ? 'bg-[#ff4d00] text-black border-black' : 'bg-zinc-200 text-black border-black'
+                }`}>
+                  FAST-TRACK
+                </span>
+              </div>
+              <p className={`text-[10px] mt-1 leading-tight ${batchPriority === 'High' ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                Top worker slot. Immediate Google API push &amp; high-tier directories first.
+              </p>
+            </div>
+
+            <div
+              onClick={() => {
+                setBatchPriority('Medium');
+                handleSetAllPriorities('Medium');
+              }}
+              className={`p-2.5 border-2 border-black cursor-pointer transition-all ${
+                batchPriority === 'Medium'
+                  ? 'bg-black text-white shadow-[3px_3px_0_#ffb703]'
+                  : 'bg-white text-black hover:bg-zinc-100 shadow-[2px_2px_0_#000]'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono-brutal font-bold flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-black" />
+                  MEDIUM PRIORITY
+                </span>
+                <span className={`text-[10px] font-mono-brutal font-bold px-1.5 py-0.5 border ${
+                  batchPriority === 'Medium' ? 'bg-amber-400 text-black border-black' : 'bg-zinc-200 text-black border-black'
+                }`}>
+                  STANDARD
+                </span>
+              </div>
+              <p className={`text-[10px] mt-1 leading-tight ${batchPriority === 'Medium' ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                Balanced queue distribution across all directory types and IndexNow nodes.
+              </p>
+            </div>
+
+            <div
+              onClick={() => {
+                setBatchPriority('Low');
+                handleSetAllPriorities('Low');
+              }}
+              className={`p-2.5 border-2 border-black cursor-pointer transition-all ${
+                batchPriority === 'Low'
+                  ? 'bg-black text-white shadow-[3px_3px_0_#94a3b8]'
+                  : 'bg-white text-black hover:bg-zinc-100 shadow-[2px_2px_0_#000]'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono-brutal font-bold flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-zinc-400 border border-black" />
+                  LOW PRIORITY
+                </span>
+                <span className={`text-[10px] font-mono-brutal font-bold px-1.5 py-0.5 border ${
+                  batchPriority === 'Low' ? 'bg-zinc-400 text-black border-black' : 'bg-zinc-200 text-black border-black'
+                }`}>
+                  BACKGROUND
+                </span>
+              </div>
+              <p className={`text-[10px] mt-1 leading-tight ${batchPriority === 'Low' ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                Background trickle mode with low concurrency impact and throttled pinging.
+              </p>
+            </div>
+          </div>
+
+          {/* Per-URL Priority Quick Tagger Preview */}
+          {uniqueUrls.length > 0 && (
+            <div className="bg-white border-2 border-black p-2.5">
+              <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-zinc-200">
+                <span className="text-[10px] font-mono-brutal font-bold text-black uppercase">
+                  ACTIVE URL TARGET TAGS ({uniqueUrls.length}): <span className="text-zinc-500 font-normal">Click any badge to toggle (High → Med → Low)</span>
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+                {uniqueUrls.slice(0, 12).map((url) => {
+                  const prio = getEffectivePriority(url);
+                  return (
+                    <button
+                      key={url}
+                      type="button"
+                      onClick={() => handleToggleUrlPriority(url)}
+                      className={`flex items-center gap-1 px-2 py-1 text-[10px] font-mono-brutal font-bold border border-black transition-all cursor-pointer ${
+                        prio === 'High'
+                          ? 'bg-[#ffe8dd] text-black border-[#ff4d00]'
+                          : prio === 'Medium'
+                          ? 'bg-[#fffbeb] text-black border-amber-500'
+                          : 'bg-zinc-100 text-zinc-700 border-zinc-400'
+                      }`}
+                      title={`Click to change priority for ${url}`}
+                    >
+                      <span className="max-w-[140px] truncate">{url.replace(/^https?:\/\//, '')}</span>
+                      <span
+                        className={`px-1 py-0.2 text-[9px] font-mono-brutal font-bold uppercase border ${
+                          prio === 'High'
+                            ? 'bg-[#ff4d00] text-black border-black'
+                            : prio === 'Medium'
+                            ? 'bg-amber-400 text-black border-black'
+                            : 'bg-zinc-300 text-black border-black'
+                        }`}
+                      >
+                        {prio}
+                      </span>
+                    </button>
+                  );
+                })}
+                {uniqueUrls.length > 12 && (
+                  <span className="px-2 py-1 text-[10px] font-mono-brutal text-zinc-500 self-center">
+                    +{uniqueUrls.length - 12} more targets tagged
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Technical SEO Readiness Pre-flight Scorecard */}

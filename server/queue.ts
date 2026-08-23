@@ -15,6 +15,8 @@ export interface RetryPolicyConfig {
 export interface TaskJobConfig {
   submissionId: string;
   targetUrls: string[];
+  priority?: 'High' | 'Medium' | 'Low' | string;
+  urlPriorities?: Record<string, string>;
   features: {
     generateBacklinks: boolean;
     checkLiveConfirmation: boolean;
@@ -187,11 +189,13 @@ export class SubmissionJobManager {
 
     const totalTasks = targetUrls.length * directoriesToRun.length;
 
+    const jobPriority = config.priority || 'Medium';
+
     // Record initial submission in DB
     db.run(
-      `INSERT INTO submissions (id, created_at, target_url, status, total_directories, completed_directories, confirmed_count, indexed_count)
-       VALUES (?, ?, ?, ?, ?, 0, 0, 0)`,
-      [submissionId, new Date().toISOString(), targetUrls.join(', '), 'Processing', totalTasks]
+      `INSERT INTO submissions (id, created_at, target_url, status, total_directories, completed_directories, confirmed_count, indexed_count, priority)
+       VALUES (?, ?, ?, ?, ?, 0, 0, 0, ?)`,
+      [submissionId, new Date().toISOString(), targetUrls.join(', '), 'Processing', totalTasks, jobPriority]
     );
     saveDb();
 
@@ -200,6 +204,7 @@ export class SubmissionJobManager {
       totalTasks,
       targetUrlsCount: targetUrls.length,
       directoriesCount: directoriesToRun.length,
+      priority: jobPriority,
       autoRotateEnabled: autoRotateProxies && proxyList.length > 1
     });
 
@@ -461,16 +466,17 @@ export class SubmissionJobManager {
 
         // Save log in SQLite DB
         const logId = `log_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+        const logPriority = config.urlPriorities?.[targetUrl] || jobPriority;
         db.run(
           `INSERT INTO logs (
             id, submission_id, created_at, target_url, directory_name, directory_type,
             generated_backlink, submission_status, http_status, live_verification,
-            google_indexing, ping_status, notes
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            google_indexing, ping_status, notes, priority
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             logId, submissionId, new Date().toISOString(), targetUrl, directory.name, directory.type,
             generatedBacklink, submissionStatus, httpStatus, liveVerification,
-            googleIndexing, pingStatus, notes
+            googleIndexing, pingStatus, notes, logPriority
           ]
         );
 
@@ -503,6 +509,7 @@ export class SubmissionJobManager {
             googleIndexing,
             pingStatus,
             notes,
+            priority: logPriority,
             createdAt: new Date().toISOString()
           }
         });
