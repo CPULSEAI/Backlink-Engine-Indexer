@@ -63,6 +63,13 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
   // Row Expansion State
   const [expandedRowIds, setExpandedRowIds] = useState<Set<string>>(new Set());
 
+  // Interactive Hover Status Popover State
+  const [hoveredStatus, setHoveredStatus] = useState<{
+    log: LogItem;
+    type: 'google' | 'ping' | 'live' | 'submission';
+    rect: DOMRect;
+  } | null>(null);
+
   // Row Selection State for Bulk CSV Export
   const [selectedLogIds, setSelectedLogIds] = useState<Set<string>>(new Set());
   const [copiedBacklinkId, setCopiedBacklinkId] = useState<string | null>(null);

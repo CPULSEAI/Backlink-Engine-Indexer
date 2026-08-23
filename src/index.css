@@ -278,3 +278,46 @@ h1, h2, h3, .display, .font-display {
   animation: liveGlowFlash 0.75s ease-out;
 }
 
+/* Status Badge Interactive Discoverability Micro-Animations */
+@keyframes subtleStatusPulse {
+  0%, 100% {
+    border-color: #000000;
+    box-shadow: 1px 1px 0 #000000;
+  }
+  50% {
+    border-color: #ff4d00;
+    box-shadow: 2px 2px 0 rgba(255, 77, 0, 0.5);
+  }
+}
+
+@keyframes popoverFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.status-badge-interactive {
+  position: relative;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.status-badge-interactive:hover {
+  transform: translateY(-1px);
+  border-color: #ff4d00 !important;
+  box-shadow: 2px 2px 0 #ff4d00 !important;
+}
+
+.status-badge-pulse {
+  animation: subtleStatusPulse 3s infinite ease-in-out;
+}
+
+.popover-card-animated {
+  animation: popoverFadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+

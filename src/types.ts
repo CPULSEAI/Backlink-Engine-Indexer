@@ -18,9 +18,9 @@ export interface LogItem {
   submissionStatus: string;
   httpStatus: number;
   liveVerification: string;
-  googleIndexing: string;
-  pingStatus: string;
-  notes?: string;
+  googleIndexing: string; // e.g. 'Submitted' | 'Indexed' | 'Pending' | 'Failed' | 'Queued'
+  pingStatus: string; // e.g. 'Success' | 'Failed' | 'Pending' | 'Broadcasted (3 nodes)'
+  notes?: string; // Diagnostic trace, indexing payload responses, HTTP verification details
   priority?: 'High' | 'Medium' | 'Low' | string;
   createdAt: string;
 }
