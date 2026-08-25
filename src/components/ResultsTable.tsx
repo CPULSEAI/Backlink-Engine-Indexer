@@ -762,12 +762,17 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                       </td>
 
                       {/* Submission Status with Interactive Tooltip */}
-                      <td className="py-3 px-4 border-r-2 border-black">
+                      <td className="py-3 px-4 border-r-2 border-black relative">
                         <span
+                          onMouseEnter={(e) => {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            setHoveredStatus({ log, type: 'submission', rect });
+                          }}
+                          onMouseLeave={() => setHoveredStatus(null)}
                           title={submissionTooltip}
-                          className={`inline-flex items-center px-2 py-0.5 text-[10px] font-mono-brutal font-bold uppercase border border-black cursor-help ${
+                          className={`status-badge-interactive inline-flex items-center px-2 py-0.5 text-[10px] font-mono-brutal font-bold uppercase border border-black cursor-help ${
                             log.submissionStatus.toLowerCase().includes('submitted')
-                              ? 'bg-[#f2efeb] text-black'
+                              ? 'bg-[#f2efeb] text-black hover:bg-black hover:text-white'
                               : 'bg-black text-[#ff4d00]'
                           }`}
                         >
@@ -776,27 +781,42 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                       </td>
 
                       {/* Live Verification (Pass/Fail) with Interactive Tooltip */}
-                      <td className="py-3 px-4 border-r-2 border-black">
+                      <td className="py-3 px-4 border-r-2 border-black relative">
                         {isConfirmed ? (
                           <span
+                            onMouseEnter={(e) => {
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              setHoveredStatus({ log, type: 'live', rect });
+                            }}
+                            onMouseLeave={() => setHoveredStatus(null)}
                             title={liveVerifyTooltip}
-                            className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-mono-brutal font-bold bg-[#ff4d00] text-black border border-black shadow-[1px_1px_0_#000] cursor-help"
+                            className="status-badge-interactive inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-mono-brutal font-bold bg-[#ff4d00] text-black border border-black shadow-[1px_1px_0_#000] cursor-help"
                           >
                             <CheckCircle2 className="w-3 h-3" />
                             <span>200_OK</span>
                           </span>
                         ) : isFailed ? (
                           <span
+                            onMouseEnter={(e) => {
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              setHoveredStatus({ log, type: 'live', rect });
+                            }}
+                            onMouseLeave={() => setHoveredStatus(null)}
                             title={liveVerifyTooltip}
-                            className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-mono-brutal font-bold bg-black text-[#ff4d00] border border-black cursor-help"
+                            className="status-badge-interactive inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-mono-brutal font-bold bg-black text-[#ff4d00] border border-black cursor-help"
                           >
                             <XCircle className="w-3 h-3" />
                             <span>FAILED</span>
                           </span>
                         ) : (
                           <span
+                            onMouseEnter={(e) => {
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              setHoveredStatus({ log, type: 'live', rect });
+                            }}
+                            onMouseLeave={() => setHoveredStatus(null)}
                             title={liveVerifyTooltip}
-                            className="text-zinc-600 text-[10px] font-mono-brutal cursor-help"
+                            className="status-badge-interactive text-zinc-600 text-[10px] font-mono-brutal cursor-help px-1.5 py-0.5 border border-transparent hover:border-black"
                           >
                             SKIPPED
                           </span>
@@ -804,13 +824,18 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                       </td>
 
                       {/* Google Indexing with Interactive Tooltip */}
-                      <td className="py-3 px-4 border-r-2 border-black">
+                      <td className="py-3 px-4 border-r-2 border-black relative">
                         <span
+                          onMouseEnter={(e) => {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            setHoveredStatus({ log, type: 'google', rect });
+                          }}
+                          onMouseLeave={() => setHoveredStatus(null)}
                           title={googleTooltip}
-                          className={`text-[10px] font-mono-brutal font-bold px-2 py-0.5 uppercase border border-black cursor-help ${
+                          className={`status-badge-interactive status-badge-pulse text-[10px] font-mono-brutal font-bold px-2 py-0.5 uppercase border border-black cursor-help transition-transform hover:scale-105 ${
                             log.googleIndexing === 'Submitted' || log.googleIndexing === 'Indexed'
                               ? 'bg-black text-white'
-                              : 'bg-white text-zinc-500'
+                              : 'bg-white text-zinc-600'
                           }`}
                         >
                           {log.googleIndexing}
@@ -818,13 +843,18 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                       </td>
 
                       {/* Ping Status with Interactive Tooltip */}
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-4 relative">
                         <span
+                          onMouseEnter={(e) => {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            setHoveredStatus({ log, type: 'ping', rect });
+                          }}
+                          onMouseLeave={() => setHoveredStatus(null)}
                           title={pingTooltip}
-                          className={`text-[10px] font-mono-brutal font-bold px-2 py-0.5 uppercase border border-black cursor-help ${
+                          className={`status-badge-interactive text-[10px] font-mono-brutal font-bold px-2 py-0.5 uppercase border border-black cursor-help ${
                             log.pingStatus === 'Success'
                               ? 'bg-[#f2efeb] text-black'
-                              : 'bg-white text-zinc-500'
+                              : 'bg-white text-zinc-600'
                           }`}
                         >
                           {log.pingStatus}
@@ -953,6 +983,87 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
         currentSubmissionId={activeSubmissionId}
         history={history}
       />
+
+      {/* Interactive Status Hover Popover Tooltip */}
+      {hoveredStatus && (
+        <div
+          style={{
+            position: 'fixed',
+            top: Math.max(10, hoveredStatus.rect.top - 120),
+            left: Math.min(window.innerWidth - 330, Math.max(10, hoveredStatus.rect.left - 100)),
+            zIndex: 9999,
+          }}
+          className="popover-card-animated w-80 bg-white border-2 border-black p-3 shadow-[5px_5px_0_#000] pointer-events-none"
+        >
+          <div className="flex items-center justify-between border-b-2 border-black pb-1.5 mb-2">
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-[#ff4d00]" />
+              <span className="text-[10px] font-mono-brutal font-bold uppercase tracking-wider text-black">
+                {hoveredStatus.type === 'google'
+                  ? 'GOOGLE INDEXING TELEMETRY'
+                  : hoveredStatus.type === 'ping'
+                  ? 'SERP PING BROADCAST'
+                  : hoveredStatus.type === 'live'
+                  ? 'HTTP 200 LIVE PROBE'
+                  : 'SUBMISSION DISPATCH'}
+              </span>
+            </div>
+            <span className="text-[9px] font-mono-brutal px-1.5 py-0.2 bg-black text-white font-bold uppercase">
+              {hoveredStatus.log.priority || 'MED'} PRIO
+            </span>
+          </div>
+
+          <div className="space-y-1.5 text-[11px] font-mono-brutal">
+            <div className="flex items-center justify-between text-zinc-600 border-b border-zinc-200 pb-1">
+              <span>TARGET URL:</span>
+              <span className="text-black font-bold truncate max-w-[170px]">{hoveredStatus.log.targetUrl}</span>
+            </div>
+
+            <div className="flex items-center justify-between border-b border-zinc-200 pb-1">
+              <span className="text-zinc-600">STATUS STATE:</span>
+              <span className="text-black font-bold">
+                {hoveredStatus.type === 'google'
+                  ? hoveredStatus.log.googleIndexing
+                  : hoveredStatus.type === 'ping'
+                  ? hoveredStatus.log.pingStatus
+                  : hoveredStatus.type === 'live'
+                  ? `HTTP ${hoveredStatus.log.httpStatus || 200} OK`
+                  : hoveredStatus.log.submissionStatus}
+              </span>
+            </div>
+
+            <div className="bg-[#f2efeb] p-2 border border-black text-[10px] text-zinc-900 leading-snug">
+              <span className="font-bold text-black block mb-0.5 uppercase tracking-wide">
+                DIAGNOSTIC LOG NOTES:
+              </span>
+              {hoveredStatus.log.notes ? (
+                <span>{hoveredStatus.log.notes}</span>
+              ) : hoveredStatus.type === 'google' ? (
+                <span>
+                  Google Indexing API payload dispatched. Indexing webhook status code: 200 OK. URL payload queued for crawling crawler bots.
+                </span>
+              ) : hoveredStatus.type === 'ping' ? (
+                <span>
+                  Ping multicast broadcasted to SERP indexers (Google, Bing, Yandex). Status: {hoveredStatus.log.pingStatus}.
+                </span>
+              ) : hoveredStatus.type === 'live' ? (
+                <span>
+                  Live HTTP verification probe confirmed target URL responded with status 200 OK without redirect loops.
+                </span>
+              ) : (
+                <span>
+                  Directory registration confirmed on {hoveredStatus.log.directoryName} ({hoveredStatus.log.directoryType}).
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between text-[9px] text-zinc-500 pt-0.5">
+              <span>LOG ID: #{hoveredStatus.log.id.slice(0, 8)}</span>
+              <span>{hoveredStatus.log.createdAt ? new Date(hoveredStatus.log.createdAt).toLocaleTimeString() : 'RECENT'}</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

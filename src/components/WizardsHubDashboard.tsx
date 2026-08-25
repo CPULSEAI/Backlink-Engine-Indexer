@@ -40,6 +40,7 @@ import { LinkStrategyGeneratorCard } from './LinkStrategyGeneratorCard';
 interface WizardsHubDashboardProps {
   onOpenConversionWizard: (url?: string) => void;
   onOpenClarityWizard?: (url?: string) => void;
+  onOpenAutonomousAuditor?: (url?: string) => void;
   onOpenGoogleApiWizard?: () => void;
   onOpenSchemaGeneratorModal?: () => void;
   onOpenBulkSeoValidator?: () => void;
@@ -63,6 +64,7 @@ interface WizardsHubDashboardProps {
 export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
   onOpenConversionWizard,
   onOpenClarityWizard,
+  onOpenAutonomousAuditor,
   onOpenGoogleApiWizard,
   onOpenSchemaGeneratorModal,
   onOpenBulkSeoValidator,
@@ -158,6 +160,16 @@ export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
 
             {/* Quick Actions Row */}
             <div className="flex flex-wrap items-center gap-2">
+              {onOpenAutonomousAuditor && (
+                <button
+                  onClick={() => onOpenAutonomousAuditor()}
+                  className="px-4 py-2.5 rounded-2xl bg-[#ff4d00] hover:bg-[#ff6a2b] text-black font-black text-xs tracking-wide shadow-lg shadow-[#ff4d00]/30 flex items-center space-x-2 transition-all cursor-pointer active:scale-95 border-2 border-black"
+                >
+                  <Sparkles className="w-4 h-4 text-black" />
+                  <span>14-Phase Site Auditor</span>
+                </button>
+              )}
+
               {onOpenSchemaGeneratorModal && (
                 <button
                   onClick={onOpenSchemaGeneratorModal}

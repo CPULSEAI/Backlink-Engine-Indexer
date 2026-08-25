@@ -20,6 +20,7 @@ import { SeoFunnelTimeline } from './components/SeoFunnelTimeline';
 import { SmartBatchScheduler } from './components/SmartBatchScheduler';
 import { ConversionWizardModal } from './components/ConversionWizardModal';
 import { ClarityOverloadWizardModal } from './components/ClarityOverloadWizardModal';
+import { AutonomousSiteAuditorWizardModal } from './components/AutonomousSiteAuditorWizardModal';
 import { ConversionWizardBanner } from './components/ConversionWizardBanner';
 import { WizardsHubDashboard } from './components/WizardsHubDashboard';
 import { GoogleApiWizard } from './components/GoogleApiWizard';
@@ -134,6 +135,8 @@ export default function App() {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isConversionWizardOpen, setIsConversionWizardOpen] = useState(false);
   const [isClarityWizardOpen, setIsClarityWizardOpen] = useState(false);
+  const [isAutonomousAuditorOpen, setIsAutonomousAuditorOpen] = useState(false);
+  const [auditorInitialUrl, setAuditorInitialUrl] = useState('');
   const [isGoogleApiWizardOpen, setIsGoogleApiWizardOpen] = useState(false);
   const [isSchemaModalOpen, setIsSchemaModalOpen] = useState(false);
   const [isSitemapAuditOpen, setIsSitemapAuditOpen] = useState(false);
@@ -146,6 +149,95 @@ export default function App() {
   const [graderKeyword, setGraderKeyword] = useState('');
   const [wizardsInitialTab, setWizardsInitialTab] = useState<'wizards' | 'citation-sim' | 'whitelabel-pdf' | 'bulk-seo' | 'funnel-map' | 'link-strategist'>('wizards');
   const [linkStrategyUrl, setLinkStrategyUrl] = useState('https://careerpulseai.net');
+
+  // --- BACKGROUND OBSERVER: HISTORICAL URLS RE-INDEXING MONITOR (>30 DAYS) ---
+  // Monitors 'Last Indexed' timestamp of historical URLs and triggers a low-priority 'Content Refresh Recommended' alert
+  const lastRefreshCheckRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!history || history.length === 0) return;
+
+    const now = Date.now();
+    if (lastRefreshCheckRef.current && now - lastRefreshCheckRef.current < 180000) {
+      return;
+    }
+    lastRefreshCheckRef.current = now;
+
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+    const staleList: { url: string; daysAgo: number }[] = [];
+
+    history.forEach((item) => {
+      const itemDate = new Date(item.created_at).getTime();
+      if (!isNaN(itemDate)) {
+        const diffMs = now - itemDate;
+        if (diffMs >= THIRTY_DAYS_MS) {
+          const daysAgo = Math.floor(diffMs / (24 * 60 * 60 * 1000));
+          staleList.push({ url: item.target_url, daysAgo });
+        }
+      }
+    });
+
+    const hasAlertedKey = 'has_alerted_stale_indexing_30d_session';
+    const hasEverAlerted = sessionStorage.getItem(hasAlertedKey);
+
+    if (staleList.length > 0 && !hasEverAlerted) {
+      sessionStorage.setItem(hasAlertedKey, 'true');
+      toast(
+        (t) => (
+          <div className="flex flex-col gap-1.5 font-mono-brutal text-xs">
+            <div className="flex items-center gap-1.5 font-bold text-black uppercase">
+              <span className="text-[#ff4d00]">🕒</span>
+              <span>Content Refresh Recommended (Low Priority)</span>
+            </div>
+            <p className="text-zinc-700 text-[11px]">
+              {staleList.length} historical URL{staleList.length > 1 ? 's have' : ' has'} not been re-indexed in &gt;30 days (e.g., {staleList[0].url}).
+            </p>
+            <div className="flex items-center gap-2 mt-1">
+              <button
+                onClick={() => {
+                  toast.dismiss(t.id);
+                  setAuditorInitialUrl(staleList[0].url);
+                  setIsAutonomousAuditorOpen(true);
+                }}
+                className="px-2.5 py-1 bg-black text-white font-bold text-[10px] hover:bg-[#ff4d00] hover:text-black border border-black cursor-pointer uppercase"
+              >
+                14-Phase Audit
+              </button>
+              <button
+                onClick={() => {
+                  toast.dismiss(t.id);
+                  handleStartJob({
+                    targetUrls: staleList.map((s) => s.url),
+                    features: {
+                      generateBacklinks: true,
+                      checkLiveConfirmation: true,
+                      requestIndexing: true,
+                      runGoogleIndexing: true,
+                      runPingServices: true,
+                    },
+                    selectedDirectoryIds: directories.slice(0, 5).map((d) => d.id),
+                    concurrencyLimit: 4,
+                  });
+                }}
+                className="px-2.5 py-1 bg-white text-black font-bold text-[10px] hover:bg-zinc-200 border border-black cursor-pointer uppercase"
+              >
+                Re-Index
+              </button>
+            </div>
+          </div>
+        ),
+        {
+          duration: 10000,
+          position: 'bottom-right',
+          style: {
+            background: '#faf8f5',
+            border: '2px solid black',
+            borderRadius: '0px',
+            boxShadow: '4px 4px 0 #000',
+          },
+        }
+      );
+    }
+  }, [history, directories]);
 
   // --- DESKTOP BROWSER NOTIFICATION TRIGGER ---
   // Fires when apiHealthReport shows degradation below 80% to ensure immediate awareness of indexing pipeline issues
@@ -937,6 +1029,10 @@ export default function App() {
             setClarityInitialUrl(url || '');
             setIsClarityWizardOpen(true);
           }}
+          onOpenAutonomousAuditor={(url) => {
+            if (url) setAuditorInitialUrl(url);
+            setIsAutonomousAuditorOpen(true);
+          }}
           onOpenGoogleApiWizard={() => setIsGoogleApiWizardOpen(true)}
           onOpenSchemaGenerator={() => setIsSchemaModalOpen(true)}
           onOpenSitemapAudit={() => handleOpenSitemapAudit()}
@@ -1153,6 +1249,10 @@ export default function App() {
               onOpenClarityWizard={(url) => {
                 setClarityInitialUrl(url || '');
                 setIsClarityWizardOpen(true);
+              }}
+              onOpenAutonomousAuditor={(url) => {
+                if (url) setAuditorInitialUrl(url);
+                setIsAutonomousAuditorOpen(true);
               }}
               onOpenGoogleApiWizard={() => setIsGoogleApiWizardOpen(true)}
               onOpenSchemaGeneratorModal={() => setIsSchemaModalOpen(true)}
@@ -1378,6 +1478,13 @@ export default function App() {
         isOpen={isClarityWizardOpen}
         onClose={() => setIsClarityWizardOpen(false)}
         initialUrl={clarityInitialUrl}
+      />
+
+      {/* 14-Phase Autonomous Site Auditor & Conversion Engineer Wizard Modal */}
+      <AutonomousSiteAuditorWizardModal
+        isOpen={isAutonomousAuditorOpen}
+        onClose={() => setIsAutonomousAuditorOpen(false)}
+        initialUrl={auditorInitialUrl || 'https://careerpulseai.net'}
       />
 
       {/* Google Indexing API 3-Step Setup Wizard Modal */}

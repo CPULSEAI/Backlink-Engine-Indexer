@@ -1033,3 +1033,233 @@ export interface DailyPerformanceDigestData {
   };
   fastestDirectoryResponseMs: number;
 }
+
+// --- ELITE AUTONOMOUS 14-PHASE WEBSITE AUDITOR & CONVERSION ENGINEER ---
+export type AuditorTaskStatus = 'Not Started' | 'In Progress' | 'Fixed' | 'Validated';
+export type AuditorPriority = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+
+export interface AuditorActionItem {
+  id: string;
+  issue: string;
+  url: string;
+  category: 'Technical' | 'SEO' | 'Content' | 'Performance' | 'Authority' | 'Internal Linking' | 'UX / Accessibility' | 'Structured Data';
+  priority: AuditorPriority;
+  severity: 'Blocker' | 'Major' | 'Moderate' | 'Minor';
+  estimatedImpact: string; // e.g. '+18% Organic CTR', '+2.4s LCP speedup'
+  estimatedEffort: string; // e.g. '15 mins', '2 hours', '1 day'
+  recommendedFix: string;
+  implementationSteps: string[];
+  status: AuditorTaskStatus;
+  codeSnippet?: string;
+}
+
+export interface CrawlNode {
+  url: string;
+  title: string;
+  depth: number;
+  clickDistance: number;
+  status: number;
+  indexable: boolean;
+  inlinksCount: number;
+  outlinksCount: number;
+  authorityFlow: number; // 0-100
+  isOrphan: boolean;
+  isWeaklyConnected: boolean;
+  isOverlinked: boolean;
+  contentType: string;
+  canonicalUrl?: string;
+  robotsDirective?: string;
+}
+
+export interface InternalLinkRecommendation {
+  sourceUrl: string;
+  targetUrl: string;
+  anchorText: string;
+  reason: string;
+  equityFlowBoost: string;
+}
+
+export interface ContentGapItem {
+  topic: string;
+  competitorCoverage: string;
+  currentSiteCoverage: string;
+  missingInformation: string[];
+  opportunityScore: number; // 0 - 100
+}
+
+export interface OnPageElementAudit {
+  element: 'Title Tag' | 'Meta Description' | 'H1 Header' | 'H2-H4 Subheadings' | 'Images' | 'Internal Anchors';
+  current: string;
+  issue: string;
+  recommendedFix: string;
+  expectedImpact: string;
+}
+
+export interface StructuredDataAuditItem {
+  schemaType: string;
+  status: 'Valid' | 'Warning' | 'Error' | 'Missing Opportunity';
+  details: string;
+  jsonLdSnippet: string;
+}
+
+export interface CompetitorPageProfile {
+  rank: number;
+  domain: string;
+  url: string;
+  h1: string;
+  h2Count: number;
+  wordCount: number;
+  coveredTopics: string[];
+  entityCoverage: number;
+  schemaTypes: string[];
+  backlinksCount: number;
+}
+
+export interface ScorecardBreakdown {
+  technical: number;
+  seo: number;
+  content: number;
+  performance: number;
+  authority: number;
+  internalLinking: number;
+  userExperience: number;
+  overall: number;
+}
+
+export interface SiteAuditorResult {
+  targetUrl: string;
+  domain: string;
+  crawledPagesCount: number;
+  auditTimestamp: string;
+  overallScore: number;
+  scorecardBefore: ScorecardBreakdown;
+  scorecardAfter: ScorecardBreakdown;
+  
+  // Phase 1: Site Discovery
+  siteDiscovery: {
+    nodes: CrawlNode[];
+    indexableCount: number;
+    nonIndexableCount: number;
+    orphanCount: number;
+    brokenCount: number;
+    redirectCount: number;
+    maxDepth: number;
+    robotsTxtFound: boolean;
+    sitemapFound: boolean;
+    taxonomyTags: string[];
+    weaklyConnectedUrls: string[];
+  };
+
+  // Phase 2: Technical SEO
+  technicalSeo: {
+    cwv: {
+      ttfbMs: number;
+      lcpSec: number;
+      fcpSec: number;
+      clsScore: number;
+      inpMs: number;
+    };
+    httpResponses: { [status: string]: number };
+    redirectChains: { source: string; target: string; hops: number }[];
+    canonicalErrorsCount: number;
+    renderBlockingBytes: number;
+    unusedCssBytes: number;
+    heavyAssets: { assetUrl: string; type: string; sizeKb: number; fix: string }[];
+  };
+
+  // Phase 3: Content Quality
+  contentQuality: {
+    searchIntentMatch: string;
+    topicalRelevanceScore: number;
+    semanticCoveragePercent: number;
+    fleschReadingScore: number;
+    avgWordCount: number;
+    keywordDensity: { keyword: string; density: number; tfIdfScore: number }[];
+    thinContentPages: string[];
+    keywordCannibalization: { keyword: string; competingUrls: string[] }[];
+    missingEntities: string[];
+    missingFaqs: { question: string; suggestedAnswer: string }[];
+  };
+
+  // Phase 4: Competitor Intelligence
+  competitorIntelligence: {
+    competitors: CompetitorPageProfile[];
+    contentGaps: ContentGapItem[];
+    pageBlueprint: string[];
+  };
+
+  // Phase 5: Semantic SEO
+  semanticSeo: {
+    extractedEntities: { name: string; type: 'Person' | 'Place' | 'Product' | 'Service' | 'Organization'; authorityWeight: number }[];
+    topicAuthorityScore: number;
+    semanticCompletenessScore: number;
+    recommendedClusters: { pillar: string; subtopics: string[] }[];
+  };
+
+  // Phase 6: On-Page SEO
+  onPageAudit: OnPageElementAudit[];
+
+  // Phase 7: Internal Linking Engine
+  internalLinkingEngine: {
+    recommendations: InternalLinkRecommendation[];
+    hubPages: string[];
+    orphanPages: string[];
+    clusterMap: { clusterName: string; coreHubUrl: string; spokeUrls: string[] }[];
+  };
+
+  // Phase 8: Structured Data
+  structuredData: {
+    items: StructuredDataAuditItem[];
+    generatedJsonLd: string;
+  };
+
+  // Phase 9: UX & Conversion
+  uxCro: {
+    mobileFriendlinessScore: number;
+    frictionPoints: string[];
+    conversionBlockers: string[];
+    ctaRecommendations: string[];
+    trustSignalsFound: string[];
+    trustSignalsMissing: string[];
+  };
+
+  // Phase 10: Accessibility (WCAG)
+  accessibility: {
+    wcagScore: number;
+    contrastViolations: number;
+    missingAltImages: number;
+    keyboardNavIssues: string[];
+    ariaGaps: string[];
+  };
+
+  // Phase 11: Master Task List
+  masterActionPlan: AuditorActionItem[];
+
+  // Phase 12: Generated Replacement Fixes
+  generatedFixes: {
+    titleMetaHtml: string;
+    redirectRules: string;
+    schemaMarkup: string;
+    headerHierarchy: string;
+    internalLinkHtml: string;
+  };
+
+  // Phase 14: Executive Summary
+  executiveSummary: {
+    healthScore: number;
+    top20IssuesCount: number;
+    quickWinsCount: number;
+    quickWins: string[];
+    mediumEffortGains: string[];
+    strategicOpportunities: string[];
+    competitorAdvantages: string[];
+    competitorWeaknesses: string[];
+    thirtyDayPlan: string[];
+    sixtyDayPlan: string[];
+    ninetyDayPlan: string[];
+  };
+
+  // Output: Master Remediation AI Prompt
+  masterRemediationPrompt: string;
+}
+

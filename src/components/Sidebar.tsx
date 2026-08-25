@@ -49,6 +49,7 @@ interface SidebarProps {
   onCloseMobile: () => void;
   onOpenConversionWizard: (url?: string) => void;
   onOpenClarityWizard?: (url?: string) => void;
+  onOpenAutonomousAuditor?: (url?: string) => void;
   onOpenGoogleApiWizard?: () => void;
   onOpenSchemaGenerator?: () => void;
   onOpenSitemapAudit?: () => void;
@@ -77,6 +78,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile,
   onOpenConversionWizard,
   onOpenClarityWizard,
+  onOpenAutonomousAuditor,
   onOpenGoogleApiWizard,
   onOpenSchemaGenerator,
   onOpenSitemapAudit,
@@ -362,6 +364,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             {(isCollapsed || openCategories.wizards) && (
               <div className="space-y-1.5">
+                {/* 14-Phase Autonomous Site Auditor & Conversion Engineer */}
+                {onOpenAutonomousAuditor && (
+                  <button
+                    onClick={() => handleNavClick(onOpenAutonomousAuditor)}
+                    className={`w-full flex items-center ${
+                      isCollapsed ? 'justify-center p-2.5' : 'space-x-3 px-3 py-2'
+                    } text-xs font-bold text-black bg-[#ff4d00]/15 hover:bg-black hover:text-white border-2 border-black shadow-[2px_2px_0_#000] transition-all cursor-pointer uppercase`}
+                    title="14-Phase Autonomous Website Auditor & Conversion Engineer"
+                  >
+                    <Sparkles className="w-4 h-4 text-[#ff4d00] shrink-0" />
+                    {!isCollapsed && (
+                      <div className="flex items-center justify-between flex-1">
+                        <span>14-PHASE AUDITOR</span>
+                        <span className="text-[9px] px-1.5 py-0.2 bg-[#ff4d00] text-black border border-black font-bold">
+                          ELITE
+                        </span>
+                      </div>
+                    )}
+                  </button>
+                )}
+
                 {/* Clarity Overload CRO Audit */}
                 {onOpenClarityWizard && (
                   <button
