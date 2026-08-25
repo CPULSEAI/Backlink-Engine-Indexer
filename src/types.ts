@@ -515,6 +515,27 @@ export interface DeviceLoginHistory {
   method: string;
 }
 
+export interface SparklineMetricItem {
+  id: string;
+  label: string;
+  currentValue: string | number;
+  unit?: string;
+  trendDirection: 'up' | 'down' | 'neutral';
+  trendPercentage: string;
+  color: string;
+  values: number[];
+  subtext?: string;
+}
+
+export interface AdvancedSummaryMetrics {
+  overallSuccessRatePct: number;
+  totalIndexedCount: number;
+  avgLatencyMs: number;
+  activeGatewaysCount?: number;
+  quotaRemainingPct?: number;
+  sparklines: SparklineMetricItem[];
+}
+
 export interface ExecutiveSummaryReport {
   title: string;
   target: string;
@@ -532,6 +553,7 @@ export interface ExecutiveSummaryReport {
     priorityLevel: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
     estimatedRevenueOrRankGain?: string;
   };
+  advancedMetrics?: AdvancedSummaryMetrics;
 }
 
 export interface IndexingCampaignConfig {

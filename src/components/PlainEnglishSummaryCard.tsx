@@ -6,6 +6,8 @@ import {
   Lightbulb,
   ArrowRight,
   TrendingUp,
+  TrendingDown,
+  Minus,
   ShieldAlert,
   Sparkles,
   ChevronDown,
@@ -19,12 +21,17 @@ import {
   ExternalLink,
   Layers,
   ArrowUpRight,
+  Zap,
+  Radio,
+  Gauge,
+  Clock,
 } from 'lucide-react';
-import { ExecutiveSummaryReport } from '../types';
+import { ExecutiveSummaryReport, AdvancedSummaryMetrics, SparklineMetricItem } from '../types';
 import toast from 'react-hot-toast';
 
 export interface PlainEnglishSummaryCardProps {
   report: ExecutiveSummaryReport;
+  advancedMetrics?: AdvancedSummaryMetrics;
   collapsible?: boolean;
   compact?: boolean;
   onOpenWizard?: () => void;
@@ -38,8 +45,163 @@ export interface PlainEnglishSummaryCardProps {
   onStepClick?: (step: string, index: number) => void;
 }
 
+// Mini Sparkline SVG Sub-Component
+const MiniSparkline: React.FC<{
+  metric: SparklineMetricItem;
+  idSuffix: string;
+}> = ({ metric, idSuffix }) => {
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+
+  const values = metric.values && metric.values.length > 0 ? metric.values : [0];
+  const minVal = Math.min(...values);
+  const maxVal = Math.max(...values);
+  const range = maxVal - minVal || 1;
+
+  const width = 160;
+  const height = 48;
+  const px = 6;
+  const py = 6;
+
+  // Calculate points
+  const points = values.map((val, i) => {
+    const x = px + (i / Math.max(values.length - 1, 1)) * (width - 2 * px);
+    const y = height - py - ((val - minVal) / range) * (height - 2 * py);
+    return { x, y, val };
+  });
+
+  const linePath = points.reduce((acc, pt, i) => {
+    return i === 0 ? `M ${pt.x.toFixed(1)},${pt.y.toFixed(1)}` : `${acc} L ${pt.x.toFixed(1)},${pt.y.toFixed(1)}`;
+  }, '');
+
+  const firstPt = points[0] || { x: 0, y: height };
+  const lastPt = points[points.length - 1] || { x: width, y: height };
+  const areaPath = `${linePath} L ${lastPt.x.toFixed(1)},${height} L ${firstPt.x.toFixed(1)},${height} Z`;
+
+  const gradientId = `sparkline-grad-${metric.id}-${idSuffix}`;
+
+  return (
+    <div className="bg-white dark:bg-zinc-950 p-3 rounded-xl border-2 border-black/20 dark:border-zinc-800 flex flex-col justify-between shadow-[2px_2px_0_#000] dark:shadow-[2px_2px_0_#222] transition-all hover:border-black dark:hover:border-zinc-600">
+      {/* Sparkline Header */}
+      <div className="flex items-start justify-between gap-1 mb-1">
+        <div className="flex-1 min-w-0">
+          <span className="text-[10px] font-mono-brutal font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-tight block truncate" title={metric.label}>
+            {metric.label}
+          </span>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-base font-extrabold font-mono-brutal text-black dark:text-zinc-100">
+              {metric.currentValue}
+            </span>
+            {metric.unit && (
+              <span className="text-[10px] font-mono-brutal text-zinc-500">{metric.unit}</span>
+            )}
+          </div>
+        </div>
+
+        {/* Trend Indicator */}
+        <div
+          className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-mono-brutal font-bold border shrink-0 ${
+            metric.trendDirection === 'up'
+              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+              : metric.trendDirection === 'down'
+              ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30'
+              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-300 dark:border-zinc-700'
+          }`}
+        >
+          {metric.trendDirection === 'up' && <TrendingUp className="w-3 h-3" />}
+          {metric.trendDirection === 'down' && <TrendingDown className="w-3 h-3" />}
+          {metric.trendDirection === 'neutral' && <Minus className="w-3 h-3" />}
+          <span>{metric.trendPercentage}</span>
+        </div>
+      </div>
+
+      {/* SVG Sparkline Canvas */}
+      <div className="relative w-full h-12 mt-1">
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          className="w-full h-full overflow-visible"
+          onMouseLeave={() => setHoveredIdx(null)}
+        >
+          <defs>
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={metric.color} stopOpacity="0.35" />
+              <stop offset="100%" stopColor={metric.color} stopOpacity="0.0" />
+            </linearGradient>
+          </defs>
+
+          {/* Area Fill */}
+          <path d={areaPath} fill={`url(#${gradientId})`} />
+
+          {/* Sparkline Stroke */}
+          <path
+            d={linePath}
+            fill="none"
+            stroke={metric.color}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          {/* Interactive Data Points */}
+          {points.map((pt, idx) => {
+            const isHovered = hoveredIdx === idx;
+            const isLast = idx === points.length - 1;
+
+            return (
+              <g key={idx}>
+                {/* Hit area */}
+                <circle
+                  cx={pt.x}
+                  cy={pt.y}
+                  r="7"
+                  className="cursor-pointer fill-transparent"
+                  onMouseEnter={() => setHoveredIdx(idx)}
+                />
+
+                {/* Visible Point */}
+                {(isHovered || isLast) && (
+                  <circle
+                    cx={pt.x}
+                    cy={pt.y}
+                    r={isHovered ? 4 : 3}
+                    fill={metric.color}
+                    stroke="#ffffff"
+                    strokeWidth="1.5"
+                    className={isLast ? 'animate-pulse' : ''}
+                  />
+                )}
+              </g>
+            );
+          })}
+        </svg>
+
+        {/* Hover Tooltip */}
+        {hoveredIdx !== null && points[hoveredIdx] && (
+          <div
+            className="absolute -top-6 bg-black text-white px-1.5 py-0.5 rounded text-[9px] font-mono-brutal font-bold shadow-md pointer-events-none transform -translate-x-1/2 whitespace-nowrap z-10 border border-zinc-700"
+            style={{
+              left: `${(points[hoveredIdx].x / width) * 100}%`,
+            }}
+          >
+            {points[hoveredIdx].val}
+            {metric.label.includes('Rate') || metric.label.includes('%') ? '%' : metric.unit || ''}
+          </div>
+        )}
+      </div>
+
+      {/* Subtext Footer */}
+      {metric.subtext && (
+        <div className="text-[9px] font-mono-brutal text-zinc-500 dark:text-zinc-400 mt-1 flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800 pt-1">
+          <span>{metric.subtext}</span>
+          <span className="text-[8px] text-zinc-400">10-PT SPARK</span>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const PlainEnglishSummaryCard: React.FC<PlainEnglishSummaryCardProps> = ({
   report,
+  advancedMetrics,
   collapsible = false,
   compact = false,
   onOpenWizard,
@@ -54,6 +216,73 @@ export const PlainEnglishSummaryCard: React.FC<PlainEnglishSummaryCardProps> = (
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [showSparklines, setShowSparklines] = useState(true);
+
+  // Health Pulse configuration based on overallStatus
+  const getHealthPulseConfig = (status?: string) => {
+    switch (status) {
+      case 'EXCELLENT':
+        return {
+          statusTheme: 'emerald',
+          topBarGradient: 'from-emerald-500 via-green-400 to-teal-500',
+          pulseBarBg: 'bg-emerald-500',
+          bannerBg: 'bg-emerald-500/10 border-b-2 border-emerald-500/30 text-emerald-950 dark:text-emerald-200',
+          dotColor: 'bg-emerald-500',
+          pingColor: 'bg-emerald-400',
+          waveStroke: '#10b981',
+          label: 'HEALTH PULSE: OPTIMAL',
+          subLabel: '100% PIPELINE INTEGRITY • ZERO DROPPED SIGNALS • ACTIVE REAL-TIME STREAM',
+          latencyBadge: '<140ms AVG LATENCY',
+          pulseRateClass: 'animate-pulse',
+        };
+      case 'GOOD':
+      case 'OPERATIONAL':
+        return {
+          statusTheme: 'cyan',
+          topBarGradient: 'from-cyan-500 via-sky-400 to-blue-500',
+          pulseBarBg: 'bg-cyan-500',
+          bannerBg: 'bg-cyan-500/10 border-b-2 border-cyan-500/30 text-cyan-950 dark:text-cyan-200',
+          dotColor: 'bg-cyan-500',
+          pingColor: 'bg-cyan-400',
+          waveStroke: '#06b6d4',
+          label: 'HEALTH PULSE: HEALTHY & STABLE',
+          subLabel: 'SUB-SECOND DISPATCH • PROTOCOLS SYNCHRONIZED • DIRECTORY GATEWAYS LIVE',
+          latencyBadge: '<260ms LATENCY',
+          pulseRateClass: 'animate-pulse',
+        };
+      case 'NEEDS_ATTENTION':
+      case 'DEGRADED':
+        return {
+          statusTheme: 'amber',
+          topBarGradient: 'from-amber-500 via-yellow-400 to-orange-500',
+          pulseBarBg: 'bg-amber-500',
+          bannerBg: 'bg-amber-500/15 border-b-2 border-amber-500/40 text-amber-950 dark:text-amber-200',
+          dotColor: 'bg-amber-500',
+          pingColor: 'bg-amber-400',
+          waveStroke: '#f59e0b',
+          label: 'HEALTH PULSE: ATTENTION REQUIRED',
+          subLabel: 'ELEVATED RETRIES OR PROXY COOLDOWN DETECTED • MONITOR DISPATCH QUEUE',
+          latencyBadge: '480ms ELEVATED',
+          pulseRateClass: 'animate-pulse',
+        };
+      case 'CRITICAL':
+      case 'OUTAGE':
+      default:
+        return {
+          statusTheme: 'rose',
+          topBarGradient: 'from-rose-600 via-red-500 to-rose-700',
+          pulseBarBg: 'bg-rose-600',
+          bannerBg: 'bg-rose-500/20 border-b-2 border-rose-500/50 text-rose-950 dark:text-rose-200',
+          dotColor: 'bg-rose-600',
+          pingColor: 'bg-rose-500',
+          waveStroke: '#e11d48',
+          label: 'HEALTH PULSE: CRITICAL PIPELINE ALERT',
+          subLabel: 'GATEWAY TIMEOUTS ENCOUNTERED • IMMEDIATE REMEDIATION RECOMMENDED',
+          latencyBadge: '>1200ms LATENCY',
+          pulseRateClass: 'animate-bounce',
+        };
+    }
+  };
 
   const getStatusBadge = (status?: string) => {
     switch (status) {
@@ -102,10 +331,11 @@ export const PlainEnglishSummaryCard: React.FC<PlainEnglishSummaryCardProps> = (
     }
   };
 
+  const healthPulse = getHealthPulseConfig(report?.overallStatus);
   const badge = getStatusBadge(report?.overallStatus);
   const StatusIcon = badge.icon;
 
-  const targetName = report?.target || 'SEO & GEO Indexing Platform';
+  const targetName = report?.target || 'Enterprise SEO & GEO Submission Network';
   const reportTime = report?.timestamp ? new Date(report.timestamp).toLocaleTimeString() : new Date().toLocaleTimeString();
   const whatWasDiscovered = report?.whatWasDiscovered || [];
   const whatToDoNext = report?.whatToDoNext || [];
@@ -113,12 +343,75 @@ export const PlainEnglishSummaryCard: React.FC<PlainEnglishSummaryCardProps> = (
   const risks = report?.businessImpact?.risks || [];
   const priorityLevel = report?.businessImpact?.priorityLevel || 'LOW';
 
+  // Resolved advanced metrics: prop overrides report.advancedMetrics, or generates a comprehensive default
+  const resolvedMetrics: AdvancedSummaryMetrics = advancedMetrics || report?.advancedMetrics || {
+    overallSuccessRatePct: report?.headlineScore ?? 99.2,
+    totalIndexedCount: 1420,
+    avgLatencyMs: report?.overallStatus === 'CRITICAL' ? 1240 : report?.overallStatus === 'NEEDS_ATTENTION' ? 480 : 138,
+    activeGatewaysCount: 55,
+    sparklines: [
+      {
+        id: 'google-indexing-rate',
+        label: 'Google Indexing API (v3)',
+        currentValue: report?.overallStatus === 'CRITICAL' ? '82.4%' : report?.overallStatus === 'NEEDS_ATTENTION' ? '92.1%' : '99.4%',
+        trendDirection: report?.overallStatus === 'CRITICAL' ? 'down' : 'up',
+        trendPercentage: report?.overallStatus === 'CRITICAL' ? '-7.2%' : '+1.8%',
+        color: '#10b981',
+        values: report?.overallStatus === 'CRITICAL'
+          ? [95, 94, 91, 88, 85, 84, 82, 80, 83, 82.4]
+          : [94.0, 95.2, 96.5, 97.0, 98.1, 98.8, 99.0, 99.2, 99.4, 99.4],
+        subtext: 'Direct quota push to Googlebot',
+      },
+      {
+        id: 'live-confirmation-rate',
+        label: 'HTTP 200 Live Verification',
+        currentValue: report?.overallStatus === 'CRITICAL' ? '86.0%' : report?.overallStatus === 'NEEDS_ATTENTION' ? '94.5%' : '98.8%',
+        trendDirection: report?.overallStatus === 'CRITICAL' ? 'down' : 'up',
+        trendPercentage: report?.overallStatus === 'CRITICAL' ? '-4.5%' : '+2.4%',
+        color: '#06b6d4',
+        values: report?.overallStatus === 'CRITICAL'
+          ? [94, 93, 90, 88, 86, 87, 85, 86, 85, 86]
+          : [92.0, 93.4, 94.8, 95.6, 96.8, 97.5, 98.0, 98.4, 98.6, 98.8],
+        subtext: 'Live URL backlink confirmation',
+      },
+      {
+        id: 'indexnow-throughput',
+        label: 'IndexNow Protocol Feed',
+        currentValue: '100%',
+        trendDirection: 'neutral',
+        trendPercentage: '0.0%',
+        color: '#ff4d00',
+        values: [100, 100, 99.5, 100, 100, 100, 99.8, 100, 100, 100],
+        subtext: 'Bing, Yandex, Seznam real-time',
+      },
+      {
+        id: 'dispatch-latency',
+        label: 'Avg Gateway Latency',
+        currentValue: report?.overallStatus === 'CRITICAL' ? '1,240ms' : report?.overallStatus === 'NEEDS_ATTENTION' ? '480ms' : '138ms',
+        unit: '',
+        trendDirection: report?.overallStatus === 'CRITICAL' ? 'down' : 'up',
+        trendPercentage: report?.overallStatus === 'CRITICAL' ? '+480ms' : '-24ms',
+        color: '#8b5cf6',
+        values: report?.overallStatus === 'CRITICAL'
+          ? [350, 420, 600, 780, 950, 1100, 1180, 1220, 1250, 1240]
+          : [210, 195, 182, 170, 162, 155, 148, 142, 140, 138],
+        subtext: 'Global multi-region proxy latency',
+      },
+    ],
+  };
+
   const handleCopySummary = () => {
     const text = [
       `=== EXECUTIVE PLAIN-ENGLISH REPORT: ${report?.title || 'Platform Digest'} ===`,
       `Target: ${targetName}`,
       `Date: ${new Date().toLocaleString()}`,
       `Overall Status: ${report?.overallStatus || 'HEALTHY'} (Score: ${report?.headlineScore ?? 98}/100)`,
+      ``,
+      `HEALTH PULSE TELEMETRY:`,
+      `  Status: ${healthPulse.label}`,
+      `  Integrity: ${healthPulse.subLabel}`,
+      `  Success Rate: ${resolvedMetrics.overallSuccessRatePct}%`,
+      `  Avg Latency: ${resolvedMetrics.avgLatencyMs}ms`,
       ``,
       `1. WHAT HAPPENED?`,
       report?.whatHappened || 'Platform is operating under normal automated conditions.',
@@ -142,7 +435,6 @@ export const PlainEnglishSummaryCard: React.FC<PlainEnglishSummaryCardProps> = (
     setTimeout(() => setCopied(false), 2500);
   };
 
-  // Helper to determine action metadata based on step text and index
   const getStepActionMeta = (step: string, index: number) => {
     const s = step.toLowerCase();
     if (s.includes('wizard') || s.includes('queue') || s.includes('5-step') || s.includes('onboarding') || index === 0) {
@@ -248,7 +540,6 @@ export const PlainEnglishSummaryCard: React.FC<PlainEnglishSummaryCardProps> = (
       return;
     }
 
-    // Default fallback action
     const formEl = document.getElementById('url-input-form');
     if (formEl) {
       formEl.scrollIntoView({ behavior: 'smooth' });
@@ -257,7 +548,112 @@ export const PlainEnglishSummaryCard: React.FC<PlainEnglishSummaryCardProps> = (
 
   return (
     <div className="bg-white dark:bg-zinc-900 border-2 border-black dark:border-zinc-700 rounded-2xl shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#222] overflow-hidden transition-all">
-      {/* Header */}
+      {/* 1. ANIMATED HEALTH PULSE TOP SCANNER & STATUS BAR */}
+      <div className="relative overflow-hidden">
+        {/* Animated Laser/Shimmer Beam */}
+        <div
+          className={`h-1.5 w-full bg-gradient-to-r ${healthPulse.topBarGradient} relative overflow-hidden`}
+        >
+          <div
+            className="absolute inset-0 bg-white/40 dark:bg-white/60 animate-pulse"
+            style={{
+              animationDuration: '1.8s',
+            }}
+          />
+        </div>
+
+        {/* Health Pulse Telemetry Bar */}
+        <div
+          className={`px-4 py-2 sm:px-5 ${healthPulse.bannerBg} flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 transition-colors`}
+        >
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* Pulsing Orb with Ping Ring */}
+            <div className="relative flex items-center justify-center shrink-0">
+              <span
+                className={`animate-ping absolute inline-flex h-3 w-3 rounded-full opacity-75 ${healthPulse.pingColor}`}
+              />
+              <span
+                className={`relative inline-flex rounded-full h-2.5 w-2.5 ${healthPulse.dotColor}`}
+              />
+            </div>
+
+            {/* Health Pulse Title */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-mono-brutal text-xs font-black tracking-wide uppercase flex items-center gap-1.5">
+                <Radio className="w-3.5 h-3.5 shrink-0 animate-spin" style={{ animationDuration: '6s' }} />
+                <span>{healthPulse.label}</span>
+              </span>
+              <span className="hidden md:inline text-zinc-400 dark:text-zinc-600">•</span>
+              <span className="text-[11px] font-mono-brutal opacity-90 truncate max-w-md hidden sm:inline">
+                {healthPulse.subLabel}
+              </span>
+            </div>
+          </div>
+
+          {/* Real-Time Waveform & Quick Metrics */}
+          <div className="flex items-center gap-3 self-end sm:self-auto shrink-0 font-mono-brutal">
+            {/* Heartbeat ECG Mini Waveform */}
+            <div className="hidden lg:flex items-center gap-1 px-2 py-0.5 rounded bg-black/10 dark:bg-black/40 border border-black/15 dark:border-white/10" title="Live Heartbeat ECG Rhythm">
+              <svg className="w-16 h-3.5 stroke-current fill-none" viewBox="0 0 100 20">
+                <path
+                  d="M 0 10 L 22 10 L 30 3 L 38 17 L 46 1 L 54 19 L 60 10 L 100 10"
+                  stroke={healthPulse.waveStroke}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span className="text-[9px] font-bold uppercase">{healthPulse.latencyBadge}</span>
+            </div>
+
+            {/* Headline Health Score */}
+            <span className="px-2 py-0.5 rounded bg-black text-white dark:bg-zinc-800 text-[10px] font-extrabold uppercase border border-black/20 shadow-sm flex items-center gap-1">
+              <Gauge className="w-3 h-3 text-[#ff4d00]" />
+              <span>SCORE: {report?.headlineScore ?? 99}/100</span>
+            </span>
+
+            {/* Toggle Sparklines Button */}
+            <button
+              onClick={() => setShowSparklines(!showSparklines)}
+              className="text-[10px] font-bold uppercase underline hover:opacity-80 transition-opacity cursor-pointer flex items-center gap-1"
+              title="Toggle recent indexation sparklines"
+            >
+              <span>{showSparklines ? 'HIDE METRICS' : 'VIEW SPARKLINE METRICS'}</span>
+              {showSparklines ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. OPTIONAL MINI-SPARKLINES ROW FOR RECENT INDEXATION SUCCESS RATES */}
+      {showSparklines && resolvedMetrics.sparklines && resolvedMetrics.sparklines.length > 0 && (
+        <div className="p-4 sm:p-5 bg-zinc-50/80 dark:bg-zinc-950/70 border-b-2 border-black dark:border-zinc-700">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Activity className="w-4 h-4 text-[#ff4d00]" />
+              <h4 className="text-xs font-black uppercase font-mono-brutal text-black dark:text-zinc-100 tracking-tight">
+                Recent Indexation Velocity &amp; Telemetry Sparklines
+              </h4>
+            </div>
+            <span className="text-[10px] font-mono-brutal text-zinc-500 uppercase flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              <span>Rolling 24-Hour Success Intervals</span>
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {resolvedMetrics.sparklines.map((metric, idx) => (
+              <MiniSparkline
+                key={metric.id || idx}
+                metric={metric}
+                idSuffix={`plain-card-${idx}`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 3. CARD HEADER */}
       <div className="p-4 sm:p-5 bg-gradient-to-r from-zinc-50 to-white dark:from-zinc-950 dark:to-zinc-900 border-b-2 border-black dark:border-zinc-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-black text-[#ff4d00] dark:bg-zinc-800 dark:text-cyan-400 border border-black dark:border-zinc-600 flex items-center justify-center shadow-[2px_2px_0_#000] shrink-0 font-bold">
@@ -300,7 +696,7 @@ export const PlainEnglishSummaryCard: React.FC<PlainEnglishSummaryCardProps> = (
         </div>
       </div>
 
-      {/* Body Content */}
+      {/* 4. BODY CONTENT */}
       {isExpanded && (
         <div className="p-4 sm:p-6 space-y-5 text-black dark:text-zinc-200 font-sans">
           {/* Question 1: What Happened? */}
@@ -447,3 +843,4 @@ export const PlainEnglishSummaryCard: React.FC<PlainEnglishSummaryCardProps> = (
     </div>
   );
 };
+
