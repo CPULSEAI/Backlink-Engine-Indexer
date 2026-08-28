@@ -684,6 +684,39 @@ export const AutonomousSiteAuditorWizardModal: React.FC<AutonomousSiteAuditorWiz
                       </div>
                     </div>
                   </div>
+
+                  {/* Master Remediation Prompt Callout Banner */}
+                  <div className="border-2 border-black bg-white p-5 shadow-[4px_4px_0_#000] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div className="space-y-1.5 max-w-2xl">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 bg-[#ff4d00] text-black font-mono-brutal text-[10px] font-bold uppercase border border-black">
+                          Phase 14 Production Output
+                        </span>
+                        <h4 className="font-mono-brutal text-sm font-bold uppercase text-black">
+                          Master Remediation Prompt Ready for Execution
+                        </h4>
+                      </div>
+                      <p className="text-xs font-mono-brutal text-zinc-700 leading-relaxed">
+                        Compiles all 14-phase diagnostic findings into an AI-executable runbook. Generates validated JSON-LD schema, fixes orphan link hierarchies, optimizes high-CTR metadata, and resolves Core Web Vitals script bottlenecks.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => setActiveTab('prompt')}
+                        className="px-3.5 py-2 bg-black text-white font-mono-brutal text-xs font-bold border-2 border-black hover:bg-[#ff4d00] hover:text-black transition-all flex items-center gap-1.5 shadow-[2px_2px_0_#000]"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-[#ff4d00]" />
+                        <span>View Master Prompt</span>
+                      </button>
+                      <button
+                        onClick={handleCopyPrompt}
+                        className="px-3.5 py-2 bg-[#ff4d00] text-black font-mono-brutal text-xs font-bold border-2 border-black hover:bg-black hover:text-white transition-all flex items-center gap-1.5 shadow-[2px_2px_0_#000]"
+                      >
+                        {copiedPrompt ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{copiedPrompt ? 'Copied!' : 'Copy Prompt'}</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -1020,11 +1053,92 @@ export const AutonomousSiteAuditorWizardModal: React.FC<AutonomousSiteAuditorWiz
 
               {/* TAB: MASTER AI PROMPT */}
               {activeTab === 'prompt' && (
-                <div className="space-y-4">
+                <div className="space-y-5">
+                  {/* Comprehensive Explanation of What the Master Remediation Prompt Accomplishes */}
+                  <div className="border-2 border-black bg-white p-5 shadow-[4px_4px_0_#000] space-y-4">
+                    <div className="flex items-center gap-2 border-b-2 border-black pb-3">
+                      <div className="w-8 h-8 rounded-lg bg-[#ff4d00] text-black border border-black flex items-center justify-center font-bold shadow-[2px_2px_0_#000]">
+                        <Sparkles className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="font-mono-brutal text-sm font-black uppercase text-black">
+                          What the Master Remediation Prompt Accomplishes
+                        </h4>
+                        <p className="text-[11px] font-mono-brutal text-zinc-600">
+                          An AI-executable implementation runbook that translates all 14 audit phases into drop-in production code &amp; copy
+                        </p>
+                      </div>
+                    </div>
+
+                    <p className="text-xs font-mono-brutal text-zinc-800 leading-relaxed">
+                      The <strong>Master Remediation Prompt</strong> synthesizes every diagnostic vulnerability, crawl defect, Core Web Vitals bottleneck, and conversion leak discovered during the 14-phase audit of <strong>{auditResult.targetUrl}</strong> into a single, multi-persona engineering directive. When pasted into an AI assistant or handed to a developer, it accomplishes four key objectives:
+                    </p>
+
+                    {/* 4 Core Accomplishments Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                      <div className="p-3.5 bg-[#faf8f5] border-2 border-black space-y-1.5 shadow-[2px_2px_0_#000]">
+                        <div className="flex items-center gap-2 text-xs font-mono-brutal font-bold text-black uppercase">
+                          <Layers className="w-4 h-4 text-[#ff4d00]" />
+                          <span>1. Structured Data &amp; Rich Snippet Graph</span>
+                        </div>
+                        <p className="text-[11px] font-mono-brutal text-zinc-700 leading-normal">
+                          Generates validated JSON-LD schema (<code>SoftwareApplication</code>, <code>BreadcrumbList</code>, <code>FAQPage</code>) ready for immediate <code>&lt;head&gt;</code> injection to secure Google rich snippets and AI search citations (Perplexity, ChatGPT, Gemini).
+                        </p>
+                      </div>
+
+                      <div className="p-3.5 bg-[#faf8f5] border-2 border-black space-y-1.5 shadow-[2px_2px_0_#000]">
+                        <div className="flex items-center gap-2 text-xs font-mono-brutal font-bold text-black uppercase">
+                          <MousePointerClick className="w-4 h-4 text-emerald-600" />
+                          <span>2. High-Converting Copy &amp; Metadata Overhaul</span>
+                        </div>
+                        <p className="text-[11px] font-mono-brutal text-zinc-700 leading-normal">
+                          Replaces low-CTR title tags, vague meta descriptions, and scattered hero CTAs with high-intent direct-response copy, unifying the value proposition to eliminate bounce rates.
+                        </p>
+                      </div>
+
+                      <div className="p-3.5 bg-[#faf8f5] border-2 border-black space-y-1.5 shadow-[2px_2px_0_#000]">
+                        <div className="flex items-center gap-2 text-xs font-mono-brutal font-bold text-black uppercase">
+                          <Workflow className="w-4 h-4 text-cyan-600" />
+                          <span>3. Reverse Silo Internal Link Redistribution</span>
+                        </div>
+                        <p className="text-[11px] font-mono-brutal text-zinc-700 leading-normal">
+                          Rescues isolated orphan URLs with zero internal PageRank by prescribing exact contextual anchor placements in blog articles and footer navigation hubs.
+                        </p>
+                      </div>
+
+                      <div className="p-3.5 bg-[#faf8f5] border-2 border-black space-y-1.5 shadow-[2px_2px_0_#000]">
+                        <div className="flex items-center gap-2 text-xs font-mono-brutal font-bold text-black uppercase">
+                          <Zap className="w-4 h-4 text-amber-600" />
+                          <span>4. Core Web Vitals &amp; Performance Tuning</span>
+                        </div>
+                        <p className="text-[11px] font-mono-brutal text-zinc-700 leading-normal">
+                          Eliminates render-blocking scripts via <code>async</code>/<code>defer</code>, prescribes below-the-fold image lazy loading, WebP hero banner migration, and server cache rules.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* How to Execute Workflow */}
+                    <div className="p-3 bg-black text-white border-2 border-black flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-mono-brutal">
+                      <div className="flex items-center gap-2">
+                        <Terminal className="w-4 h-4 text-[#ff4d00] shrink-0" />
+                        <span><strong>Execution Flow:</strong> 1. Copy Prompt ➔ 2. Paste in AI coding session ➔ 3. Deploy code &amp; push to Rapid Indexer</span>
+                      </div>
+                      <button
+                        onClick={handleCopyPrompt}
+                        className="px-3 py-1 bg-[#ff4d00] text-black font-bold uppercase hover:bg-white transition-colors shrink-0 flex items-center gap-1"
+                      >
+                        {copiedPrompt ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{copiedPrompt ? 'Copied!' : 'Copy AI Prompt'}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Raw Prompt Textarea Container */}
                   <div className="border-2 border-black bg-white p-5 shadow-[4px_4px_0_#000] space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="font-mono-brutal text-sm font-bold uppercase text-black">
-                        Master Remediation Prompt (Copy & Paste to AI Session)
+                      <span className="font-mono-brutal text-sm font-bold uppercase text-black flex items-center gap-2">
+                        <Terminal className="w-4 h-4 text-[#ff4d00]" />
+                        <span>Master Remediation Prompt (Raw Markdown Format)</span>
                       </span>
                       <button
                         onClick={handleCopyPrompt}
@@ -1037,7 +1151,7 @@ export const AutonomousSiteAuditorWizardModal: React.FC<AutonomousSiteAuditorWiz
                     <textarea
                       readOnly
                       value={auditResult.masterRemediationPrompt}
-                      rows={18}
+                      rows={16}
                       className="w-full p-4 bg-black text-green-400 font-mono-brutal text-xs border-2 border-black focus:outline-none"
                     />
                   </div>

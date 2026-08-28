@@ -218,70 +218,60 @@ export const PlainEnglishSummaryCard: React.FC<PlainEnglishSummaryCardProps> = (
   const [copied, setCopied] = useState(false);
   const [showSparklines, setShowSparklines] = useState(true);
 
-  // Health Pulse configuration based on overallStatus
-  const getHealthPulseConfig = (status?: string) => {
-    switch (status) {
-      case 'EXCELLENT':
-        return {
-          statusTheme: 'emerald',
-          topBarGradient: 'from-emerald-500 via-green-400 to-teal-500',
-          pulseBarBg: 'bg-emerald-500',
-          bannerBg: 'bg-emerald-500/10 border-b-2 border-emerald-500/30 text-emerald-950 dark:text-emerald-200',
-          dotColor: 'bg-emerald-500',
-          pingColor: 'bg-emerald-400',
-          waveStroke: '#10b981',
-          label: 'HEALTH PULSE: OPTIMAL',
-          subLabel: '100% PIPELINE INTEGRITY • ZERO DROPPED SIGNALS • ACTIVE REAL-TIME STREAM',
-          latencyBadge: '<140ms AVG LATENCY',
-          pulseRateClass: 'animate-pulse',
-        };
-      case 'GOOD':
-      case 'OPERATIONAL':
-        return {
-          statusTheme: 'cyan',
-          topBarGradient: 'from-cyan-500 via-sky-400 to-blue-500',
-          pulseBarBg: 'bg-cyan-500',
-          bannerBg: 'bg-cyan-500/10 border-b-2 border-cyan-500/30 text-cyan-950 dark:text-cyan-200',
-          dotColor: 'bg-cyan-500',
-          pingColor: 'bg-cyan-400',
-          waveStroke: '#06b6d4',
-          label: 'HEALTH PULSE: HEALTHY & STABLE',
-          subLabel: 'SUB-SECOND DISPATCH • PROTOCOLS SYNCHRONIZED • DIRECTORY GATEWAYS LIVE',
-          latencyBadge: '<260ms LATENCY',
-          pulseRateClass: 'animate-pulse',
-        };
-      case 'NEEDS_ATTENTION':
-      case 'DEGRADED':
-        return {
-          statusTheme: 'amber',
-          topBarGradient: 'from-amber-500 via-yellow-400 to-orange-500',
-          pulseBarBg: 'bg-amber-500',
-          bannerBg: 'bg-amber-500/15 border-b-2 border-amber-500/40 text-amber-950 dark:text-amber-200',
-          dotColor: 'bg-amber-500',
-          pingColor: 'bg-amber-400',
-          waveStroke: '#f59e0b',
-          label: 'HEALTH PULSE: ATTENTION REQUIRED',
-          subLabel: 'ELEVATED RETRIES OR PROXY COOLDOWN DETECTED • MONITOR DISPATCH QUEUE',
-          latencyBadge: '480ms ELEVATED',
-          pulseRateClass: 'animate-pulse',
-        };
-      case 'CRITICAL':
-      case 'OUTAGE':
-      default:
-        return {
-          statusTheme: 'rose',
-          topBarGradient: 'from-rose-600 via-red-500 to-rose-700',
-          pulseBarBg: 'bg-rose-600',
-          bannerBg: 'bg-rose-500/20 border-b-2 border-rose-500/50 text-rose-950 dark:text-rose-200',
-          dotColor: 'bg-rose-600',
-          pingColor: 'bg-rose-500',
-          waveStroke: '#e11d48',
-          label: 'HEALTH PULSE: CRITICAL PIPELINE ALERT',
-          subLabel: 'GATEWAY TIMEOUTS ENCOUNTERED • IMMEDIATE REMEDIATION RECOMMENDED',
-          latencyBadge: '>1200ms LATENCY',
-          pulseRateClass: 'animate-bounce',
-        };
+  // Health Pulse configuration based on overallStatus & headline score percentage
+  const getHealthPulseConfig = (status?: string, score?: number) => {
+    // If score is provided, prioritize score percentage thresholds:
+    // >95% -> Green (Optimal)
+    // 80-94% -> Amber (Moderate / Needs Attention)
+    // <80% -> Red (Critical)
+    const effectiveScore = score ?? (status === 'EXCELLENT' ? 98 : status === 'GOOD' ? 90 : status === 'NEEDS_ATTENTION' ? 84 : 68);
+
+    if (effectiveScore >= 95 || status === 'EXCELLENT') {
+      return {
+        statusTheme: 'emerald',
+        topBarGradient: 'from-emerald-500 via-green-400 to-teal-500',
+        pulseBarBg: 'bg-emerald-500',
+        bannerBg: 'bg-emerald-500/15 border-b-2 border-emerald-500/40 text-emerald-950 dark:text-emerald-200',
+        dotColor: 'bg-emerald-500',
+        pingColor: 'bg-emerald-400',
+        waveStroke: '#10b981',
+        label: 'HEALTH PULSE: OPTIMAL (>95% HEALTH)',
+        subLabel: '100% PIPELINE INTEGRITY • ZERO DROPPED SIGNALS • ACTIVE REAL-TIME STREAM',
+        latencyBadge: '<140ms AVG LATENCY',
+        pulseRateClass: 'animate-pulse',
+      };
     }
+
+    if ((effectiveScore >= 80 && effectiveScore < 95) || status === 'GOOD' || status === 'OPERATIONAL' || status === 'NEEDS_ATTENTION' || status === 'DEGRADED') {
+      return {
+        statusTheme: 'amber',
+        topBarGradient: 'from-amber-500 via-yellow-400 to-orange-500',
+        pulseBarBg: 'bg-amber-500',
+        bannerBg: 'bg-amber-500/20 border-b-2 border-amber-500/50 text-amber-950 dark:text-amber-200',
+        dotColor: 'bg-amber-500',
+        pingColor: 'bg-amber-400',
+        waveStroke: '#f59e0b',
+        label: 'HEALTH PULSE: ATTENTION REQUIRED (80-94% HEALTH)',
+        subLabel: 'ELEVATED RETRIES OR PROXY COOLDOWN DETECTED • MONITOR DISPATCH QUEUE',
+        latencyBadge: '480ms ELEVATED',
+        pulseRateClass: 'animate-pulse',
+      };
+    }
+
+    // Default to Red for <80% (Critical)
+    return {
+      statusTheme: 'rose',
+      topBarGradient: 'from-rose-600 via-red-500 to-rose-700',
+      pulseBarBg: 'bg-rose-600',
+      bannerBg: 'bg-rose-500/25 border-b-2 border-rose-500/60 text-rose-950 dark:text-rose-200',
+      dotColor: 'bg-rose-600',
+      pingColor: 'bg-rose-500',
+      waveStroke: '#e11d48',
+      label: 'HEALTH PULSE: CRITICAL PIPELINE ALERT (<80% HEALTH)',
+      subLabel: 'GATEWAY TIMEOUTS ENCOUNTERED • IMMEDIATE REMEDIATION RECOMMENDED',
+      latencyBadge: '>1200ms LATENCY',
+      pulseRateClass: 'animate-bounce',
+    };
   };
 
   const getStatusBadge = (status?: string) => {
@@ -331,7 +321,7 @@ export const PlainEnglishSummaryCard: React.FC<PlainEnglishSummaryCardProps> = (
     }
   };
 
-  const healthPulse = getHealthPulseConfig(report?.overallStatus);
+  const healthPulse = getHealthPulseConfig(report?.overallStatus, report?.headlineScore);
   const badge = getStatusBadge(report?.overallStatus);
   const StatusIcon = badge.icon;
 
