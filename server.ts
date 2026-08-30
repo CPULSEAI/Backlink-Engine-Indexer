@@ -3436,9 +3436,39 @@ Respond ONLY with a valid JSON object strictly matching this schema:
     try {
       const changelog = [
         {
-          version: 'v3.1.0 (Enterprise Automation & Diagnostic Suite)',
+          version: 'v3.2.0 (Autonomous Auditor & BullMQ Priority Architecture)',
           releaseDate: 'August 2026',
           status: 'Current Production Release',
+          highlights: [
+            '14-Phase Autonomous Website Auditor & Conversion Engineer for multi-vector diagnosis & code-level fixes',
+            'Master Remediation Prompt architecture generating copy-paste patches, redirect rules, and JSON-LD markup',
+            'BullMQ Priority Queue system (P0 Enterprise vs P2 Historical) with 80/20 concurrency reservation',
+            'Real-time sparkline trend visualizers for indexation latency, throughput, and 24h success rate telemetry',
+            'Dynamic Health Pulse bar with animated threshold indicators in PlainEnglishSummaryCard',
+          ],
+          features: [
+            {
+              module: '14-Phase Auditor Engine',
+              description: 'Multi-vector diagnostic and remediation pipeline analyzing orphan URLs, Core Web Vitals, TF-IDF density, competitor gap radar, internal PageRank silos, and WCAG accessibility with direct Google API & IndexNow dispatch.'
+            },
+            {
+              module: 'BullMQ Priority Queue',
+              description: 'P0/P1/P2 priority tiering reserving 80% concurrency for user/enterprise submissions while throttling historical re-indexing tasks to a background 20% worker pool.'
+            },
+            {
+              module: 'Sparkline Analytics & Health Pulse',
+              description: 'Integrated SVG sparkline charts visualizing real-time throughput and latency trends with dynamic color-coded health status thresholds (Green >95%, Amber 80-94%, Red <80%).'
+            },
+            {
+              module: 'Master Remediation Prompt',
+              description: 'Generates structured AI coding agent prompts containing complete diagnostic payloads for automated source file repairs and semantic schema injection.'
+            },
+          ]
+        },
+        {
+          version: 'v3.1.0 (Enterprise Automation & Diagnostic Suite)',
+          releaseDate: 'August 2026',
+          status: 'Previous Stable',
           highlights: [
             'Automated XML Sitemap Crawler & Audit Engine with broken link and meta description inspection',
             'Peer-to-Peer Partner Backlink Exchange Network real-time health telemetry & quality safeguards',

@@ -81,6 +81,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
     | 'faq'
     | 'advanced'
     | 'server-automation'
+    | 'auditor-engine'
     | 'glossary'
     | 'changelog'
     | 'system-docs'
@@ -239,9 +240,10 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
     { id: 'faq', label: '8. FAQ', icon: HelpCircle },
     { id: 'advanced', label: '9. Advanced', icon: Terminal },
     { id: 'server-automation', label: '10. Server-Side Automation (Cron)', icon: Server },
-    { id: 'glossary', label: '11. Glossary', icon: FileText },
-    { id: 'changelog', label: '12. Live Updates & Changelog', icon: Activity },
-    { id: 'system-docs', label: '13. Master System Architecture & Future Analysis', icon: Cpu },
+    { id: 'auditor-engine', label: '11. 14-Phase Autonomous Auditor', icon: Cpu },
+    { id: 'glossary', label: '12. Glossary', icon: FileText },
+    { id: 'changelog', label: '13. Live Updates & Changelog', icon: Activity },
+    { id: 'system-docs', label: '14. Master System Architecture & Future Analysis', icon: Cpu },
   ];
 
   return (
@@ -1904,16 +1906,228 @@ crontab -e
 0 2 * * * /workspace/generated/run_indexing_cron.sh >> /var/log/indexing-cron.log 2>&1`}
                   </pre>
                 </div>
+
+                {/* Queue Priority Architecture (P0 / P1 / P2) */}
+                <div className="p-5 bg-zinc-900/90 border border-zinc-800 rounded-xl space-y-4">
+                  <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+                    <div className="flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-cyan-400" />
+                      <h4 className="text-sm font-bold text-white font-mono uppercase">4. Queue Priority &amp; Capacity Isolation (BullMQ Engine)</h4>
+                    </div>
+                    <span className="text-[10px] font-mono bg-cyan-500/10 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/20 font-bold">
+                      80/20 Concurrency Split
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-300 leading-relaxed">
+                    To eliminate intermittent resource clashing between active user submissions and background maintenance tasks, the backend BullMQ worker enforces a strict priority tiering system:
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-mono">
+                    <div className="p-3 bg-zinc-950/70 border border-rose-500/30 rounded-lg space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-rose-400 font-bold">P0: Enterprise Submission</span>
+                        <span className="px-1.5 py-0.5 bg-rose-500/20 text-rose-300 rounded text-[10px]">Priority = 1</span>
+                      </div>
+                      <p className="text-zinc-400 text-[11px] font-sans">
+                        Instant live dispatches initiated by users or API endpoints. Guaranteed 80% concurrency allocation (up to 8 dedicated workers) with zero latency throttling.
+                      </p>
+                    </div>
+
+                    <div className="p-3 bg-zinc-950/70 border border-amber-500/30 rounded-lg space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-amber-400 font-bold">P1: Automated Refresh</span>
+                        <span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-300 rounded text-[10px]">Priority = 2</span>
+                      </div>
+                      <p className="text-zinc-400 text-[11px] font-sans">
+                        Scheduled content refreshes, LinkFlow Pro backlink monitors, and sitemap delta crawls. Processed when P0 queue depth is under capacity.
+                      </p>
+                    </div>
+
+                    <div className="p-3 bg-zinc-950/70 border border-indigo-500/30 rounded-lg space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-indigo-400 font-bold">P2: Historical Re-Index</span>
+                        <span className="px-1.5 py-0.5 bg-indigo-500/20 text-indigo-300 rounded text-[10px]">Priority = 5</span>
+                      </div>
+                      <p className="text-zinc-400 text-[11px] font-sans">
+                        Routine 30-day link verification and historical URL pings. Throttled to a 20% background drip worker pool (max 2 workers) to prevent API rate-limit exhaustion.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
-            {/* 11. GLOSSARY */}
+            {/* 11. 14-PHASE AUTONOMOUS AUDITOR EXPLAINED */}
+            {activeTab === 'auditor-engine' && (
+              <div className="space-y-6 animate-in fade-in duration-200">
+                <div className="border-b border-zinc-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+                      <Cpu className="w-6 h-6 text-indigo-400" />
+                      <span>11. 14-Phase Autonomous Website Auditor &amp; Conversion Engineer</span>
+                    </h3>
+                    <p className="text-zinc-400 text-sm mt-1">
+                      Deep-dive technical breakdown of the autonomous diagnostic, remediation, and GEO schema injection engine.
+                    </p>
+                  </div>
+                  <span className="px-3 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 text-xs font-mono font-bold rounded">
+                    14-PHASE ARCHITECTURE v3.0
+                  </span>
+                </div>
+
+                {/* Key Outcomes Banner */}
+                <div className="p-5 bg-gradient-to-r from-indigo-950/40 via-purple-950/30 to-zinc-950 border border-indigo-500/30 rounded-xl space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-bold text-indigo-300 font-mono uppercase">
+                    <Sparkles className="w-4 h-4 text-indigo-400" />
+                    <span>Engine Objectives &amp; Quantified SEO/GEO Outcomes</span>
+                  </div>
+                  <p className="text-xs text-zinc-300 leading-relaxed font-sans">
+                    The Autonomous Auditor functions as an intelligent diagnostic and code-level remediation agent. By systematically auditing 14 sequential vectors, correcting technical bottlenecks, and injecting machine-readable semantic schema, the engine delivers verifiable real-world outcomes:
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                    <div className="p-3 bg-black/50 border border-emerald-500/20 rounded-lg space-y-1">
+                      <span className="text-emerald-400 font-bold text-sm block">10x Indexation Velocity</span>
+                      <p className="text-[11px] text-zinc-400">Direct protocol pings via Google Indexing API v3 and IndexNow bypass standard crawl queues.</p>
+                    </div>
+                    <div className="p-3 bg-black/50 border border-cyan-500/20 rounded-lg space-y-1">
+                      <span className="text-cyan-400 font-bold text-sm block">High SERP &amp; LLM Inclusion</span>
+                      <p className="text-[11px] text-zinc-400">Structured JSON-LD entity graph ensures 85%+ citation probability across ChatGPT, Perplexity &amp; Gemini.</p>
+                    </div>
+                    <div className="p-3 bg-black/50 border border-amber-500/20 rounded-lg space-y-1">
+                      <span className="text-amber-400 font-bold text-sm block">Zero Crawler Abandonment</span>
+                      <p className="text-[11px] text-zinc-400">Elimination of redirect chains, 404 loops, and slow LCP speeds keeps Googlebot and Bingbot crawl budgets optimized.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* The 14 Phases In 3 Architectural Clusters */}
+                <div className="space-y-4">
+                  {/* Cluster 1: Phases 1-4 */}
+                  <div className="p-5 bg-zinc-900/70 border border-zinc-800 rounded-xl space-y-3">
+                    <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+                      <h4 className="text-sm font-bold text-cyan-300 font-mono uppercase flex items-center gap-2">
+                        <Search className="w-4 h-4 text-cyan-400" />
+                        <span>Cluster A: Diagnostic &amp; Pre-Flight Discovery (Phases 1–4)</span>
+                      </h4>
+                      <span className="text-[10px] font-mono bg-cyan-500/10 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/20">
+                        Discovery &amp; Intelligence
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                      <div className="p-3 bg-zinc-950/60 border border-zinc-800/80 rounded-lg space-y-1">
+                        <strong className="text-zinc-200 block font-mono">Phase 1: Complete Site Discovery</strong>
+                        <p className="text-zinc-400 text-[11px]">Recursive crawl constructing click-distance graphs, discovering orphan URLs, and validating total crawlable depth.</p>
+                      </div>
+                      <div className="p-3 bg-zinc-950/60 border border-zinc-800/80 rounded-lg space-y-1">
+                        <strong className="text-zinc-200 block font-mono">Phase 2: Technical SEO &amp; Core Web Vitals</strong>
+                        <p className="text-zinc-400 text-[11px]">Evaluates robots.txt disallow rules, 301/302 redirect hops, canonical tags, and LCP/CLS/INP performance budgets.</p>
+                      </div>
+                      <div className="p-3 bg-zinc-950/60 border border-zinc-800/80 rounded-lg space-y-1">
+                        <strong className="text-zinc-200 block font-mono">Phase 3: Content Quality &amp; TF-IDF Density</strong>
+                        <p className="text-zinc-400 text-[11px]">Calculates topical keyword coverage, entity frequency, information gain, and flags low-density or duplicate content.</p>
+                      </div>
+                      <div className="p-3 bg-zinc-950/60 border border-zinc-800/80 rounded-lg space-y-1">
+                        <strong className="text-zinc-200 block font-mono">Phase 4: Competitor Intelligence &amp; Gap Radar</strong>
+                        <p className="text-zinc-400 text-[11px]">Extracts competitor SERP blueprints and detects missing search intent clusters across Commercial, Informational &amp; GEO topics.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Cluster 2: Phases 5-10 */}
+                  <div className="p-5 bg-zinc-900/70 border border-zinc-800 rounded-xl space-y-3">
+                    <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+                      <h4 className="text-sm font-bold text-purple-300 font-mono uppercase flex items-center gap-2">
+                        <Sliders className="w-4 h-4 text-purple-400" />
+                        <span>Cluster B: Remediation &amp; Content Drift Correction (Phases 5–10)</span>
+                      </h4>
+                      <span className="text-[10px] font-mono bg-purple-500/10 text-purple-300 px-2 py-0.5 rounded border border-purple-500/20">
+                        On-Page &amp; UX Correction
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                      <div className="p-3 bg-zinc-950/60 border border-zinc-800/80 rounded-lg space-y-1">
+                        <strong className="text-zinc-200 block font-mono">Phase 5: Semantic Entity Graph</strong>
+                        <p className="text-zinc-400 text-[11px]">Builds topical entity maps and connects parent/child relationship nodes for semantic search comprehension.</p>
+                      </div>
+                      <div className="p-3 bg-zinc-950/60 border border-zinc-800/80 rounded-lg space-y-1">
+                        <strong className="text-zinc-200 block font-mono">Phase 6: On-Page Hierarchy Audit</strong>
+                        <p className="text-zinc-400 text-[11px]">Audits H1–H4 structure, meta descriptions, OpenGraph tags, and enforces image alt attribute compliance.</p>
+                      </div>
+                      <div className="p-3 bg-zinc-950/60 border border-zinc-800/80 rounded-lg space-y-1">
+                        <strong className="text-zinc-200 block font-mono">Phase 7: Internal Linking &amp; PageRank Silos</strong>
+                        <p className="text-zinc-400 text-[11px]">Constructs reverse-silo PageRank distribution models to channel authority from power pages to deeper landing pages.</p>
+                      </div>
+                      <div className="p-3 bg-zinc-950/60 border border-zinc-800/80 rounded-lg space-y-1">
+                        <strong className="text-zinc-200 block font-mono">Phase 8: Structured Data (JSON-LD)</strong>
+                        <p className="text-zinc-400 text-[11px]">Synthesizes Schema.org JSON-LD definitions (Organization, WebSite, FAQPage, Article) for rich search cards.</p>
+                      </div>
+                      <div className="p-3 bg-zinc-950/60 border border-zinc-800/80 rounded-lg space-y-1">
+                        <strong className="text-zinc-200 block font-mono">Phase 9: UX &amp; 5-Second Conversion Review</strong>
+                        <p className="text-zinc-400 text-[11px]">Inspects above-the-fold CTA prominence, cognitive friction, and value proposition clarity for conversion lift.</p>
+                      </div>
+                      <div className="p-3 bg-zinc-950/60 border border-zinc-800/80 rounded-lg space-y-1">
+                        <strong className="text-zinc-200 block font-mono">Phase 10: Accessibility &amp; WCAG 2.1</strong>
+                        <p className="text-zinc-400 text-[11px]">Tests contrast ratios (4.5:1 AA), keyboard navigation, and ARIA roles for inclusive search usability.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Cluster 3: Phases 11-14 */}
+                  <div className="p-5 bg-zinc-900/70 border border-zinc-800 rounded-xl space-y-3">
+                    <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+                      <h4 className="text-sm font-bold text-emerald-300 font-mono uppercase flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-emerald-400" />
+                        <span>Cluster C: GEO Schema Injection, Code Fixes &amp; Dispatch (Phases 11–14)</span>
+                      </h4>
+                      <span className="text-[10px] font-mono bg-emerald-500/10 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/20">
+                        Action &amp; Dispatch
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                      <div className="p-3 bg-zinc-950/60 border border-zinc-800/80 rounded-lg space-y-1">
+                        <strong className="text-zinc-200 block font-mono">Phase 11: Prioritized ROI Action Matrix</strong>
+                        <p className="text-zinc-400 text-[11px]">Ranks all detected defects into Critical (P0), High (P1), Medium (P2), and Low (P3) tiers based on traffic ROI.</p>
+                      </div>
+                      <div className="p-3 bg-zinc-950/60 border border-zinc-800/80 rounded-lg space-y-1">
+                        <strong className="text-zinc-200 block font-mono">Phase 12: Automated Code Fix Generation</strong>
+                        <p className="text-zinc-400 text-[11px]">Generates copy-paste HTML patches, Nginx/Apache 301 redirect rules, and complete JSON-LD markup snippets.</p>
+                      </div>
+                      <div className="p-3 bg-zinc-950/60 border border-zinc-800/80 rounded-lg space-y-1">
+                        <strong className="text-zinc-200 block font-mono">Phase 13: Scorecard &amp; Change Tracking</strong>
+                        <p className="text-zinc-400 text-[11px]">Tracks before/after metric deltas (Technical Score, Clarity, SEO Health) in SQLite for historical proof of improvement.</p>
+                      </div>
+                      <div className="p-3 bg-zinc-950/60 border border-zinc-800/80 rounded-lg space-y-1">
+                        <strong className="text-zinc-200 block font-mono">Phase 14: Master Remediation Prompt &amp; Protocol Dispatch</strong>
+                        <p className="text-zinc-400 text-[11px]">Assembles full 30/60/90 day action plan and automatically streams verified URLs into the Google &amp; IndexNow dispatch pipeline.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Master Remediation Prompt Breakdown */}
+                <div className="p-5 bg-zinc-900/90 border border-zinc-800 rounded-xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Terminal className="w-4 h-4 text-[#ff4d00]" />
+                      <h4 className="text-sm font-bold text-white font-mono uppercase">Master Remediation Prompt Architecture</h4>
+                    </div>
+                    <span className="text-[10px] font-mono bg-[#ff4d00]/10 text-[#ff4d00] px-2 py-0.5 rounded border border-[#ff4d00]/30 font-bold">
+                      Agentic Execution Framework
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-300 leading-relaxed font-sans">
+                    The <strong>Master Remediation Prompt</strong> encapsulates the complete diagnostic payload generated during the 14-phase crawl into a structured prompt for AI coding agents. When executed, it instructs the agent to autonomously update source files, fix canonical discrepancies, apply answer-first copy formatting, and inject JSON-LD schemas directly into the target project codebase.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* 12. GLOSSARY */}
             {activeTab === 'glossary' && (
               <div className="space-y-6 animate-in fade-in duration-200">
                 <div className="border-b border-zinc-800 pb-4">
                   <h3 className="text-2xl font-bold text-white flex items-center gap-2">
                     <FileText className="w-6 h-6 text-emerald-400" />
-                    <span>10. Terminology &amp; SEO Glossary</span>
+                    <span>12. Terminology &amp; SEO Glossary</span>
                   </h3>
                   <p className="text-zinc-400 text-sm mt-1">
                     Key definitions and technical concepts used throughout the platform.
@@ -1940,14 +2154,14 @@ crontab -e
               </div>
             )}
 
-            {/* 11. LIVE CHANGELOG & UPDATES */}
+            {/* 13. LIVE CHANGELOG & UPDATES */}
             {activeTab === 'changelog' && (
               <div className="space-y-6 animate-in fade-in duration-200">
                 <div className="border-b border-zinc-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h3 className="text-2xl font-bold text-white flex items-center gap-2">
                       <Activity className="w-6 h-6 text-[#ff4d00]" />
-                      <span>11. Live System Changelog &amp; Real-time Documentation</span>
+                      <span>13. Live System Changelog &amp; Real-time Documentation</span>
                     </h3>
                     <p className="text-zinc-400 text-sm mt-1">
                       Continuously synchronized with live backend release notes, features, and enterprise updates.

@@ -254,8 +254,16 @@ export function generateUserManualPdf(options: ManualPdfOptions = {}): jsPDF {
     cursorY += aLines.length * 4.2 + 4;
   });
 
-  // --- 6. DEVELOPER API & WEBHOOK REFERENCE ---
-  addSectionHeading('6. Developer API & REST Endpoints', 'Programmatic access for CI/CD pipelines and external integrations');
+  // --- 6. 14-PHASE AUTONOMOUS AUDITOR & REMEDIATION ENGINE ---
+  addSectionHeading('6. 14-Phase Autonomous Auditor & Conversion Engineer', 'Agentic diagnostics, content drift repair & semantic schema injection');
+  addParagraph('The 14-Phase Autonomous Auditor executes a multi-vector scan across discovery, technical performance, TF-IDF density, competitor gap radar, UX clarity, and semantic JSON-LD entity graphs. It generates code-level fixes and streams verified URLs directly into the indexing pipeline.');
+  addBullet('Diagnostic & Discovery (Phases 1-4)', 'Crawls orphan links, evaluates Core Web Vitals, measures topical density, and benchmarks against competitor SERP blueprints.');
+  addBullet('Remediation & UX Drift (Phases 5-10)', 'Constructs entity graphs, audits heading hierarchy, repairs PageRank silos, injects JSON-LD, and eliminates cognitive conversion friction.');
+  addBullet('Action Matrix & Protocol Push (Phases 11-14)', 'Ranks defects by traffic ROI, generates copy-paste HTML patches, tracks SQLite scorecards, and triggers instant Google API & IndexNow dispatch.');
+  addBullet('BullMQ Queue Priority & 80/20 Concurrency Split', 'P0 enterprise submissions receive dedicated 80% concurrency while P2 historical re-indexing tasks run throttled in the background.');
+
+  // --- 7. DEVELOPER API & WEBHOOK REFERENCE ---
+  addSectionHeading('7. Developer API & REST Endpoints', 'Programmatic access for CI/CD pipelines and external integrations');
   addBullet('POST /api/submissions', 'Payload: { targetUrls: string[], features: {...}, concurrencyLimit: number } — Launches background indexing task.');
   addBullet('GET /api/health/integrations', 'Returns live connectivity and latency metrics for Google API, IndexNow, SERP pings, and proxy nodes.');
   addBullet('POST /api/grade-content', 'Payload: { url: string, keyword: string } — Executes multi-vector GEO evaluation and JSON-LD generator.');
