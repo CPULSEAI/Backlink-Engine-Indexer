@@ -1021,6 +1021,9 @@ export interface LinkBuildingStrategyResult {
   googleDorks: GoogleDorkQuery[];
   outreachTemplate: OutreachEmailTemplate;
   actionPlanNextSteps: string[];
+  generationSource?: 'gemini_ai' | 'heuristic_engine';
+  quotaDepletedNotice?: boolean;
+  statusMessage?: string;
 }
 
 // --- DAILY PERFORMANCE DIGEST & 24H INDEXING ANALYTICS ---

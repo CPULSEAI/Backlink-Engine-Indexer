@@ -19,6 +19,7 @@ import {
   Flame,
   CheckCircle2,
   AlertCircle,
+  AlertTriangle,
   HelpCircle,
   RotateCw,
   Compass,
@@ -113,11 +114,33 @@ export const LinkStrategyGeneratorCard: React.FC<LinkStrategyGeneratorCardProps>
 
       setStrategyResult(response.data);
       toast.dismiss(loadingToast);
-      toast.success('🎯 Strategic Link Acquisition Blueprint Ready!');
+
+      if (response.data?.quotaDepletedNotice) {
+        toast('⚡ Strategy compiled via Built-in SEO Heuristic Engine (Gemini credits depleted).', {
+          icon: 'ℹ️',
+          duration: 4500,
+        });
+      } else {
+        toast.success('🎯 Strategic Link Acquisition Blueprint Ready!');
+      }
     } catch (err: any) {
       toast.dismiss(loadingToast);
-      const errMsg = err?.response?.data?.error || err?.message || 'Failed to generate link building strategy';
-      toast.error(`Strategy Generation Failed: ${errMsg}`);
+      let errMsg = err?.response?.data?.error || err?.message || 'Failed to generate link building strategy';
+      if (typeof errMsg === 'string') {
+        if (errMsg.startsWith('{') || errMsg.includes('"message":')) {
+          try {
+            const parsed = JSON.parse(errMsg);
+            if (parsed?.error?.message) {
+              errMsg = parsed.error.message;
+            } else if (parsed?.message) {
+              errMsg = parsed.message;
+            }
+          } catch {
+            // retain errMsg
+          }
+        }
+      }
+      toast.error(`Strategy Notice: ${errMsg}`);
       console.error('[LinkStrategist Error]', err);
     } finally {
       setIsLoading(false);
@@ -243,9 +266,16 @@ export const LinkStrategyGeneratorCard: React.FC<LinkStrategyGeneratorCardProps>
                 <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
                 AI LINK STRATEGIST
               </span>
-              <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded text-[11px] font-mono">
-                GEMINI 3.7 FLASH LIVE
-              </span>
+              {strategyResult?.quotaDepletedNotice ? (
+                <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded text-[11px] font-mono flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3 text-amber-400" />
+                  OFFLINE HEURISTIC ENGINE
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded text-[11px] font-mono">
+                  GEMINI 3.7 FLASH LIVE
+                </span>
+              )}
               <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded text-[11px] font-mono">
                 ZERO FAKE DATA
               </span>
@@ -382,6 +412,29 @@ export const LinkStrategyGeneratorCard: React.FC<LinkStrategyGeneratorCardProps>
       {/* Generated Strategy Results Display */}
       {strategyResult && (
         <div className="space-y-6">
+          {/* Quota Depleted Warning / Fallback Notice Banner */}
+          {strategyResult.quotaDepletedNotice && (
+            <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-xs text-amber-200 flex items-start gap-3 shadow-lg">
+              <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <span className="font-bold font-mono uppercase text-amber-300 block">
+                  Built-in SEO Heuristic Strategy Engine Active
+                </span>
+                <p className="text-slate-300 leading-relaxed font-sans">
+                  Gemini API prepayment credits are currently depleted or restricted. The strategist automatically synthesized this comprehensive campaign blueprint using our domain-tailored SEO heuristic matrix — generating genuine real-world competitors, linkable asset blueprints, targeted Google search dorks, and outreach templates with zero downtime. To reactivate live Gemini 3.7 Flash generation, top up your project billing in{' '}
+                  <a
+                    href="https://ai.studio/projects"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-amber-300 underline font-semibold hover:text-amber-100 inline-flex items-center gap-1"
+                  >
+                    Google AI Studio <ExternalLink className="w-3 h-3" />
+                  </a>.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Executive Summary Card */}
           <div className="bg-slate-900/90 border border-indigo-500/30 rounded-2xl p-5 shadow-xl space-y-3">
             <div className="flex items-center justify-between flex-wrap gap-2">
