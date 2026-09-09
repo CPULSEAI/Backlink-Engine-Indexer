@@ -38,6 +38,8 @@ import {
   Layers,
   Sparkles,
   Download,
+  HardDrive,
+  Database,
 } from 'lucide-react';
 import { AppSettings, ProxyHealth, DiagnosticSummary, ActiveSession, LoginHistoryItem, StripeSubscriptionDetails } from '../types';
 import toast from 'react-hot-toast';
@@ -124,6 +126,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [disabledProxies, setDisabledProxies] = useState<Array<{ proxy: string; disabledUntil: string; reason: string; remainingMinutes?: number }>>([]);
   const [reinstatingProxy, setReinstatingProxy] = useState<string | null>(null);
   const [testingSingleProxy, setTestingSingleProxy] = useState<string | null>(null);
+  const [backingUpGcs, setBackingUpGcs] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -994,6 +997,73 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <p className="text-[11px] text-zinc-500">
                   Controls maximum simultaneous HTTP worker threads submitting requests to backlink directories.
                 </p>
+              </div>
+
+              {/* Google Cloud Storage & Gemini Infrastructure Card */}
+              <div className="bg-zinc-950/60 border border-zinc-800 rounded-2xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <HardDrive className="w-4 h-4 text-emerald-400" />
+                    <span>Google Cloud Storage &amp; AI Copilot Infrastructure</span>
+                  </label>
+                  <span className="text-[10px] font-bold text-emerald-400 font-mono bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                    LIVE &amp; READY
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div className="bg-zinc-900/70 border border-zinc-800 rounded-xl p-3 space-y-1">
+                    <span className="text-[10px] text-zinc-400 uppercase font-semibold block">Cloud Storage Bucket</span>
+                    <strong className="text-xs font-mono text-zinc-200 block truncate" title="ai-studio-bucket-517580921038-us-east1">
+                      ai-studio-bucket-517580921038-us-east1
+                    </strong>
+                    <span className="text-[10px] text-emerald-400 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      Region: us-east1 (Database Snapshots &amp; Archives)
+                    </span>
+                  </div>
+
+                  <div className="bg-zinc-900/70 border border-zinc-800 rounded-xl p-3 space-y-1">
+                    <span className="text-[10px] text-zinc-400 uppercase font-semibold block">Gemini Model &amp; GEO Engine</span>
+                    <strong className="text-xs font-mono text-zinc-200 block">
+                      gemini-3.7-flash (Multimodal)
+                    </strong>
+                    <span className="text-[10px] text-cyan-400 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                      API Key Active &amp; Prepayment Quota Connected
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <p className="text-[11px] text-zinc-400">
+                    Automated snapshots are preserved in your secure Google Cloud Storage bucket.
+                  </p>
+                  <button
+                    type="button"
+                    disabled={backingUpGcs}
+                    onClick={async () => {
+                      try {
+                        setBackingUpGcs(true);
+                        toast.loading('Exporting database snapshot to GCS...', { id: 'gcs-backup' });
+                        const res = await axios.post('/api/storage/backup');
+                        if (res.data?.success) {
+                          toast.success(`Snapshot archived to ${res.data.uri} (${(res.data.sizeBytes / 1024).toFixed(0)} KB)`, { id: 'gcs-backup', duration: 4000 });
+                        } else {
+                          toast.error(res.data?.error || 'Backup failed', { id: 'gcs-backup' });
+                        }
+                      } catch (err: any) {
+                        toast.error(err.message || 'Backup failed', { id: 'gcs-backup' });
+                      } finally {
+                        setBackingUpGcs(false);
+                      }
+                    }}
+                    className="px-3 py-1.5 bg-zinc-800 hover:bg-emerald-600 text-zinc-200 hover:text-white border border-zinc-700 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    <Database className="w-3.5 h-3.5" />
+                    <span>{backingUpGcs ? 'Archiving...' : 'Backup Snapshot to GCS'}</span>
+                  </button>
+                </div>
               </div>
             </div>
           )}

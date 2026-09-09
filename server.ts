@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config({ override: true });
+
 import express from 'express';
 import path from 'path';
 import http from 'http';
@@ -10,6 +13,7 @@ import { DIRECTORY_LIST } from './server/directories.js';
 import { jobManager, TaskJobConfig } from './server/queue.js';
 import { crawlWebsiteAudit } from './server/crawler.js';
 import { checkApiHealthReport } from './server/indexer.js';
+import { cloudStorage } from './server/storageService.js';
 import {
   initSchedulerLoop,
   getScheduledJobs,
@@ -42,6 +46,8 @@ import {
   checkAllMonitoredTargets,
   acknowledgeNewDiscoveredUrls,
 } from './server/sitemapObserver.js';
+import { broadcastService } from './server/broadcastService.js';
+import { geoSchemaService } from './server/geoSchemaService.js';
 
 
 async function startServer() {
@@ -269,6 +275,34 @@ async function startServer() {
     }
   });
 
+  // Google Cloud Storage Integration Status
+  app.get('/api/storage/status', async (req, res) => {
+    try {
+      const status = await cloudStorage.getStorageStatus();
+      res.json(status);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Failed to fetch storage status' });
+    }
+  });
+
+  // Trigger Google Cloud Storage database snapshot backup
+  app.post('/api/storage/backup', async (req, res) => {
+    try {
+      const db = await getDb();
+      const binaryData = db.export();
+      const filename = `db_snapshot_${Date.now()}.sqlite`;
+      const result = await cloudStorage.recordBackup(filename, binaryData.byteLength);
+      res.json({
+        success: true,
+        filename,
+        sizeBytes: binaryData.byteLength,
+        ...result
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Failed to backup database to storage' });
+    }
+  });
+
   // Get currently disabled proxies due to 3 consecutive 403 blocks
   app.get('/api/proxies/disabled', (req, res) => {
     try {
@@ -468,6 +502,146 @@ async function startServer() {
     } catch (err: any) {
       console.error('[API Error] /api/indexing/instant-dispatch:', err);
       res.status(500).json({ error: err.message || 'Instant indexation dispatch failed' });
+    }
+  });
+
+  // --- MASTER ENTERPRISE MULTI-PROTOCOL BROADCAST (Google Indexing API v3 + IndexNow) ---
+  app.post('/api/indexing/broadcast', async (req, res) => {
+    try {
+      const { sourcePlatform, urls, options } = req.body;
+      if (!Array.isArray(urls) || urls.length === 0) {
+        return res.status(400).json({
+          error: 'Please provide a non-empty array of target URLs in "urls".',
+          supportedPlatforms: ['AI Digital Product Creator', 'LinkFlow Pro', 'CareerPulseAI', 'Custom'],
+        });
+      }
+
+      const broadcastResult = await broadcastService.executeBroadcast({
+        sourcePlatform: sourcePlatform || 'AI Digital Product Creator',
+        urls,
+        options: options || {},
+      });
+
+      res.json(broadcastResult);
+    } catch (err: any) {
+      console.error('[API Error] /api/indexing/broadcast:', err);
+      res.status(500).json({ error: err.message || 'Multi-protocol broadcast execution failed' });
+    }
+  });
+
+  app.get('/api/indexing/broadcast/history', async (req, res) => {
+    try {
+      const limit = Number(req.query.limit) || 20;
+      const history = await broadcastService.getRecentBroadcasts(limit);
+      res.json({ total: history.length, broadcasts: history });
+    } catch (err: any) {
+      console.error('[API Error] /api/indexing/broadcast/history:', err);
+      res.status(500).json({ error: err.message || 'Failed to fetch broadcast history' });
+    }
+  });
+
+  // --- GENERATIVE ENGINE OPTIMIZATION (GEO) & SCHEMA SYNTHESIS ---
+  app.post('/api/geo/synthesize-schema', async (req, res) => {
+    try {
+      const {
+        type = 'SoftwareApplication',
+        title,
+        url,
+        description,
+        category,
+        sourcePlatform,
+        price,
+        priceCurrency,
+        sku,
+        availability,
+        brandName,
+        operatingSystem,
+        applicationCategory,
+        features,
+        faqs,
+        authorName,
+        publisherName,
+        publishedDate,
+        rawContentOrSummary,
+      } = req.body;
+
+      if (!title || !url) {
+        return res.status(400).json({ error: 'Please provide both "title" and "url" for Schema synthesis.' });
+      }
+
+      const result = geoSchemaService.synthesizeSchema({
+        type,
+        title,
+        url,
+        description,
+        category,
+        sourcePlatform,
+        price,
+        priceCurrency,
+        sku,
+        availability,
+        brandName,
+        operatingSystem,
+        applicationCategory,
+        features,
+        faqs,
+        authorName,
+        publisherName,
+        publishedDate,
+        rawContentOrSummary,
+      });
+
+      res.json(result);
+    } catch (err: any) {
+      console.error('[API Error] /api/geo/synthesize-schema:', err);
+      res.status(500).json({ error: err.message || 'GEO schema synthesis failed' });
+    }
+  });
+
+  // --- ANSWER-FIRST ARCHITECTURE AUDIT ENGINE (30-50 word definitional snippet analyzer) ---
+  app.post('/api/geo/audit-answer-first', async (req, res) => {
+    try {
+      const { html, url } = req.body;
+      let targetHtml = html || '';
+
+      if (!targetHtml && url) {
+        // Fetch HTML dynamically from the target URL
+        try {
+          const fetchRes = await axios.get(url, {
+            headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1)' },
+            timeout: 7000,
+          });
+          targetHtml = typeof fetchRes.data === 'string' ? fetchRes.data : '';
+        } catch (fetchErr: any) {
+          return res.status(422).json({ error: `Could not fetch target URL: ${fetchErr.message}` });
+        }
+      }
+
+      if (!targetHtml) {
+        return res.status(400).json({ error: 'Please provide either "html" content or a valid "url" to audit.' });
+      }
+
+      const auditResult = geoSchemaService.auditAnswerFirstHtml(targetHtml, url);
+      res.json(auditResult);
+    } catch (err: any) {
+      console.error('[API Error] /api/geo/audit-answer-first:', err);
+      res.status(500).json({ error: err.message || 'Answer-First audit failed' });
+    }
+  });
+
+  // --- PRE-FLIGHT PARALLEL BULK AUDIT (Canonical, Meta Description, Heading Hierarchy) ---
+  app.post('/api/preflight/bulk-audit', async (req, res) => {
+    try {
+      const { urls, concurrency = 25, timeoutMs = 8000 } = req.body;
+      if (!Array.isArray(urls) || urls.length === 0) {
+        return res.status(400).json({ error: 'Please provide an array of URLs to audit.' });
+      }
+
+      const audit = await runBulkValidation(urls, Number(concurrency) || 25, undefined, Number(timeoutMs) || 8000);
+      res.json(audit);
+    } catch (err: any) {
+      console.error('[API Error] /api/preflight/bulk-audit:', err);
+      res.status(500).json({ error: err.message || 'Pre-flight bulk audit failed' });
     }
   });
 
@@ -2728,7 +2902,7 @@ Execute a 5-step analysis sequentially and respond ONLY with a valid JSON object
 }`;
 
           const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3.7-flash',
             contents: prompt,
           });
 

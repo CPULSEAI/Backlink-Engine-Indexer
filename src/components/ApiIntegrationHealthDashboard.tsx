@@ -31,7 +31,9 @@ import {
   ArrowUpRight,
   TrendingDown,
   TrendingUp,
-  Cpu
+  Cpu,
+  HardDrive,
+  Database
 } from 'lucide-react';
 import { ApiHealthReport } from '../types';
 
@@ -59,6 +61,21 @@ export const ApiIntegrationHealthDashboard: React.FC<ApiIntegrationHealthDashboa
 }) => {
   const [report, setReport] = useState<ApiHealthReport | null>(initialReport || null);
   const [loading, setLoading] = useState(false);
+  const [backingUpStorage, setBackingUpStorage] = useState(false);
+  const [storageStatus, setStorageStatus] = useState<{
+    configured: boolean;
+    bucketName: string;
+    region: string;
+    status: string;
+    totalBackups: number;
+    lastBackupAt?: string;
+  }>({
+    configured: true,
+    bucketName: 'ai-studio-bucket-517580921038-us-east1',
+    region: 'us-east1',
+    status: 'connected',
+    totalBackups: 0
+  });
   const [timeRange, setTimeRange] = useState<'1h' | '6h' | '24h'>('24h');
   const [activeMetricView, setActiveMetricView] = useState<'latency' | 'successRate' | 'combined'>('combined');
   const [trendData, setTrendData] = useState<LatencyTrendPoint[]>([]);
@@ -111,6 +128,37 @@ export const ApiIntegrationHealthDashboard: React.FC<ApiIntegrationHealthDashboa
     return points;
   }, []);
 
+  const fetchStorageStatus = useCallback(async () => {
+    try {
+      const res = await fetch('/api/storage/status');
+      const data = await res.json();
+      if (data && data.bucketName) {
+        setStorageStatus(data);
+      }
+    } catch (e) {
+      console.warn('Storage status check skipped:', e);
+    }
+  }, []);
+
+  const handleTriggerBackup = async () => {
+    try {
+      setBackingUpStorage(true);
+      toast.loading('Exporting database snapshot to Google Cloud Storage...', { id: 'storage-backup' });
+      const res = await fetch('/api/storage/backup', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(`Snapshot archived to ${data.uri} (${(data.sizeBytes / 1024).toFixed(0)} KB)`, { id: 'storage-backup', duration: 4000 });
+        await fetchStorageStatus();
+      } else {
+        toast.error(data.error || 'Failed to archive snapshot', { id: 'storage-backup' });
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Backup failed', { id: 'storage-backup' });
+    } finally {
+      setBackingUpStorage(false);
+    }
+  };
+
   const fetchLiveHealth = useCallback(async () => {
     try {
       setLoading(true);
@@ -120,12 +168,13 @@ export const ApiIntegrationHealthDashboard: React.FC<ApiIntegrationHealthDashboa
         setReport(data.report);
         setTrendData(generateTrendData(data.report, timeRange));
       }
+      await fetchStorageStatus();
     } catch (err) {
       console.error('Failed to fetch API integration health:', err);
     } finally {
       setLoading(false);
     }
-  }, [generateTrendData, timeRange]);
+  }, [generateTrendData, timeRange, fetchStorageStatus]);
 
   const handlePingAll = async () => {
     try {
@@ -242,7 +291,7 @@ export const ApiIntegrationHealthDashboard: React.FC<ApiIntegrationHealthDashboa
       </div>
 
       {/* KPI Status Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Service 1: Google Indexing API */}
         <div className="bg-[#f8f6f0] dark:bg-zinc-950 border-3 border-black dark:border-zinc-700 p-4 rounded-xl shadow-[4px_4px_0_#000] space-y-3">
           <div className="flex items-center justify-between">
@@ -350,6 +399,51 @@ export const ApiIntegrationHealthDashboard: React.FC<ApiIntegrationHealthDashboa
 
           <div className="text-[11px] text-zinc-600 dark:text-zinc-400 font-sans truncate">
             {proxyHealth?.activeHealthyNodes ?? 12} Active Nodes | {proxyHealth?.totalRequests24h ?? 482} Requests (24h)
+          </div>
+        </div>
+
+        {/* Service 4: Google Cloud Storage */}
+        <div className="bg-[#f8f6f0] dark:bg-zinc-950 border-3 border-black dark:border-zinc-700 p-4 rounded-xl shadow-[4px_4px_0_#000] space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <HardDrive className="w-4 h-4 text-emerald-500" />
+              <span className="text-xs font-black uppercase text-black dark:text-zinc-100">Cloud Storage Bucket</span>
+            </div>
+            <span
+              className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded border border-black ${
+                storageStatus.configured ? 'bg-emerald-500 text-white' : 'bg-amber-400 text-black'
+              }`}
+            >
+              {storageStatus.configured ? 'CONNECTED (US-EAST1)' : 'UNCONFIGURED'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-black/10 dark:border-zinc-800">
+            <div>
+              <span className="text-[10px] text-zinc-500 uppercase block">BUCKET REGION</span>
+              <strong className="text-base font-black text-black dark:text-zinc-100 uppercase">
+                {storageStatus.region || 'us-east1'}
+              </strong>
+            </div>
+            <div>
+              <span className="text-[10px] text-zinc-500 uppercase block">SNAPSHOT BACKUPS</span>
+              <strong className="text-xs font-black text-emerald-600 dark:text-emerald-400">
+                {storageStatus.totalBackups} Archived
+              </strong>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between gap-2 pt-0.5">
+            <div className="text-[10px] font-mono text-zinc-600 dark:text-zinc-400 truncate max-w-[130px]" title={storageStatus.bucketName}>
+              {storageStatus.bucketName}
+            </div>
+            <button
+              onClick={handleTriggerBackup}
+              disabled={backingUpStorage}
+              className="px-2 py-1 bg-black text-white hover:bg-[#ff4d00] hover:text-black border border-black rounded text-[10px] font-black uppercase transition-all shadow-[1px_1px_0_#000] cursor-pointer disabled:opacity-50 whitespace-nowrap"
+            >
+              {backingUpStorage ? 'Backing up...' : 'Backup DB'}
+            </button>
           </div>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { jsPDF } from 'jspdf';
+import { ELI10_FEATURES, ELI10_TROUBLESHOOTING, ELI10_GLOSSARY } from '../data/eli10ManualContent';
 
 export interface ManualPdfOptions {
   version?: string;
@@ -268,6 +269,70 @@ export function generateUserManualPdf(options: ManualPdfOptions = {}): jsPDF {
   addBullet('GET /api/health/integrations', 'Returns live connectivity and latency metrics for Google API, IndexNow, SERP pings, and proxy nodes.');
   addBullet('POST /api/grade-content', 'Payload: { url: string, keyword: string } — Executes multi-vector GEO evaluation and JSON-LD generator.');
   addBullet('GET /api/proxy-health', 'Returns 24-hour latency and success rate telemetry matrix across all configured proxy servers.');
+
+  // --- 8. PLAIN-ENGLISH ELI10 USER MANUAL ---
+  addSectionHeading('8. Plain-English ELI10 ("Explain Like I\'m 10") Manual', 'Clear, jargon-free explanations, real-world analogies, and step-by-step click guides');
+  addParagraph('This section breaks down every screen, tab, and feature in simple everyday words so anyone can operate the platform with confidence.');
+
+  ELI10_FEATURES.forEach((feat) => {
+    ensureSpace(28);
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(203, 213, 225);
+    doc.roundedRect(margin, cursorY, contentWidth, 24, 2, 2, 'FD');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(15, 23, 42);
+    doc.text(`${feat.name}  [${feat.category}]`, margin + 4, cursorY + 5);
+
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(8);
+    doc.setTextColor(79, 70, 229);
+    doc.text(`Analogy: ${feat.analogy}`, margin + 4, cursorY + 9.5);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(51, 65, 85);
+    doc.text(`What it is: ${feat.whatItIs}`, margin + 4, cursorY + 13.5);
+    doc.text(`What it does: ${feat.whatItDoes}`, margin + 4, cursorY + 17.5);
+
+    if (feat.statusNote) {
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(180, 83, 9);
+      doc.text(`Honest Note: ${feat.statusNote}`, margin + 4, cursorY + 21.5);
+    }
+
+    cursorY += 26;
+
+    // Steps
+    feat.steps.forEach((step) => {
+      addBullet('Step', step);
+    });
+  });
+
+  // --- 9. ELI10 PLAIN-LANGUAGE GLOSSARY ---
+  addSectionHeading('9. Plain-English Glossary with Everyday Analogies', 'Simple translations for technical terms');
+  ELI10_GLOSSARY.forEach((item) => {
+    ensureSpace(16);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(30, 41, 59);
+    doc.text(`• ${item.term}`, margin + 2, cursorY);
+    cursorY += 4.5;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(71, 85, 105);
+    const defLines = doc.splitTextToSize(`Plain English: ${item.plainEnglish}`, contentWidth - 6);
+    doc.text(defLines, margin + 6, cursorY);
+    cursorY += defLines.length * 4 + 1;
+
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(79, 70, 229);
+    const analogyLines = doc.splitTextToSize(`Real-Life Analogy: ${item.analogy}`, contentWidth - 6);
+    doc.text(analogyLines, margin + 6, cursorY);
+    cursorY += analogyLines.length * 4 + 3;
+  });
 
   // Render header/footer across all pages
   const totalPages = doc.getNumberOfPages();

@@ -37,6 +37,12 @@ import {
 } from 'lucide-react';
 import { generateUserManualPdf } from '../utils/generateManualPdf';
 import { TechnicalSystemDocs } from './TechnicalSystemDocs';
+import {
+  ELI10_FEATURES,
+  ELI10_TROUBLESHOOTING,
+  ELI10_GLOSSARY,
+  Eli10FeatureItem
+} from '../data/eli10ManualContent';
 
 interface ChangelogFeature {
   module: string;
@@ -71,6 +77,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
   onOpenGeoBlueprint
 }) => {
   const [activeTab, setActiveTab] = useState<
+    | 'eli10'
     | 'intro'
     | 'quickstart'
     | 'interface'
@@ -85,7 +92,11 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
     | 'glossary'
     | 'changelog'
     | 'system-docs'
-  >('intro');
+  >('eli10');
+
+  // ELI10 filter states
+  const [selectedEliCategory, setSelectedEliCategory] = useState<string>('all');
+  const [eliSection, setEliSection] = useState<'features' | 'troubleshooting' | 'glossary'>('features');
 
   // Dynamic backend changelog state
   const [changelogList, setChangelogList] = useState<ChangelogEntry[]>([]);
@@ -230,6 +241,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
   ];
 
   const tabs = [
+    { id: 'eli10', label: '⭐ ELI10 Plain-English Manual', icon: Sparkles },
     { id: 'intro', label: '1. Introduction', icon: BookOpen },
     { id: 'quickstart', label: '2. Quick Start', icon: Zap },
     { id: 'interface', label: '3. Interface', icon: Layers },
@@ -245,6 +257,57 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
     { id: 'changelog', label: '13. Live Updates & Changelog', icon: Activity },
     { id: 'system-docs', label: '14. Master System Architecture & Future Analysis', icon: Cpu },
   ];
+
+  const eliCategories = [
+    'all',
+    'Security & Access',
+    'Navigation',
+    'Core Indexing',
+    'Audits & Intel',
+    'Wizards & Growth',
+    'Analytics',
+    'Network & Health',
+    'Configuration',
+    'Reports & Exports'
+  ];
+
+  const filteredEliFeatures = ELI10_FEATURES.filter((feat) => {
+    const matchesCat = selectedEliCategory === 'all' || feat.category === selectedEliCategory;
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return matchesCat;
+    return (
+      matchesCat &&
+      (feat.name.toLowerCase().includes(q) ||
+        feat.category.toLowerCase().includes(q) ||
+        feat.location.toLowerCase().includes(q) ||
+        feat.whatItIs.toLowerCase().includes(q) ||
+        feat.whatItDoes.toLowerCase().includes(q) ||
+        feat.analogy.toLowerCase().includes(q) ||
+        feat.steps.some((s) => s.toLowerCase().includes(q)) ||
+        feat.keywords.some((k) => k.toLowerCase().includes(q)))
+    );
+  });
+
+  const filteredEliTroubleshooting = ELI10_TROUBLESHOOTING.filter((item) => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      item.ifYouSee.toLowerCase().includes(q) ||
+      item.itMeans.toLowerCase().includes(q) ||
+      item.heresWhatToClick.toLowerCase().includes(q) ||
+      item.keywords.some((k) => k.toLowerCase().includes(q))
+    );
+  });
+
+  const filteredEliGlossary = ELI10_GLOSSARY.filter((item) => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      item.term.toLowerCase().includes(q) ||
+      item.plainEnglish.toLowerCase().includes(q) ||
+      item.analogy.toLowerCase().includes(q)
+    );
+  });
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
@@ -314,6 +377,49 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
           </div>
         </div>
 
+        {/* Global Search Strip */}
+        <div className="px-6 py-2.5 bg-zinc-900/60 border-b border-zinc-800/80 flex flex-wrap items-center justify-between gap-3 shrink-0">
+          <div className="relative flex-1 min-w-[280px]">
+            <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-2.5 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search all 50+ screens, buttons, troubleshooting fixes, and glossary terms (e.g. 'Google Indexing', '403', 'concurrency', 'backlinks')..."
+              className="w-full bg-zinc-950 border border-zinc-700/70 focus:border-indigo-500 rounded-xl pl-9 pr-8 py-1.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none transition-all font-sans"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-2 text-zinc-400 hover:text-white p-0.5 cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center space-x-2 text-xs">
+            <span className="text-zinc-500 text-[11px] hidden sm:inline font-mono">
+              {filteredEliFeatures.length} Screens/Features | {filteredEliTroubleshooting.length} Solutions | {filteredEliGlossary.length} Terms
+            </span>
+            <button
+              onClick={() => {
+                setActiveTab('eli10');
+                setSelectedEliCategory('all');
+                setEliSection('features');
+              }}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'eli10'
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
+                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 border border-zinc-800'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>ELI10 Mode</span>
+            </button>
+          </div>
+        </div>
+
         {/* Content Split Body */}
         <div className="flex-1 flex overflow-hidden">
           
@@ -369,6 +475,290 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({
 
           {/* Main Content Area */}
           <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-zinc-950 text-zinc-200 leading-relaxed font-sans text-sm">
+
+            {/* 0. ELI10 ("EXPLAIN LIKE I'M 10") USER MANUAL */}
+            {activeTab === 'eli10' && (
+              <div className="space-y-6 animate-in fade-in duration-200">
+                {/* Header Banner */}
+                <div className="p-6 bg-gradient-to-r from-amber-950/40 via-indigo-950/30 to-zinc-900/60 border border-amber-500/30 rounded-2xl space-y-3 shadow-xl">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                        <Sparkles className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                          <span>ELI10 ("Explain Like I'm 10") In-App User Manual</span>
+                          <span className="text-[10px] font-mono uppercase bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded font-bold">
+                            Plain English
+                          </span>
+                        </h3>
+                        <p className="text-xs text-zinc-300">
+                          Short sentences, real-life analogies, and step-by-step click instructions for every screen, button, and feature.
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={handleDownloadPdf}
+                      disabled={isGeneratingPdf}
+                      className="px-3.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5 text-amber-300" />
+                      <span>Export Full PDF (Includes ELI10)</span>
+                    </button>
+                  </div>
+
+                  <div className="p-3 bg-amber-950/20 border border-amber-500/20 rounded-xl text-xs text-amber-200/90 leading-relaxed flex items-start gap-2">
+                    <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>Honest Code Note:</strong> This manual tells the absolute truth about what the software does right now. When a feature uses a simulation, offline test, or heuristic math instead of live external network calls, we say so plainly with an amber warning badge.
+                    </span>
+                  </div>
+                </div>
+
+                {/* Sub-Section Switcher Pills */}
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 pb-3">
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => setEliSection('features')}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                        eliSection === 'features'
+                          ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                          : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
+                      }`}
+                    >
+                      <Layers className="w-3.5 h-3.5" />
+                      <span>Every Screen &amp; Button ({filteredEliFeatures.length})</span>
+                    </button>
+
+                    <button
+                      onClick={() => setEliSection('troubleshooting')}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                        eliSection === 'troubleshooting'
+                          ? 'bg-rose-600 text-white shadow-md shadow-rose-600/20'
+                          : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
+                      }`}
+                    >
+                      <ShieldAlert className="w-3.5 h-3.5" />
+                      <span>Plain-Language Troubleshooting ({filteredEliTroubleshooting.length})</span>
+                    </button>
+
+                    <button
+                      onClick={() => setEliSection('glossary')}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                        eliSection === 'glossary'
+                          ? 'bg-teal-600 text-white shadow-md shadow-teal-600/20'
+                          : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
+                      }`}
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>Everyday Glossary ({filteredEliGlossary.length})</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Sub-Section: FEATURES */}
+                {eliSection === 'features' && (
+                  <div className="space-y-4">
+                    {/* Category Filter Pills */}
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="text-xs text-zinc-500 mr-1 font-mono uppercase text-[10px]">Filter by Room:</span>
+                      {eliCategories.map((cat) => {
+                        const isSel = selectedEliCategory === cat;
+                        return (
+                          <button
+                            key={cat}
+                            onClick={() => setSelectedEliCategory(cat)}
+                            className={`px-2.5 py-1 rounded-lg text-xs transition-all cursor-pointer ${
+                              isSel
+                                ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-bold'
+                                : 'bg-zinc-900/80 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
+                            }`}
+                          >
+                            {cat === 'all' ? 'All Rooms (32)' : cat}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Features List Cards */}
+                    <div className="grid grid-cols-1 gap-4">
+                      {filteredEliFeatures.length === 0 ? (
+                        <div className="p-8 text-center bg-zinc-900/40 border border-zinc-800 rounded-2xl">
+                          <p className="text-zinc-400 text-sm">No features match your search filter.</p>
+                          <button
+                            onClick={() => {
+                              setSelectedEliCategory('all');
+                              setSearchQuery('');
+                            }}
+                            className="mt-3 px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold cursor-pointer"
+                          >
+                            Clear Filters
+                          </button>
+                        </div>
+                      ) : (
+                        filteredEliFeatures.map((feat) => (
+                          <div
+                            key={feat.id}
+                            className="p-5 bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700/80 rounded-2xl space-y-3 transition-all"
+                          >
+                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800/80 pb-3">
+                              <div>
+                                <h4 className="text-base font-bold text-white flex items-center gap-2">
+                                  <span>{feat.name}</span>
+                                </h4>
+                                <div className="text-[11px] text-zinc-400 font-mono mt-0.5 flex items-center gap-2">
+                                  <span className="text-indigo-400 font-medium">📍 {feat.location}</span>
+                                </div>
+                              </div>
+                              <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
+                                {feat.category}
+                              </span>
+                            </div>
+
+                            {/* Analogy Callout */}
+                            <div className="p-3 bg-indigo-950/30 border border-indigo-500/20 rounded-xl text-xs text-indigo-200 flex items-start gap-2">
+                              <span className="text-base leading-none mt-0.5">💡</span>
+                              <div>
+                                <strong className="font-semibold text-indigo-300">Real-Life Analogy: </strong>
+                                <span>{feat.analogy}</span>
+                              </div>
+                            </div>
+
+                            {/* What It Is / Does */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                              <div className="p-3 bg-zinc-950/60 border border-zinc-800/60 rounded-xl">
+                                <span className="font-bold text-zinc-400 uppercase text-[10px] tracking-wider block mb-1">
+                                  What it is
+                                </span>
+                                <p className="text-zinc-200">{feat.whatItIs}</p>
+                              </div>
+                              <div className="p-3 bg-zinc-950/60 border border-zinc-800/60 rounded-xl">
+                                <span className="font-bold text-zinc-400 uppercase text-[10px] tracking-wider block mb-1">
+                                  What it does
+                                </span>
+                                <p className="text-zinc-200">{feat.whatItDoes}</p>
+                              </div>
+                            </div>
+
+                            {/* Steps to Use */}
+                            <div className="p-3.5 bg-zinc-950/80 border border-zinc-800/80 rounded-xl space-y-2">
+                              <span className="font-bold text-emerald-400 text-xs flex items-center gap-1.5">
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                <span>Click-by-Click Steps to Use:</span>
+                              </span>
+                              <div className="space-y-1.5 text-xs text-zinc-300 font-sans">
+                                {feat.steps.map((step, idx) => (
+                                  <div key={idx} className="flex items-start gap-2">
+                                    <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                                      {idx + 1}
+                                    </span>
+                                    <span>{step.replace(/^\d+\.\s*/, '')}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Code Reality Status */}
+                            {feat.statusNote && (
+                              <div className="px-3 py-2 bg-amber-950/20 border border-amber-500/20 rounded-lg text-[11px] text-amber-300/90 flex items-center gap-1.5">
+                                <span className="font-bold uppercase text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                  Code Status
+                                </span>
+                                <span>{feat.statusNote}</span>
+                              </div>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Sub-Section: TROUBLESHOOTING */}
+                {eliSection === 'troubleshooting' && (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-rose-950/20 border border-rose-500/30 rounded-xl text-xs text-rose-200">
+                      <p className="font-bold text-sm text-rose-300 mb-1">
+                        Plain-Language Troubleshooting Guide
+                      </p>
+                      <p>
+                        "If you see X, it means Y, here's what to click." Find your exact error message or symptom below for instant solutions.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-3">
+                      {filteredEliTroubleshooting.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="p-4 bg-zinc-900/60 border border-zinc-800 rounded-xl space-y-3"
+                        >
+                          <div className="flex items-start gap-2">
+                            <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold uppercase shrink-0 mt-0.5">
+                              If you see
+                            </span>
+                            <span className="text-sm font-bold text-white">{item.ifYouSee}</span>
+                          </div>
+
+                          <div className="flex items-start gap-2 text-xs">
+                            <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-bold uppercase shrink-0 mt-0.5">
+                              It means
+                            </span>
+                            <span className="text-zinc-300">{item.itMeans}</span>
+                          </div>
+
+                          <div className="p-3 bg-emerald-950/20 border border-emerald-500/20 rounded-lg text-xs flex items-start gap-2">
+                            <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold uppercase shrink-0 mt-0.5">
+                              Here's what to click
+                            </span>
+                            <span className="text-emerald-200 leading-relaxed">{item.heresWhatToClick}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Sub-Section: GLOSSARY */}
+                {eliSection === 'glossary' && (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-teal-950/20 border border-teal-500/30 rounded-xl text-xs text-teal-200">
+                      <p className="font-bold text-sm text-teal-300 mb-1">
+                        Plain-English Glossary with Everyday Analogies
+                      </p>
+                      <p>
+                        Every technical acronym translated into everyday English so nobody gets confused.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {filteredEliGlossary.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="p-4 bg-zinc-900/60 border border-zinc-800 rounded-xl space-y-2"
+                        >
+                          <h4 className="text-sm font-bold text-teal-300 flex items-center gap-2">
+                            <span>{item.term}</span>
+                          </h4>
+                          <div className="text-xs text-zinc-300 leading-relaxed">
+                            <strong className="text-zinc-400">Plain English: </strong>
+                            <span>{item.plainEnglish}</span>
+                          </div>
+                          <div className="p-2.5 bg-teal-950/30 border border-teal-500/20 rounded-lg text-xs text-teal-200 flex items-start gap-1.5">
+                            <span className="text-sm leading-none">💡</span>
+                            <div>
+                              <strong className="text-teal-300">Analogy: </strong>
+                              <span>{item.analogy}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* 1. INTRODUCTION */}
             {activeTab === 'intro' && (

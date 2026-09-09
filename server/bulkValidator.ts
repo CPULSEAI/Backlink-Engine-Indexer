@@ -373,7 +373,9 @@ export async function validateSingleUrl(rawUrl: string, timeoutMs: number = 8000
  */
 export async function runBulkValidation(
   urls: string[],
-  concurrencyLimit: number = 8
+  concurrencyLimit: number = 8,
+  onProgress?: (completed: number, total: number) => void,
+  timeoutMs: number = 8000
 ): Promise<{ summary: BulkValidationSummary; results: BulkUrlValidationResult[] }> {
   const cleanUrls = urls
     .map(u => u.trim())
@@ -381,15 +383,18 @@ export async function runBulkValidation(
 
   const results: BulkUrlValidationResult[] = [];
   const queue = [...cleanUrls];
-  const actualConcurrency = Math.min(Math.max(concurrencyLimit, 1), 15);
+  const actualConcurrency = Math.min(Math.max(concurrencyLimit, 1), 50);
 
   const worker = async () => {
     while (queue.length > 0) {
       const url = queue.shift();
       if (!url) break;
       try {
-        const result = await validateSingleUrl(url);
+        const result = await validateSingleUrl(url, timeoutMs);
         results.push(result);
+        if (onProgress) {
+          onProgress(results.length, cleanUrls.length);
+        }
       } catch (err: any) {
         results.push({
           url,
@@ -417,6 +422,9 @@ export async function runBulkValidation(
           overallScore: 0,
           issues: [{ severity: 'error', type: 'status', message: err.message || 'Validation error' }],
         });
+        if (onProgress) {
+          onProgress(results.length, cleanUrls.length);
+        }
       }
     }
   };
