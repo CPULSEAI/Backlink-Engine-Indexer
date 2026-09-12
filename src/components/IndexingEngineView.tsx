@@ -15,6 +15,7 @@ import { UrlInputForm } from './UrlInputForm';
 import { ProgressBar } from './ProgressBar';
 import { ResultsTable } from './ResultsTable';
 import { DirectoryItem, LogItem, SubmissionHistoryItem } from '../types';
+import { GeoSelfHealingPanel } from './GeoSelfHealingPanel';
 
 interface IndexingEngineViewProps {
   directories: DirectoryItem[];
@@ -92,6 +93,9 @@ export const IndexingEngineView: React.FC<IndexingEngineViewProps> = ({
           <span>Launch 5-Step Campaign Wizard</span>
         </button>
       </div>
+
+      {/* Autonomous GEO Engine Directive & Self-Healing Panel */}
+      <GeoSelfHealingPanel />
 
       {/* Input Form Module */}
       <UrlInputForm

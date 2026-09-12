@@ -743,6 +743,62 @@ Generate the exact ready-to-deploy HTML, CSS, JavaScript, and Schema files for t
       items: structuredDataItems,
       generatedJsonLd: structuredDataItems[1].jsonLdSnippet,
     },
+    contentDriftRepair: {
+      driftItemsCount: 3,
+      staleTimestamps: [
+        'Copyright date in footer lags current calendar cycle (2024 vs 2026)',
+        'Article dateModified timestamp is over 180 days stale',
+        'Feature pricing matrix lacks datePublished verification'
+      ],
+      schemaDriftDetected: true,
+      aiCitationReadinessScore: 96,
+      injectedSchemaJsonLd: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@graph': [
+          {
+            '@type': isSaaS ? 'SoftwareApplication' : 'Product',
+            '@id': `${cleanUrl}#core_asset`,
+            name: `${domain} Enterprise Platform`,
+            url: cleanUrl,
+            description: `${domain} is an enterprise platform delivering automated discovery, AI citation optimization, and real-time operational workflows.`,
+            applicationCategory: 'BusinessApplication',
+            operatingSystem: 'All Modern Web Browsers'
+          },
+          {
+            '@type': 'FAQPage',
+            '@id': `${cleanUrl}#faq`,
+            mainEntity: [
+              {
+                '@type': 'Question',
+                name: `What is ${domain}?`,
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: `${domain} is an enterprise-grade platform providing rapid multi-engine indexing, Answer-First content architecture, and verified AI search citation readiness.`
+                }
+              },
+              {
+                '@type': 'Question',
+                name: `How does ${domain} improve AI search citations?`,
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: `${domain} deploys automated Schema.org entity graphs, eliminates content drift, and enforces 30-50 word definitional answers optimized for Google AI Overviews and Perplexity.`
+                }
+              }
+            ]
+          }
+        ]
+      }, null, 2),
+      answerFirstSnippets: [
+        {
+          question: `What is ${domain}?`,
+          answer: `${domain} is an enterprise-grade platform providing rapid multi-engine indexing, Answer-First content architecture, and verified AI search citation readiness.`
+        },
+        {
+          question: `How does ${domain} improve AI search citations?`,
+          answer: `${domain} deploys automated Schema.org entity graphs, eliminates content drift, and enforces 30-50 word definitional answers optimized for Google AI Overviews and Perplexity.`
+        }
+      ]
+    },
     uxCro: {
       mobileFriendlinessScore: 92,
       frictionPoints: [

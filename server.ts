@@ -48,6 +48,9 @@ import {
 } from './server/sitemapObserver.js';
 import { broadcastService } from './server/broadcastService.js';
 import { geoSchemaService } from './server/geoSchemaService.js';
+import { frmService } from './server/frmService.js';
+import { geoSelfHealingService } from './server/geoSelfHealingService.js';
+import { revenueAssetService } from './server/revenueAssetService.js';
 
 
 async function startServer() {
@@ -509,6 +512,16 @@ async function startServer() {
   app.post('/api/indexing/broadcast', async (req, res) => {
     try {
       const { sourcePlatform, urls, options } = req.body;
+
+      // Failure Recovery Mode (FRM) Immediate Action 1: Freeze new publishing if FRM active
+      if (frmService.isPublishingFrozen() && !options?.bypassFreeze) {
+        return res.status(423).json({
+          error: 'Publishing is FROZEN by Failure Recovery Mode (FRM).',
+          message: 'Immediate Action triggered: Publishing frozen due to safety compliance threshold. Lanette recovery guidance required.',
+          frmStatus: frmService.getStatus(),
+        });
+      }
+
       if (!Array.isArray(urls) || urls.length === 0) {
         return res.status(400).json({
           error: 'Please provide a non-empty array of target URLs in "urls".',
@@ -527,6 +540,63 @@ async function startServer() {
       console.error('[API Error] /api/indexing/broadcast:', err);
       res.status(500).json({ error: err.message || 'Multi-protocol broadcast execution failed' });
     }
+  });
+
+  // --- FAILURE RECOVERY MODE (FRM) ENDPOINTS ---
+  app.get('/api/frm/status', (req, res) => {
+    res.json(frmService.getStatus());
+  });
+
+  app.post('/api/frm/trigger', (req, res) => {
+    const { failureSource, revenueComplianceScore, ctr, cvr, triggerReason } = req.body;
+    const state = frmService.activateFRM({
+      failureSource: failureSource || 'indexing',
+      revenueComplianceScore: revenueComplianceScore !== undefined ? Number(revenueComplianceScore) : 74,
+      ctr: ctr !== undefined ? Number(ctr) : 2.4,
+      cvr: cvr !== undefined ? Number(cvr) : 1.4,
+      triggerReason,
+    });
+    res.json({ success: true, message: 'Failure Recovery Mode (FRM) activated. Publishing frozen.', state });
+  });
+
+  app.post('/api/frm/step-action', async (req, res) => {
+    try {
+      const { stepNumber, actionId } = req.body;
+      const updatedState = await frmService.executeOperatorStep(Number(stepNumber), actionId);
+      res.json({ success: true, state: updatedState });
+    } catch (err: any) {
+      console.error('[API Error] /api/frm/step-action:', err);
+      res.status(500).json({ error: err.message || 'Failed to execute recovery step' });
+    }
+  });
+
+  app.post('/api/frm/resolve', async (req, res) => {
+    try {
+      const resolvedState = await frmService.autoResolve();
+      res.json({ success: true, message: 'Failure Recovery Mode resolved. Publishing un-frozen.', state: resolvedState });
+    } catch (err: any) {
+      console.error('[API Error] /api/frm/resolve:', err);
+      res.status(500).json({ error: err.message || 'Failed to resolve FRM' });
+    }
+  });
+
+  app.post('/api/frm/self-heal', async (req, res) => {
+    try {
+      const healedState = await frmService.executeSelfHealingLoop();
+      res.json({
+        success: true,
+        message: 'Autonomous 8-Phase Self-Healing Loop Protocol completed. All metrics restored to compliant thresholds (Compliance >=85%, Demand >=95).',
+        state: healedState,
+      });
+    } catch (err: any) {
+      console.error('[API Error] /api/frm/self-heal:', err);
+      res.status(500).json({ error: err.message || 'Failed to execute Self-Healing Loop' });
+    }
+  });
+
+  app.post('/api/frm/reset', (req, res) => {
+    const state = frmService.resetToHealthy();
+    res.json({ success: true, message: 'FRM reset to healthy baseline.', state });
   });
 
   app.get('/api/indexing/broadcast/history', async (req, res) => {
@@ -626,6 +696,58 @@ async function startServer() {
     } catch (err: any) {
       console.error('[API Error] /api/geo/audit-answer-first:', err);
       res.status(500).json({ error: err.message || 'Answer-First audit failed' });
+    }
+  });
+
+  // --- GEO ENGINE HEALTH & METRICS AUDIT ---
+  app.get('/api/geo/health', (req, res) => {
+    try {
+      const health = geoSelfHealingService.getHealthSummary();
+      res.json(health);
+    } catch (err: any) {
+      console.error('[API Error] /api/geo/health:', err);
+      res.status(500).json({ error: err.message || 'Failed to fetch GEO engine health' });
+    }
+  });
+
+  // --- GEO ENGINE SELF-HEALING PIPELINE ---
+  // Retry -> Regenerate Schema -> Rebuild FAQ -> Re-submit -> Verify
+  app.post('/api/geo/self-heal', async (req, res) => {
+    try {
+      const { urls, sourcePlatform, originalReason } = req.body;
+      const targetUrls = Array.isArray(urls) && urls.length > 0 
+        ? urls 
+        : ['https://careerpulseai.net/tools/salary-calculator', 'https://careerpulseai.net/reports/tech-career-pulse-2026'];
+
+      const healResult = await geoSelfHealingService.executeSelfHealing(
+        targetUrls,
+        sourcePlatform || 'CareerPulseAI',
+        originalReason || 'Indexation timeout / 429 rate limit'
+      );
+
+      res.json({
+        success: true,
+        message: 'GEO Self-Healing pipeline executed: Retry -> Regenerate Schema -> Rebuild FAQ -> Re-submit -> Verify',
+        ...healResult,
+      });
+    } catch (err: any) {
+      console.error('[API Error] /api/geo/self-heal:', err);
+      res.status(500).json({ error: err.message || 'GEO self-healing pipeline failed' });
+    }
+  });
+
+  // --- REVENUE ASSET PRIORITIZER ENGINE ---
+  app.post('/api/revenue-assets/prioritize', (req, res) => {
+    try {
+      const { urls } = req.body;
+      if (!Array.isArray(urls)) {
+        return res.status(400).json({ error: 'Please provide an array of URLs to prioritize.' });
+      }
+      const prioritized = revenueAssetService.prioritizeUrls(urls);
+      res.json(prioritized);
+    } catch (err: any) {
+      console.error('[API Error] /api/revenue-assets/prioritize:', err);
+      res.status(500).json({ error: err.message || 'Failed to prioritize revenue assets' });
     }
   });
 

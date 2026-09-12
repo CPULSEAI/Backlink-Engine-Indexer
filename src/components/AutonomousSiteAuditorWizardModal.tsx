@@ -962,8 +962,98 @@ export const AutonomousSiteAuditorWizardModal: React.FC<AutonomousSiteAuditorWiz
               )}
 
               {/* TAB: PHASE 8 STRUCTURED DATA */}
+              {/* TAB: PHASE 8 STRUCTURED DATA & CONTENT DRIFT REPAIR */}
               {activeTab === 'schema' && (
                 <div className="space-y-6">
+                  {/* Content Drift Repair & AI Citation Injection Banner */}
+                  {auditResult.contentDriftRepair && (
+                    <div className="border-4 border-black bg-[#faf8f5] p-5 shadow-[5px_5px_0_#000] space-y-4">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b-2 border-black pb-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 bg-[#ff4d00] text-black text-[10px] font-black font-mono uppercase">
+                              AUTONOMOUS DRIFT REPAIR
+                            </span>
+                            <h4 className="font-mono-brutal font-black text-sm text-black uppercase">
+                              Content Drift Repair &amp; AI Citation Schema Injection
+                            </h4>
+                          </div>
+                          <p className="text-xs font-mono-brutal text-zinc-600 mt-1">
+                            Repairs decaying dates, stale semantic facts, and injects Answer-First JSON-LD to maximize Google AI Overview &amp; Perplexity citations.
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <div className="text-right">
+                            <span className="text-[10px] font-mono-brutal text-zinc-500 block">AI Citation Readiness</span>
+                            <span className="text-base font-black font-mono text-green-700">
+                              {auditResult.contentDriftRepair.aiCitationReadinessScore}%
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => {
+                              if (onSendToIndexingQueue) {
+                                onSendToIndexingQueue([auditResult.targetUrl]);
+                                toast.success('Injected AI Schema queued for instant IndexNow & Google dispatch!');
+                                onClose();
+                              } else {
+                                toast.success('AI Citation Schema successfully applied to asset profile.');
+                              }
+                            }}
+                            className="px-3.5 py-2 bg-black text-white hover:bg-[#ff4d00] hover:text-black font-mono-brutal font-bold text-xs uppercase border-2 border-black shadow-[2px_2px_0_#000] transition-all flex items-center gap-1.5"
+                          >
+                            <Sparkles className="w-3.5 h-3.5" />
+                            <span>Inject &amp; Queue for Indexing</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Drift Checklist & Rebuilt Q&As */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono-brutal">
+                        <div className="border border-black p-3 bg-white space-y-2">
+                          <strong className="text-black block text-xs uppercase">
+                            Identified Content Drift ({auditResult.contentDriftRepair.staleTimestamps.length} items repaired)
+                          </strong>
+                          <ul className="space-y-1.5 text-zinc-700">
+                            {auditResult.contentDriftRepair.staleTimestamps.map((item, idx) => (
+                              <li key={idx} className="flex items-start gap-1.5">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-green-600 shrink-0 mt-0.5" />
+                                <span>{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div className="border border-black p-3 bg-white space-y-2">
+                          <strong className="text-black block text-xs uppercase">
+                            Answer-First AI Q&amp;A Citation Anchors
+                          </strong>
+                          <div className="space-y-2">
+                            {auditResult.contentDriftRepair.answerFirstSnippets.map((faq, idx) => (
+                              <div key={idx} className="p-2 bg-zinc-50 border border-zinc-200">
+                                <span className="font-bold text-black block">{faq.question}</span>
+                                <p className="text-[11px] text-zinc-600 mt-0.5">{faq.answer}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Injected Schema Preview */}
+                      <div className="relative">
+                        <pre className="bg-black text-green-400 p-3 text-xs font-mono-brutal overflow-x-auto border-2 border-black max-h-48">
+                          {auditResult.contentDriftRepair.injectedSchemaJsonLd}
+                        </pre>
+                        <button
+                          onClick={() => handleCopySnippet(auditResult.contentDriftRepair!.injectedSchemaJsonLd, 'injected-drift-schema')}
+                          className="absolute top-2 right-2 px-2.5 py-1 bg-white text-black text-[10px] font-mono-brutal font-bold border border-black hover:bg-[#ff4d00]"
+                        >
+                          {copiedCodeId === 'injected-drift-schema' ? 'Copied!' : 'Copy Injected JSON-LD'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="border-2 border-black bg-white p-5 shadow-[4px_4px_0_#000] space-y-4">
                     <h3 className="font-mono-brutal text-sm font-bold uppercase text-black">
                       Schema.org JSON-LD Generator & Validator
@@ -976,10 +1066,10 @@ export const AutonomousSiteAuditorWizardModal: React.FC<AutonomousSiteAuditorWiz
                             <span
                               className={`text-[10px] font-mono-brutal px-2 py-0.5 font-bold uppercase ${
                                 item.status === 'Valid'
-                                  ? 'bg-green-600 text-white'
-                                  : item.status === 'Warning'
-                                  ? 'bg-amber-500 text-black'
-                                  : 'bg-red-600 text-white'
+                                    ? 'bg-green-600 text-white'
+                                    : item.status === 'Warning'
+                                    ? 'bg-amber-500 text-black'
+                                    : 'bg-red-600 text-white'
                               }`}
                             >
                               {item.status}

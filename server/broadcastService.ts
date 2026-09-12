@@ -4,6 +4,7 @@ import { jobManager } from './queue.js';
 import { getGoogleIndexingAccessToken } from './googleAuth.js';
 import { runBulkValidation, BulkUrlValidationResult, BulkValidationSummary } from './bulkValidator.js';
 import { geoSchemaService, GeoSchemaSynthesisResponse } from './geoSchemaService.js';
+import { revenueAssetService } from './revenueAssetService.js';
 
 export interface BroadcastRequest {
   sourcePlatform?: 'AI Digital Product Creator' | 'LinkFlow Pro' | 'CareerPulseAI' | string;
@@ -17,6 +18,7 @@ export interface BroadcastRequest {
     maxRetries?: number;
     geoEnrichment?: boolean;
     geoSchemaType?: 'SoftwareApplication' | 'Product' | 'FAQPage' | 'Article';
+    bypassFreeze?: boolean;
   };
 }
 
@@ -58,6 +60,12 @@ export interface BroadcastRunResult {
     sampleSchema?: Record<string, any>;
     answerFirstSnippets: Array<{ url: string; snippet: string; score: number }>;
   };
+  revenueAssets?: {
+    prioritizedCount: number;
+    storefronts: number;
+    calculators: number;
+    highIntentGuides: number;
+  };
   logs: BroadcastUrlLog[];
 }
 
@@ -92,6 +100,10 @@ export class BroadcastService {
       throw new Error('No valid target URLs provided for broadcast');
     }
 
+    // Treat every URL as a revenue asset: prioritize storefronts, products, and calculators
+    const prioritizedData = revenueAssetService.prioritizeUrls(cleanUrls);
+    const targetUrls = prioritizedData.sortedUrls;
+
     const priority = req.options?.priority || 'high';
     const runPreflight = req.options?.runPreflightAudit ?? false;
     const maxRetries = Math.min(req.options?.maxRetries ?? 3, 5);
@@ -102,7 +114,8 @@ export class BroadcastService {
       type: 'BROADCAST_STARTED',
       broadcastId,
       sourcePlatform,
-      urlCount: cleanUrls.length,
+      urlCount: targetUrls.length,
+      revenueAssets: prioritizedData.summary,
       priority,
       timestamp: new Date().toISOString(),
     });
@@ -171,13 +184,13 @@ export class BroadcastService {
     const logs: BroadcastUrlLog[] = [];
 
     // 3. Parallel Dispatch to IndexNow Protocol (Bing, Yandex, Seznam, Naver)
-    const primaryDomain = cleanUrls[0] ? new URL(cleanUrls[0]).hostname : 'example.com';
+    const primaryDomain = targetUrls[0] ? new URL(targetUrls[0]).hostname : 'example.com';
     const indexnowKey = req.options?.indexnowKey || process.env.INDEXNOW_KEY || '7bca98324e9045bca128d9c0e27163ba';
 
-    const indexNowPromise = this.dispatchIndexNowWithRetry(cleanUrls, primaryDomain, indexnowKey, maxRetries);
+    const indexNowPromise = this.dispatchIndexNowWithRetry(targetUrls, primaryDomain, indexnowKey, maxRetries);
 
     // 4. Parallel Dispatch to Google Indexing API v3 with Exponential Backoff
-    const googlePromise = this.dispatchGoogleWithConcurrency(cleanUrls, googleToken, googleAuthSource, maxConcurrency, maxRetries);
+    const googlePromise = this.dispatchGoogleWithConcurrency(targetUrls, googleToken, googleAuthSource, maxConcurrency, maxRetries);
 
     // Await both dispatches simultaneously
     const [indexNowResult, googleResult] = await Promise.all([indexNowPromise, googlePromise]);
@@ -191,8 +204,8 @@ export class BroadcastService {
       const answerFirstSnippets: Array<{ url: string; snippet: string; score: number }> = [];
       let sampleSchema: Record<string, any> | undefined;
 
-      for (let i = 0; i < Math.min(cleanUrls.length, 5); i++) {
-        const u = cleanUrls[i];
+      for (let i = 0; i < Math.min(targetUrls.length, 5); i++) {
+        const u = targetUrls[i];
         const pageTitle = u.split('/').filter(Boolean).pop()?.replace(/[-_]/g, ' ') || 'Digital Asset';
         const synth = geoSchemaService.synthesizeSchema({
           type: req.options.geoSchemaType || 'SoftwareApplication',
@@ -210,7 +223,7 @@ export class BroadcastService {
       }
 
       geoEnrichment = {
-        schemasGenerated: cleanUrls.length,
+        schemasGenerated: targetUrls.length,
         sampleSchema,
         answerFirstSnippets,
       };
@@ -221,7 +234,7 @@ export class BroadcastService {
     const result: BroadcastRunResult = {
       broadcastId,
       sourcePlatform,
-      totalUrls: cleanUrls.length,
+      totalUrls: targetUrls.length,
       completedAt: new Date().toISOString(),
       durationMs,
       preflightAudit: preflightAuditResult,
@@ -238,6 +251,12 @@ export class BroadcastService {
         message: indexNowResult.message,
       },
       geoEnrichment,
+      revenueAssets: {
+        prioritizedCount: prioritizedData.revenueAssetCount,
+        storefronts: prioritizedData.summary.storefronts,
+        calculators: prioritizedData.summary.calculators,
+        highIntentGuides: prioritizedData.summary.highIntentGuides,
+      },
       logs,
     };
 

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Play, Sparkles, CheckCircle2, Sliders, Globe, ShieldCheck, Zap, AlertCircle, RefreshCw, Bot, Target, Repeat, StopCircle, Filter, Search } from 'lucide-react';
+import { Play, Sparkles, CheckCircle2, Sliders, Globe, ShieldCheck, Zap, AlertCircle, RefreshCw, Bot, Target, Repeat, StopCircle, Filter, Search, DollarSign, TrendingUp } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { DirectoryEntry, AutonomousConfig } from '../types';
 import { SmartUrlBatcherModal } from './SmartUrlBatcherModal';
@@ -131,6 +131,53 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
     const curr = getEffectivePriority(url);
     const next: 'High' | 'Medium' | 'Low' = curr === 'High' ? 'Medium' : curr === 'Medium' ? 'Low' : 'High';
     setCustomUrlPriorities((prev) => ({ ...prev, [url]: next }));
+  };
+
+  // Autonomous Revenue Asset Analysis
+  const revenueAssetStats = useMemo(() => {
+    let storefronts = 0;
+    let calculators = 0;
+    let highIntent = 0;
+
+    uniqueUrls.forEach((url) => {
+      const lower = url.toLowerCase();
+      if (/(?:store|shop|product|pricing|checkout|buy|cart|billing|purchase|order)/i.test(lower)) {
+        storefronts++;
+      } else if (/(?:calculator|tool|simulator|quiz|estimate|compar|benchmark|audit)/i.test(lower)) {
+        calculators++;
+      } else if (/(?:guide|salary|report|pulse|vs|review|best-|top-)/i.test(lower)) {
+        highIntent++;
+      }
+    });
+
+    return {
+      storefronts,
+      calculators,
+      highIntent,
+      totalRevenueAssets: storefronts + calculators + highIntent,
+    };
+  }, [uniqueUrls]);
+
+  const handleAutoPrioritizeRevenueAssets = () => {
+    const updatedPriorities: Record<string, 'High' | 'Medium' | 'Low'> = { ...customUrlPriorities };
+    let promoted = 0;
+    uniqueUrls.forEach((url) => {
+      const lower = url.toLowerCase();
+      if (
+        /(?:store|shop|product|pricing|checkout|buy|cart|billing|purchase|order)/i.test(lower) ||
+        /(?:calculator|tool|simulator|quiz|estimate|compar|benchmark|audit)/i.test(lower)
+      ) {
+        updatedPriorities[url] = 'High';
+        promoted++;
+      } else if (/(?:guide|salary|report|pulse|vs|review|best-|top-)/i.test(lower)) {
+        if (!updatedPriorities[url] || updatedPriorities[url] === 'Low') {
+          updatedPriorities[url] = 'Medium';
+          promoted++;
+        }
+      }
+    });
+    setCustomUrlPriorities(updatedPriorities);
+    toast.success(`Prioritized ${promoted} revenue assets to Head of Queue!`);
   };
 
   const handleCleanInput = () => {
@@ -312,6 +359,42 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({
 
         {/* Priority Assignment & Tagging Module */}
         <div className="bg-[#f2efeb] border-4 border-black p-4 shadow-[4px_4px_0_#000] space-y-3">
+          {/* Revenue Asset Autonomous Prioritizer Bar */}
+          <div className="border-2 border-black bg-white p-3 shadow-[2px_2px_0_#000] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-[#ff4d00] text-black border border-black font-black">
+                <DollarSign className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono-brutal font-black uppercase text-black">
+                    REVENUE ASSET PRIORITIZER (ACTIVE)
+                  </span>
+                  <span className="px-1.5 py-0.2 bg-green-100 text-green-800 text-[10px] font-mono-brutal font-bold border border-green-700">
+                    DIRECTIVE COMPLIANT
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 mt-0.5 text-[11px] font-mono-brutal text-zinc-600">
+                  <span>Storefronts: <strong className="text-black">{revenueAssetStats.storefronts}</strong></span>
+                  <span>•</span>
+                  <span>Calculators: <strong className="text-black">{revenueAssetStats.calculators}</strong></span>
+                  <span>•</span>
+                  <span>High-Intent Guides: <strong className="text-black">{revenueAssetStats.highIntent}</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleAutoPrioritizeRevenueAssets}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-black text-white hover:bg-[#ff4d00] hover:text-black text-xs font-mono-brutal font-bold uppercase border-2 border-black shadow-[2px_2px_0_#000] transition-all self-start sm:self-auto cursor-pointer"
+              title="Automatically promote storefronts, checkout links, and interactive calculators to Head of Queue"
+            >
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>Auto-Prioritize Revenue Assets</span>
+            </button>
+          </div>
+
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b-2 border-black pb-2">
             <div className="flex items-center gap-2">
               <span className="px-2 py-0.5 bg-black text-white font-mono-brutal text-[10px] font-bold uppercase">

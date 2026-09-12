@@ -112,6 +112,21 @@ export const ELI10_GLOSSARY: Eli10GlossaryItem[] = [
     term: 'Stripe',
     plainEnglish: 'A secure online payment service that handles credit cards and subscription billing.',
     analogy: 'Like a cash register with a card reader at a checkout counter.'
+  },
+  {
+    term: 'Revenue Asset',
+    plainEnglish: 'A webpage directly tied to earning revenue, such as a product checkout page, storefront, or interactive calculator.',
+    analogy: 'Like placing the best-selling toy right in the front display window of your toy shop so people buy it immediately.'
+  },
+  {
+    term: 'Content Drift',
+    plainEnglish: 'When information on a webpage becomes outdated over time, like stale copyright dates, expired prices, or outdated answers.',
+    analogy: 'Like milk in the refrigerator that has passed its expiration date and needs to be replaced with a fresh carton.'
+  },
+  {
+    term: 'Answer-First Architecture',
+    plainEnglish: 'Writing a direct 30-to-50 word answer right beneath a heading so AI chatbots like Perplexity and ChatGPT can quote you word-for-word.',
+    analogy: 'Like answering a question on a test with the exact, clear answer right on the first line before adding extra details.'
   }
 ];
 
@@ -928,6 +943,79 @@ export const ELI10_FEATURES: Eli10FeatureItem[] = [
     ],
     statusNote: 'Global modal safeguarding against accidental job termination or data purge.',
     keywords: ['confirmation modal', 'cancel job', 'safety', 'stop', 'delete']
+  },
+
+  // 17. GEO Engine, Revenue Prioritizer & Failure Recovery Guides
+  {
+    id: 'geo-engine-self-healing',
+    name: 'GEO Engine & Autonomous Self-Healing Pipeline',
+    category: 'Core Indexing',
+    location: 'URL Submission & Indexing Screen -> Top Banner & Diagnostic Panel',
+    analogy: 'Like an automatic pit crew that watches your race car: if a tire goes flat, it changes the tire, tunes the engine, and sends the car right back onto the track.',
+    whatItIs: 'An automated diagnostic and repair engine that guarantees your web pages get indexed by search engines and cited by AI chatbots.',
+    whatItDoes: 'When an address fails or gets slow, it follows a strict 5-step repair rule: Retry -> Regenerate Schema -> Rebuild FAQ -> Re-submit -> Verify.',
+    steps: [
+      '1. Click "URL Submission & Indexing Engine" in the sidebar or top tab bar.',
+      '2. Look at the top of the screen for the "SYSTEM DIRECTIVE — GEO ENGINE" banner.',
+      '3. Check the 5 health criteria: IndexNow Success, Google Indexing API, Schema Correctness, Zero Fake Metrics, and 85%+ Revenue Compliance.',
+      '4. Click the purple "Execute 5-Step Self-Healing" button to launch an automatic repair cycle.',
+      '5. Click the "Regenerated Schema.org & FAQ" tab to inspect the rebuilt Answer-First Q&A blocks and structured data.'
+    ],
+    statusNote: 'Fully active self-healing engine tied to /api/geo/self-heal and WebSocket live telemetry.',
+    keywords: ['geo engine', 'self-healing', 'retry', 'regenerate schema', 'faq rebuild', 'ai citation', 'lanette']
+  },
+  {
+    id: 'revenue-asset-prioritizer',
+    name: 'Revenue Asset Prioritizer (Storefronts & High-Intent Engine)',
+    category: 'Core Indexing',
+    location: 'URL Submission Form & Broadcast Dispatch Queue',
+    analogy: 'Like a hospital triage nurse who rushes patients with urgent needs straight to the doctor first, while keeping general checkups in the normal line.',
+    whatItIs: 'A smart priority sorter that treats every web address as a financial revenue asset.',
+    whatItDoes: 'It automatically detects storefronts, pricing tables, checkout pages, and interactive calculators, putting them at the very front of the indexing line so you earn money faster.',
+    steps: [
+      '1. Paste your list of website links into the "Bulk URL Input" box.',
+      '2. The engine instantly classifies your links: Tier 1 (Storefronts & Checkouts), Tier 2 (Calculators & Tools), Tier 3 (High-Intent Guides), or Tier 4 (Editorial Articles).',
+      '3. Click "START MULTI-ENGINE BROADCAST". High-value checkout and calculator pages are dispatched to Google and Bing ahead of regular articles.',
+      '4. Review the Results Table to confirm that revenue assets received immediate HTTP 200/202 confirmations.'
+    ],
+    statusNote: 'Active prioritization algorithm sorting dispatch queues with 80/20 concurrency.',
+    keywords: ['revenue asset', 'storefront', 'calculator', 'high intent', 'prioritization', 'tier 1', 'dispatch']
+  },
+  {
+    id: '14-phase-content-drift',
+    name: '14-Phase Auditor: Content Drift Repair & AI Schema Injection',
+    category: 'Wizards & Growth',
+    location: 'Sidebar -> Wizards & Growth -> 14-Phase Auditor -> Schema & Drift Tab',
+    analogy: 'Like a master editor who spots outdated facts in an encyclopedia and pastes shiny new explanation cards right over them.',
+    whatItIs: 'An advanced scanner inside the 14-Phase Auditor that discovers stale dates, decaying answers, and missing AI tags.',
+    whatItDoes: 'It fixes content drift and injects complete Schema.org JSON-LD and 30-50 word Answer-First snippets so ChatGPT and Google AI Overviews cite your pages.',
+    steps: [
+      '1. Click "14-Phase Auditor" in the sidebar and enter your website address.',
+      '2. Click "Start 14-Phase Audit" and wait 3 seconds while all 14 multi-vector phases scan your site.',
+      '3. In the diagnostic tabs, click "Schema & Structured Data".',
+      '4. Look at the "AUTONOMOUS DRIFT REPAIR" box to view repaired timestamps and AI Q&A citation anchors.',
+      '5. Click "Inject & Queue for Indexing" to immediately send the repaired asset into the live broadcast queue.'
+    ],
+    statusNote: 'Directly injects Answer-First schema graphs and synchronizes with the indexing queue.',
+    keywords: ['14-phase auditor', 'content drift', 'schema injection', 'ai citation', 'answer first', 'perplexity']
+  },
+  {
+    id: 'frm-lanette-recovery',
+    name: 'Failure Recovery Mode (FRM) Lanette 1-Click Guide',
+    category: 'Core Indexing',
+    location: 'Global Emergency Banner (Top of screen when active)',
+    analogy: 'Like a big red emergency brake on a factory assembly line that protects you from shipping broken products until a supervisor clicks 3 green buttons.',
+    whatItIs: 'An automated safety system that freezes publishing if click rates or revenue compliance scores drop below safety thresholds.',
+    whatItDoes: 'It protects your domain reputation and provides Lanette with step-by-step 1-click recovery actions to unfreeze the system safely.',
+    steps: [
+      '1. If you see the warning banner saying "FAILURE RECOVERY MODE (FRM) ACTIVE", publishing is safely paused.',
+      '2. Click Step 1 "Regenerate Failing Assets" to rebuild any broken products or schemas.',
+      '3. Click Step 2 "Revalidate Market Demand" to test customer interest with fresh trend data (target >= 95).',
+      '4. Click Step 3 "Recalculate Compliance" to verify your revenue compliance score is back above 85%.',
+      '5. Click "Resolve & Un-Freeze System" to return to normal operation.'
+    ],
+    statusNote: 'Enforces the FRM Kindergarten-level 1-click operator guidance rules.',
+    keywords: ['failure recovery mode', 'frm', 'lanette', 'freeze', 'unfreeze', 'compliance', 'demand score']
   }
 ];
 
@@ -1003,5 +1091,29 @@ export const ELI10_TROUBLESHOOTING: Eli10TroubleshootingItem[] = [
     itMeans: 'You have a search filter typed in that hid all the rows in the table.',
     heresWhatToClick: 'Clear the search box above the Results Table and make sure the status dropdown is set to "All Statuses". Then click "EXPORT CSV" again.',
     keywords: ['export csv', 'empty', 'no rows', 'download']
+  },
+  {
+    ifYouSee: 'Content Drift Warning or Stale Schema in 14-Phase Auditor',
+    itMeans: 'Your page contains old dates (e.g. 2023 copyright) or lacks modern Answer-First JSON-LD markup.',
+    heresWhatToClick: 'In the 14-Phase Auditor, switch to the "Schema & Structured Data" tab, review the repaired timestamp list in the "AUTONOMOUS DRIFT REPAIR" box, and click "Inject & Queue for Indexing" to instantly update Google and Bing.',
+    keywords: ['content drift', 'stale schema', '14-phase auditor', 'timestamp', 'drift repair']
+  },
+  {
+    ifYouSee: 'Revenue Asset Not Prioritized at Head of Queue',
+    itMeans: 'The URL was typed as a plain blog path instead of matching standard storefront, checkout, or calculator naming conventions.',
+    heresWhatToClick: 'Check your URL structure. The engine automatically looks for words like /tools/, /calculator, /store, /products/, or /cart. If it is a pricing page, name it /pricing to ensure Tier-1 dispatch treatment.',
+    keywords: ['revenue asset', 'queue priority', 'storefront', 'calculator', 'high intent']
+  },
+  {
+    ifYouSee: 'GEO Citation Probability Below 90%',
+    itMeans: 'Your content does not answer users’ search questions right in the first sentence with clear numbers and definitions.',
+    heresWhatToClick: 'Open the "GEO Engine & Autonomous Self-Healing" panel at the top of the Indexing screen and click "Execute 5-Step Self-Healing". This regenerates your Answer-First FAQ block and resubmits the page automatically.',
+    keywords: ['geo citation', 'citation probability', 'perplexity', 'chatgpt', 'self-healing']
+  },
+  {
+    ifYouSee: 'Publishing Frozen Under Failure Recovery Mode (FRM)',
+    itMeans: 'Revenue compliance dropped below 85% or CTR fell below 3.5%, so the safety lock turned on to protect your domain reputation.',
+    heresWhatToClick: 'Look at the FRM banner at the top of the screen. Follow Lanette’s 3 simple steps: 1. Click "Regenerate Failing Assets", 2. Click "Revalidate Demand", 3. Click "Recalculate Compliance", then click "Resolve & Unfreeze".',
+    keywords: ['frm', 'failure recovery mode', 'frozen', 'compliance', 'lanette', 'unfreeze']
   }
 ];

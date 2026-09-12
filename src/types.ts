@@ -38,39 +38,6 @@ export interface SubmissionRecord {
   urlList?: string[];
 }
 
-export interface HourlyPerformanceBucket {
-  hourLabel: string;
-  isoHour: string;
-  timestamp: string;
-  total: number;
-  confirmed: number;
-  failed: number;
-  googleIndexed: number;
-  successRate: number;
-  avgLatencyMs: number;
-}
-
-export interface DailyPerformanceDigestData {
-  timeRange: string;
-  generatedAt: string;
-  kpis: {
-    successRate24h: number;
-    totalSubmissions24h: number;
-    confirmed24h: number;
-    failed24h: number;
-    googlePushed24h: number;
-    avgLatencyMs: number;
-    peakHour: string;
-    trendDelta: number;
-    priorityBreakdown: {
-      high: number;
-      medium: number;
-      low: number;
-    };
-  };
-  hourlyTrend: HourlyPerformanceBucket[];
-}
-
 export interface SystemSettings {
   proxyList: string;
   googleServiceAccountJson: string;
@@ -1236,6 +1203,16 @@ export interface SiteAuditorResult {
   structuredData: {
     items: StructuredDataAuditItem[];
     generatedJsonLd: string;
+  };
+
+  // Content Drift Repair & AI Citation Schema Injection
+  contentDriftRepair?: {
+    driftItemsCount: number;
+    staleTimestamps: string[];
+    schemaDriftDetected: boolean;
+    aiCitationReadinessScore: number;
+    injectedSchemaJsonLd: string;
+    answerFirstSnippets: Array<{ question: string; answer: string }>;
   };
 
   // Phase 9: UX & Conversion

@@ -40,6 +40,7 @@ import { TrafficEngineDashboard } from './components/TrafficEngineDashboard';
 import { UrlIndexingWizardModal } from './components/UrlIndexingWizardModal';
 import { AiAssistantWidget } from './components/AiAssistantWidget';
 import { DailyPerformanceDigest } from './components/DailyPerformanceDigest';
+import { FailureRecoveryModeBanner } from './components/FailureRecoveryModeBanner';
 import { ConfirmationModal, ConfirmationModalProps } from './components/ConfirmationModal';
 import { DirectoryEntry, LogItem, SubmissionRecord, SystemSettings, AnalyticsData, AutonomousConfig, ApiHealthReport, WorkspaceSnapshot, DashboardViewType, AuthSession, NewContentDetectedEvent } from './types';
 
@@ -981,6 +982,9 @@ export default function App() {
           },
         }}
       />
+
+      {/* Failure Recovery Mode (FRM) Banner & Lanette Operator Guidance */}
+      <FailureRecoveryModeBanner />
 
       {/* Header Bar */}
       <Header
