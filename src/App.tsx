@@ -42,6 +42,7 @@ import { AiAssistantWidget } from './components/AiAssistantWidget';
 import { DailyPerformanceDigest } from './components/DailyPerformanceDigest';
 import { FailureRecoveryModeBanner } from './components/FailureRecoveryModeBanner';
 import { ConfirmationModal, ConfirmationModalProps } from './components/ConfirmationModal';
+import { UnifiedRevenueMandateModal } from './components/UnifiedRevenueMandateModal';
 import { DirectoryEntry, LogItem, SubmissionRecord, SystemSettings, AnalyticsData, AutonomousConfig, ApiHealthReport, WorkspaceSnapshot, DashboardViewType, AuthSession, NewContentDetectedEvent } from './types';
 
 export default function App() {
@@ -51,6 +52,7 @@ export default function App() {
   const [wsConnected, setWsConnected] = useState(false);
   const [activeSubmissionId, setActiveSubmissionId] = useState<string | null>(null);
   const [newContentAlert, setNewContentAlert] = useState<NewContentDetectedEvent | null>(null);
+  const [isRevenueMandateOpen, setIsRevenueMandateOpen] = useState(false);
 
   // Global Confirmation Modal State for Destructive Actions
   const [confirmationState, setConfirmationState] = useState<{
@@ -1013,6 +1015,7 @@ export default function App() {
         onRefreshApiHealth={handleRefreshApiHealth}
         isRefreshingApiHealth={isRefreshingHealth}
         totalDirectoriesCount={directories.length}
+        onOpenRevenueMandate={() => setIsRevenueMandateOpen(true)}
       />
 
       {/* Main Container with Sidebar + Responsive View Area */}
@@ -1025,6 +1028,7 @@ export default function App() {
           onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
           isMobileOpen={isSidebarMobileOpen}
           onCloseMobile={() => setIsSidebarMobileOpen(false)}
+          onOpenRevenueMandate={() => setIsRevenueMandateOpen(true)}
           onOpenConversionWizard={(url) => {
             setWizardInitialUrl(url || '');
             setIsConversionWizardOpen(true);
@@ -1662,6 +1666,12 @@ export default function App() {
 
       {/* AI Copilot Float Widget */}
       <AiAssistantWidget />
+
+      {/* Unified Revenue Mandate Modal */}
+      <UnifiedRevenueMandateModal
+        isOpen={isRevenueMandateOpen}
+        onClose={() => setIsRevenueMandateOpen(false)}
+      />
     </div>
   );
 }

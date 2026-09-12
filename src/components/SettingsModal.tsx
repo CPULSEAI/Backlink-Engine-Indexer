@@ -1386,35 +1386,54 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </button>
               </div>
 
+              {/* Zero Fake Data Policy Guarantee Banner */}
+              <div className="p-3 bg-emerald-950/30 border border-emerald-500/30 rounded-xl flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span className="text-emerald-300 font-mono text-[11px]">
+                    <strong>UNIFIED REVENUE MANDATE ENFORCED:</strong> Real Revenue • Real Customers • Real Subscribers Only. Zero fake or projected data.
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">
+                  ZERO FAKE DATA
+                </span>
+              </div>
+
               {/* Plan Details & Billing Cycle Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Current Plan Card */}
                 <div className="bg-zinc-950/70 border border-zinc-800/90 rounded-2xl p-5 space-y-4">
                   <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
                     <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Current Active Plan</span>
-                    <span className="text-xs font-bold font-mono text-purple-400 bg-purple-950/80 px-2.5 py-0.5 rounded-lg border border-purple-500/30">
-                      ${subscription?.amount || '249.00'} / {subscription?.interval || 'mo'}
+                    <span className={`text-xs font-bold font-mono px-2.5 py-0.5 rounded-lg border ${subscription?.isLive ? 'text-purple-400 bg-purple-950/80 border-purple-500/30' : 'text-amber-400 bg-amber-950/80 border-amber-500/30'}`}>
+                      {subscription?.isLive ? `$${subscription?.amount} / ${subscription?.interval}` : 'NO VERIFIED DATA AVAILABLE'}
                     </span>
                   </div>
 
                   <div className="space-y-2">
                     <div className="text-base font-black text-zinc-100 tracking-tight flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-amber-400" />
-                      <span>{subscription?.planName || 'Enterprise Indexer Engine (Pro)'}</span>
+                      <span>{subscription?.isLive ? subscription?.planName : 'NO VERIFIED PLAN DETECTED'}</span>
                     </div>
                     <p className="text-xs text-zinc-400 leading-relaxed">
-                      Includes 10 simultaneous high-speed concurrency threads, Google Cloud Indexing API automation, Smart Proxy rotation shield, and full Conversion Rate Optimization suite.
+                      {subscription?.isLive
+                        ? 'Includes verified high-speed concurrency threads, Google Cloud Indexing API automation, Smart Proxy rotation shield, and full Conversion Rate Optimization suite.'
+                        : 'No verified active Stripe subscription was detected for this account. Configure STRIPE_SECRET_KEY or initiate a verified checkout to activate live subscription telemetry.'}
                     </p>
                   </div>
 
                   <div className="pt-2 border-t border-zinc-800/80 grid grid-cols-2 gap-3 text-xs">
                     <div>
-                      <span className="text-zinc-500 block text-[10px] font-mono uppercase">Submissions Quota</span>
-                      <span className="font-bold text-zinc-200 font-mono">Unlimited (100k/mo)</span>
+                      <span className="text-zinc-500 block text-[10px] font-mono uppercase">Verified Status</span>
+                      <span className={`font-bold font-mono ${subscription?.isLive ? 'text-emerald-400' : 'text-zinc-400'}`}>
+                        {subscription?.isLive ? 'AUTHENTICATED' : 'NO VERIFIED DATA AVAILABLE'}
+                      </span>
                     </div>
                     <div>
-                      <span className="text-zinc-500 block text-[10px] font-mono uppercase">Worker Concurrency</span>
-                      <span className="font-bold text-cyan-400 font-mono">10 Dedicated Threads</span>
+                      <span className="text-zinc-500 block text-[10px] font-mono uppercase">Gateway Link</span>
+                      <span className="font-bold text-cyan-400 font-mono">
+                        {subscription?.isConfigured ? 'Stripe Configured' : 'Stripe Pending'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -1424,16 +1443,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <div className="space-y-4">
                     <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
                       <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Billing Cycle End Date</span>
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 font-mono">
-                        <Calendar className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>
+                      <div className="flex items-center gap-1.5 text-xs font-bold font-mono">
+                        <Calendar className="w-3.5 h-3.5 text-zinc-400" />
+                        <span className={subscription?.currentPeriodEnd ? 'text-emerald-400' : 'text-zinc-400'}>
                           {subscription?.currentPeriodEnd
                             ? new Date(subscription.currentPeriodEnd).toLocaleDateString('en-US', {
                                 year: 'numeric',
                                 month: 'long',
                                 day: 'numeric',
                               })
-                            : 'March 15, 2026'}
+                            : 'NO VERIFIED DATA AVAILABLE'}
                         </span>
                       </div>
                     </div>
@@ -1441,20 +1460,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     {/* Payment Method Badge */}
                     <div className="space-y-1.5">
                       <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">Default Payment Card</span>
-                      <div className="flex items-center justify-between p-3 bg-zinc-900 border border-zinc-800 rounded-xl">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-6 bg-zinc-800 border border-zinc-700 rounded flex items-center justify-center text-[10px] font-bold text-zinc-200 font-mono">
-                            VISA
+                      {subscription?.paymentMethod?.last4 ? (
+                        <div className="flex items-center justify-between p-3 bg-zinc-900 border border-zinc-800 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-6 bg-zinc-800 border border-zinc-700 rounded flex items-center justify-center text-[10px] font-bold text-zinc-200 font-mono">
+                              {subscription.paymentMethod.brand || 'CARD'}
+                            </div>
+                            <div>
+                              <div className="text-xs font-bold text-zinc-200 font-mono">•••• •••• •••• {subscription.paymentMethod.last4}</div>
+                              <div className="text-[10px] text-zinc-500">Expires {subscription.paymentMethod.expMonth}/{subscription.paymentMethod.expYear}</div>
+                            </div>
                           </div>
-                          <div>
-                            <div className="text-xs font-bold text-zinc-200 font-mono">•••• •••• •••• {subscription?.paymentMethod?.last4 || '4242'}</div>
-                            <div className="text-[10px] text-zinc-500">Expires {subscription?.paymentMethod?.expMonth || 12}/{subscription?.paymentMethod?.expYear || 2028}</div>
-                          </div>
+                          <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 text-[10px] font-bold font-mono">
+                            PRIMARY
+                          </span>
                         </div>
-                        <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 text-[10px] font-bold font-mono">
-                          PRIMARY
-                        </span>
-                      </div>
+                      ) : (
+                        <div className="p-3 bg-zinc-900/50 border border-dashed border-zinc-800 rounded-xl text-center">
+                          <span className="text-xs text-zinc-400 font-mono font-medium">NO VERIFIED DATA AVAILABLE</span>
+                          <p className="text-[10px] text-zinc-500 mt-1">Payment method records will populate after authenticated Stripe checkout verification.</p>
+                        </div>
+                      )}
                     </div>
                   </div>
 

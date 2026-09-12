@@ -66,6 +66,7 @@ interface HeaderProps {
   isRefreshingApiHealth?: boolean;
   totalDirectoriesCount: number;
   authSession?: AuthSession | null;
+  onOpenRevenueMandate?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -93,6 +94,7 @@ export const Header: React.FC<HeaderProps> = ({
   isRefreshingApiHealth = false,
   totalDirectoriesCount,
   authSession,
+  onOpenRevenueMandate,
 }) => {
   const [isNavMenuOpen, setIsNavMenuOpen] = useState(false);
   const navMenuRef = useRef<HTMLDivElement | null>(null);
@@ -318,6 +320,18 @@ export const Header: React.FC<HeaderProps> = ({
                 {cronStatus.activeJobsCount > 0 ? ` [${cronStatus.activeJobsCount}]` : ''}
               </span>
             </button>
+
+            {/* Unified Revenue Mandate Badge */}
+            {onOpenRevenueMandate && (
+              <button
+                onClick={onOpenRevenueMandate}
+                title="CareerPulse AI Unified Revenue Mandate: Real Revenue • Real Customers • Real Subscribers Only"
+                className="hidden xl:flex items-center space-x-1.5 px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 border-2 border-black text-[11px] font-mono-brutal font-bold text-emerald-950 shadow-[2px_2px_0_#000] transition-all cursor-pointer"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
+                <span>REVENUE MANDATE</span>
+              </button>
+            )}
 
             {/* Dedicated Real-Time API Health Monitor */}
             {apiHealthReport !== undefined && (
@@ -644,6 +658,22 @@ export const Header: React.FC<HeaderProps> = ({
                           PRO TIER
                         </span>
                       </button>
+
+                      {onOpenRevenueMandate && (
+                        <button
+                          type="button"
+                          onClick={() => handleAction(onOpenRevenueMandate)}
+                          className="w-full flex items-center justify-between p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border border-emerald-600 text-xs font-mono-brutal font-bold uppercase transition-all cursor-pointer"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
+                            <span>UNIFIED REVENUE MANDATE</span>
+                          </div>
+                          <span className="text-[9px] bg-emerald-600 text-white px-1.5 py-0.5 font-bold">
+                            REAL ONLY
+                          </span>
+                        </button>
+                      )}
 
                       {authSession && onLockSession && (
                         <button

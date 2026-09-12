@@ -67,6 +67,7 @@ interface SidebarProps {
   totalDirectoriesCount: number;
   wsConnected: boolean;
   authSession: AuthSession | null;
+  onOpenRevenueMandate?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -96,6 +97,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   totalDirectoriesCount,
   wsConnected,
   authSession,
+  onOpenRevenueMandate,
 }) => {
   // Category accordion expansion states
   const [openCategories, setOpenCategories] = useState<{ [key: string]: boolean }>({
@@ -823,6 +825,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             {(isCollapsed || openCategories.system) && (
               <div className="space-y-1.5">
+                {/* Unified Revenue Mandate (Real Revenue Only) */}
+                {onOpenRevenueMandate && (
+                  <button
+                    onClick={() => handleNavClick(onOpenRevenueMandate)}
+                    className={`w-full flex items-center ${
+                      isCollapsed ? 'justify-center p-2.5' : 'space-x-3 px-3 py-2'
+                    } text-xs font-bold text-emerald-950 bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-600 shadow-[2px_2px_0_#059669] transition-all cursor-pointer uppercase`}
+                    title="Unified Revenue Mandate (Real Revenue • Real Customers • Zero Fake Data)"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                    {!isCollapsed && <span>REVENUE MANDATE</span>}
+                  </button>
+                )}
+
                 {/* Account & Enterprise Auth */}
                 <button
                   onClick={() => handleNavClick(() => onChangeView('account'))}
