@@ -235,6 +235,19 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
 
               <button
+                onClick={() => onChangeView('global_expansion')}
+                className={`flex items-center space-x-1 px-2 py-1 text-xs font-mono-brutal font-bold uppercase transition-all cursor-pointer ${
+                  currentView === 'global_expansion'
+                    ? 'bg-emerald-400 text-black'
+                    : 'text-black hover:bg-zinc-200'
+                }`}
+                title="Global Revenue Expansion (135+ Stripe Markets)"
+              >
+                <Globe className="w-3.5 h-3.5 text-black animate-pulse" />
+                <span>Global</span>
+              </button>
+
+              <button
                 onClick={() => onChangeView('submissions')}
                 className={`flex items-center space-x-1 px-2 py-1 text-xs font-mono-brutal font-bold uppercase transition-all cursor-pointer ${
                   currentView === 'submissions'

@@ -249,6 +249,7 @@ export type DashboardViewType =
   | 'dashboard'
   | 'bento'
   | 'wizards'
+  | 'global_expansion'
   | 'indexing_engine'
   | 'traffic_engine'
   | 'submissions'
@@ -1263,5 +1264,128 @@ export interface SiteAuditorResult {
 
   // Output: Master Remediation AI Prompt
   masterRemediationPrompt: string;
+}
+
+export type MarketTier = 'TIER_1_PRIORITY' | 'TIER_2_GROWTH' | 'TIER_3_GLOBAL_ELIGIBLE';
+
+export interface GlobalMarket {
+  countryCode: string;
+  countryName: string;
+  tier: MarketTier;
+  primaryCurrencies: string[];
+  locale: string;
+  hiringTerminology: {
+    resumeOrCv: 'CV' | 'Resume' | 'CV / Resume';
+    standardNoticePeriod: string;
+    dominantJobBoards: string[];
+    typicalWorkingModel: string;
+  };
+  highIntentKeywords: string[];
+  socialPlatforms: string[];
+  activeCampaignCount: number;
+}
+
+export interface InternationalPersona {
+  id: string;
+  name: string;
+  targetAudience: string;
+  corePainPoints: string[];
+  monetizationPathway: string;
+  suggestedDigitalOffer: string;
+  averageTransactionValueUsd: number;
+}
+
+export interface MultiCurrencyRate {
+  code: string;
+  symbol: string;
+  name: string;
+  rateVsUsd: number;
+  paymentMethods: string[];
+}
+
+export interface GlobalSocialCampaign {
+  id: string;
+  platform: 'LinkedIn' | 'TikTok' | 'Instagram' | 'Facebook' | 'YouTube' | 'X' | 'Reddit' | 'Pinterest';
+  targetRegion: string;
+  targetPersona: string;
+  hook: string;
+  contentBody: string;
+  callToAction: string;
+  tags: string[];
+  monetizationTarget: 'SUBSCRIBER' | 'DIGITAL_PRODUCT' | 'CONSULTING' | 'ENTERPRISE';
+  generatedAt: string;
+}
+
+export interface GlobalDigitalProduct {
+  id: string;
+  sku: string;
+  title: string;
+  category: string;
+  targetCustomerType: string;
+  priceUsd: number;
+  deliveryFormat: string;
+  description: string;
+  internationalRelevance: string;
+  verifiedSalesCount: number;
+}
+
+export interface AutonomousDiscoveryCluster {
+  id: string;
+  discoveredAt: string;
+  region: string;
+  country: string;
+  theme: string;
+  searchQuery: string;
+  targetPersona: string;
+  commercialIntentScore: number;
+  opportunityType: 'HIGH_INTENT_KEYWORD' | 'COMMERCIAL_EXPANSION' | 'DIGITAL_PRODUCT' | 'ENTERPRISE_CONTRACT';
+  suggestedAction: string;
+}
+
+export interface GlobalRevenueStatusResponse {
+  protocolName: string;
+  protocolSubtitle: string;
+  zeroFakeDataPolicyEnforced: boolean;
+  successMetrics: {
+    primary: {
+      name: string;
+      value: string;
+      hasData: boolean;
+      status: string;
+    };
+    secondary: {
+      name: string;
+      value: string;
+      hasData: boolean;
+      status: string;
+    };
+    tertiary: {
+      name: string;
+      value: string;
+      hasData: boolean;
+      status: string;
+    };
+    quaternary: {
+      name: string;
+      value: string;
+      hasData: boolean;
+      status: string;
+    };
+  };
+  tierCoverage: {
+    tier1MarketsCount: number;
+    tier2MarketsCount: number;
+    tier3CoverageDescription: string;
+    supportedCurrenciesCount: number;
+  };
+  regionalBreakdown: Record<string, { count: number; totalCents: number; currency: string }>;
+  stripeWorldwideGateway: {
+    isConfigured: boolean;
+    checkoutCurrency: string;
+    globalPaymentMethodsActive: string[];
+  };
+  totalDigitalProductsCatalogued: number;
+  activeInternationalPersonas: number;
+  latestDiscoveries: AutonomousDiscoveryCluster[];
 }
 

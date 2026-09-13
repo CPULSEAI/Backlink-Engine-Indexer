@@ -343,6 +343,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                   )}
                 </button>
+
+                {/* Global Revenue Expansion View */}
+                <button
+                  onClick={() => handleNavClick(() => onChangeView('global_expansion'))}
+                  className={`w-full flex items-center ${
+                    isCollapsed ? 'justify-center p-2.5' : 'space-x-3 px-3 py-2'
+                  } text-xs font-bold transition-all cursor-pointer border-2 border-black uppercase ${
+                    currentView === 'global_expansion'
+                      ? 'bg-emerald-400 text-black shadow-[2px_2px_0_#000]'
+                      : 'bg-white text-black hover:bg-emerald-400 hover:text-black shadow-[2px_2px_0_#000]'
+                  }`}
+                  title="Global Revenue Expansion & Worldwide Acquisition Protocol"
+                >
+                  <Globe className="w-4 h-4 text-black shrink-0 animate-pulse" />
+                  {!isCollapsed && (
+                    <div className="flex items-center justify-between flex-1">
+                      <span>GLOBAL EXPANSION</span>
+                      <span className="text-[9px] uppercase px-1.5 py-0.2 bg-black text-white border border-black font-bold">
+                        135+
+                      </span>
+                    </div>
+                  )}
+                </button>
               </div>
             )}
           </div>

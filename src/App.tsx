@@ -43,6 +43,7 @@ import { DailyPerformanceDigest } from './components/DailyPerformanceDigest';
 import { FailureRecoveryModeBanner } from './components/FailureRecoveryModeBanner';
 import { ConfirmationModal, ConfirmationModalProps } from './components/ConfirmationModal';
 import { UnifiedRevenueMandateModal } from './components/UnifiedRevenueMandateModal';
+import { GlobalRevenueExpansionDashboard } from './components/GlobalRevenueExpansionDashboard';
 import { DirectoryEntry, LogItem, SubmissionRecord, SystemSettings, AnalyticsData, AutonomousConfig, ApiHealthReport, WorkspaceSnapshot, DashboardViewType, AuthSession, NewContentDetectedEvent } from './types';
 
 export default function App() {
@@ -1379,6 +1380,13 @@ export default function App() {
               initialTab={wizardsInitialTab}
               defaultUrl={linkStrategyUrl || (history.length > 0 ? (history[0].urlList?.[0] || 'https://careerpulseai.net') : 'https://careerpulseai.net')}
               defaultAgencyName="Apex Enterprise Growth Labs"
+            />
+          )}
+
+          {/* VIEW: Global Revenue Expansion & Acquisition Protocol */}
+          {currentView === 'global_expansion' && (
+            <GlobalRevenueExpansionDashboard
+              onOpenRevenueMandate={() => setIsRevenueMandateOpen(true)}
             />
           )}
 

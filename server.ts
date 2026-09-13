@@ -52,6 +52,7 @@ import { frmService } from './server/frmService.js';
 import { geoSelfHealingService } from './server/geoSelfHealingService.js';
 import { revenueAssetService } from './server/revenueAssetService.js';
 import { unifiedRevenueMandateService } from './server/unifiedRevenueMandateService.js';
+import { globalRevenueExpansionService } from './server/globalRevenueExpansionService.js';
 
 
 async function startServer() {
@@ -710,6 +711,139 @@ async function startServer() {
     } catch (err: any) {
       console.error('[API Error] /api/revenue-mandate/create-checkout-session:', err);
       res.status(500).json({ error: err.message || 'Failed to create checkout session' });
+    }
+  });
+
+  // =========================================================================
+  // GLOBAL REVENUE EXPANSION & WORLDWIDE ACQUISITION ENDPOINTS
+  // INTERNATIONAL SUBSCRIBER & DIGITAL BUYER PROTOCOL (ZERO FAKE DATA ENFORCED)
+  // =========================================================================
+
+  // Get comprehensive Global Revenue Status & Metrics
+  app.get('/api/global-expansion/status', async (req, res) => {
+    try {
+      const status = await globalRevenueExpansionService.getGlobalRevenueStatus();
+      res.json(status);
+    } catch (err: any) {
+      console.error('[API Error] /api/global-expansion/status:', err);
+      res.status(500).json({ error: err.message || 'Failed to fetch global revenue status' });
+    }
+  });
+
+  // Get all target markets (Tier 1, Tier 2, Tier 3)
+  app.get('/api/global-expansion/markets', (req, res) => {
+    try {
+      const markets = globalRevenueExpansionService.getMarkets();
+      res.json({ success: true, count: markets.length, markets });
+    } catch (err: any) {
+      console.error('[API Error] /api/global-expansion/markets:', err);
+      res.status(500).json({ error: err.message || 'Failed to fetch global markets' });
+    }
+  });
+
+  // Get all international personas & monetization pathways
+  app.get('/api/global-expansion/personas', (req, res) => {
+    try {
+      const personas = globalRevenueExpansionService.getPersonas();
+      res.json({ success: true, count: personas.length, personas });
+    } catch (err: any) {
+      console.error('[API Error] /api/global-expansion/personas:', err);
+      res.status(500).json({ error: err.message || 'Failed to fetch international personas' });
+    }
+  });
+
+  // Get multi-currency exchange rates and conversion transparency
+  app.get('/api/global-expansion/currencies', (req, res) => {
+    try {
+      const rates = globalRevenueExpansionService.getMultiCurrencyRates();
+      res.json({
+        success: true,
+        baseCurrency: 'USD',
+        supportedCurrenciesCount: rates.length,
+        rates,
+        transparencyNotice: 'All checkout transactions are processed in USD via Stripe. Your card issuer converts at standard interbank rates with zero surcharges from our platform.'
+      });
+    } catch (err: any) {
+      console.error('[API Error] /api/global-expansion/currencies:', err);
+      res.status(500).json({ error: err.message || 'Failed to fetch currency rates' });
+    }
+  });
+
+  // Get global digital products catalog
+  app.get('/api/global-expansion/products', (req, res) => {
+    try {
+      const products = globalRevenueExpansionService.getDigitalProducts();
+      res.json({ success: true, count: products.length, products });
+    } catch (err: any) {
+      console.error('[API Error] /api/global-expansion/products:', err);
+      res.status(500).json({ error: err.message || 'Failed to fetch digital products catalog' });
+    }
+  });
+
+  // Generate localized SEO & Geo Cluster for a target market
+  app.post('/api/global-expansion/seo-cluster', (req, res) => {
+    try {
+      const { countryCode } = req.body;
+      if (!countryCode) {
+        return res.status(400).json({ error: 'countryCode is required (e.g. "CA", "GB", "AU", "DE", "SG", "AE", "IN")' });
+      }
+      const cluster = globalRevenueExpansionService.generateCountrySeoCluster(countryCode);
+      res.json({ success: true, countryCode, cluster });
+    } catch (err: any) {
+      console.error('[API Error] /api/global-expansion/seo-cluster:', err);
+      res.status(500).json({ error: err.message || 'Failed to generate country SEO cluster' });
+    }
+  });
+
+  // Generate localized multi-platform social media campaign
+  app.post('/api/global-expansion/campaigns', (req, res) => {
+    try {
+      const { countryCode, personaId } = req.body;
+      if (!countryCode) {
+        return res.status(400).json({ error: 'countryCode is required' });
+      }
+      const campaigns = globalRevenueExpansionService.generateGlobalSocialCampaigns(countryCode, personaId);
+      res.json({ success: true, countryCode, personaId, count: campaigns.length, campaigns });
+    } catch (err: any) {
+      console.error('[API Error] /api/global-expansion/campaigns:', err);
+      res.status(500).json({ error: err.message || 'Failed to generate global campaigns' });
+    }
+  });
+
+  // Autonomous Global Discovery Engine (proactively identify untapped international clusters)
+  app.post('/api/global-expansion/discover', async (req, res) => {
+    try {
+      const { targetRegion, focusPersona } = req.body;
+      const result = await globalRevenueExpansionService.executeAutonomousDiscovery({
+        targetRegion,
+        focusPersona
+      });
+      res.json(result);
+    } catch (err: any) {
+      console.error('[API Error] /api/global-expansion/discover:', err);
+      res.status(500).json({ error: err.message || 'Autonomous global discovery failed' });
+    }
+  });
+
+  // Get all discovered international clusters
+  app.get('/api/global-expansion/discoveries', (req, res) => {
+    try {
+      const discoveries = globalRevenueExpansionService.getAutonomousDiscoveries();
+      res.json({ success: true, count: discoveries.length, discoveries });
+    } catch (err: any) {
+      console.error('[API Error] /api/global-expansion/discoveries:', err);
+      res.status(500).json({ error: err.message || 'Failed to fetch discoveries' });
+    }
+  });
+
+  // Get international CRO trust signals, compliance standards, and worldwide testimonials
+  app.get('/api/global-expansion/cro-signals', (req, res) => {
+    try {
+      const signals = globalRevenueExpansionService.getGlobalCroSignals();
+      res.json({ success: true, ...signals });
+    } catch (err: any) {
+      console.error('[API Error] /api/global-expansion/cro-signals:', err);
+      res.status(500).json({ error: err.message || 'Failed to fetch global CRO signals' });
     }
   });
 
