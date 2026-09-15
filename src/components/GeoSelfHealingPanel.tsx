@@ -52,7 +52,13 @@ export interface HealedReport {
   overallStatus: string;
 }
 
-export const GeoSelfHealingPanel: React.FC = () => {
+export interface GeoSelfHealingPanelProps {
+  onOpenSeoRecoveryDirective?: () => void;
+}
+
+export const GeoSelfHealingPanel: React.FC<GeoSelfHealingPanelProps> = ({
+  onOpenSeoRecoveryDirective,
+}) => {
   const [health, setHealth] = useState<GeoEngineHealthSummary | null>(null);
   const [isHealing, setIsHealing] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'reports' | 'schema'>('overview');
@@ -134,23 +140,36 @@ export const GeoSelfHealingPanel: React.FC = () => {
           </div>
         </div>
 
-        <button
-          onClick={handleRunSelfHealing}
-          disabled={isHealing}
-          className="px-4 py-2.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-bold text-xs rounded-xl shadow-lg transition flex items-center gap-2 shrink-0 disabled:opacity-50"
-        >
-          {isHealing ? (
-            <>
-              <RefreshCw className="w-4 h-4 animate-spin" />
-              <span>Self-Healing in Progress...</span>
-            </>
-          ) : (
-            <>
-              <Zap className="w-4 h-4" />
-              <span>Execute 5-Step Self-Healing</span>
-            </>
+        <div className="flex items-center gap-2 flex-wrap">
+          {onOpenSeoRecoveryDirective && (
+            <button
+              onClick={onOpenSeoRecoveryDirective}
+              className="px-3.5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-black font-black text-xs rounded-xl shadow-lg transition flex items-center gap-1.5 shrink-0 border border-black cursor-pointer"
+              title="Open SEO, GEO, AI Search & Indexation Recovery Directive (Primary Owner of SEO Recovery)"
+            >
+              <Sparkles className="w-4 h-4 text-black" />
+              <span>SEO Recovery Directive</span>
+            </button>
           )}
-        </button>
+
+          <button
+            onClick={handleRunSelfHealing}
+            disabled={isHealing}
+            className="px-4 py-2.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-bold text-xs rounded-xl shadow-lg transition flex items-center gap-2 shrink-0 disabled:opacity-50"
+          >
+            {isHealing ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                <span>Self-Healing in Progress...</span>
+              </>
+            ) : (
+              <>
+                <Zap className="w-4 h-4" />
+                <span>Execute 5-Step Self-Healing</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Success Criteria Metric Badges */}

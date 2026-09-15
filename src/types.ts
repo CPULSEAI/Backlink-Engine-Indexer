@@ -1389,3 +1389,253 @@ export interface GlobalRevenueStatusResponse {
   latestDiscoveries: AutonomousDiscoveryCluster[];
 }
 
+// -------------------------------------------------------------
+// Comprehensive SEO, Traffic Loss & AI Search Visibility Audit
+// -------------------------------------------------------------
+
+export interface TrafficLossAuditInputs {
+  websiteUrl: string;
+  websiteDescription: string;
+  industryNiche: string;
+  targetAudience: string;
+  primaryTrafficGoal: 'Organic Search' | 'AI Search' | 'Referral' | 'Direct' | 'Social' | 'Multi-Channel';
+  dateRangeAnalyzed: string;
+
+  // Google Search Console Data
+  totalClicks: number | string;
+  clickChangePercent: number | string;
+  totalImpressions: number | string;
+  impressionChangePercent: number | string;
+  averageCtr: number | string;
+  averagePosition: number | string;
+  indexedPages: number | string;
+  coverageErrors: number | string;
+
+  // Analytics Data
+  totalUsers: number | string;
+  sessions: number | string;
+  organicTraffic: number | string;
+  directTraffic: number | string;
+  referralTraffic: number | string;
+  socialTraffic: number | string;
+
+  // Top Pages
+  highestPerformingPages: string;
+  lowestPerformingPages: string;
+  pagesWithTrafficDeclines: string;
+
+  // Top Queries & Keywords
+  topQueriesAndKeywords: string;
+
+  // Recent Website Changes
+  recentChanges: {
+    websiteRedesign: boolean;
+    cmsMigration: boolean;
+    domainMigration: boolean;
+    hostingMigration: boolean;
+    themeChanges: boolean;
+    robotsTxtModifications: boolean;
+    trackingCodeChanges: boolean;
+    sitemapUpdates: boolean;
+    canonicalUpdates: boolean;
+    securityIssues: boolean;
+    manualPenalties: boolean;
+    majorContentUpdates: boolean;
+  };
+  recentChangesNotes: string;
+
+  // Backlink Data
+  referringDomains: number | string;
+  totalBacklinks: number | string;
+  authorityMetrics: number | string;
+  newLinksGained: number | string;
+  linksLost: number | string;
+  anchorTextDistribution: string;
+  topLinkingPages: string;
+}
+
+export interface DataValidationFactor {
+  factor: string;
+  status: 'Confirmed' | 'Highly Likely' | 'Possible' | 'Unlikely';
+  reasoning: string;
+}
+
+export interface TechnicalSeoIssue {
+  issue: string;
+  rating: 'Critical' | 'High' | 'Medium' | 'Low' | 'No Evidence';
+  description: string;
+  impact: string;
+}
+
+export interface ContentQualityAssessment {
+  factor: string;
+  status: 'Problematic' | 'Acceptable' | 'Strong' | 'Needs Review';
+  detail: string;
+}
+
+export interface SearchPerformanceFactor {
+  factor: string;
+  contributionPercent: number;
+  explanation: string;
+}
+
+export interface BacklinkAnalysisSection {
+  referringDomainCount: number;
+  totalBacklinkCount: number;
+  authorityScore: number;
+  qualitySummary: string;
+  majorWeaknesses: string[];
+  linkRiskIssues: string[];
+  opportunitiesToIncreaseAuthority: string[];
+  competitorBacklinkAdvantages: string[];
+  prioritizedRecommendations: string[];
+}
+
+export interface SchemaRecommendationItem {
+  schemaType: string;
+  priority: 'P1 - Immediate' | 'P2 - High' | 'P3 - Medium';
+  seoBenefits: string;
+  aiSearchBenefits: string;
+  implementationRecommendations: string;
+  exampleSnippet?: string;
+}
+
+export interface AiSearchVisibilitySection {
+  platforms: Array<{
+    platform: string;
+    visibilityPotential: 'High' | 'Moderate' | 'Low' | 'Critical Barrier';
+    scorePercent: number;
+    observations: string;
+  }>;
+  barriersPreventingCitations: string[];
+  recommendations: {
+    contentStructure: string[];
+    entityOptimization: string[];
+    knowledgeGraph: string[];
+    schemaEnhancements: string[];
+    authorityBuilding: string[];
+    originalResearch: string[];
+    faqAnswerContent: string[];
+    citationWorthyStrategies: string[];
+  };
+}
+
+export interface CompetitiveGapItem {
+  dimension: string;
+  websiteStatus: string;
+  competitorBenchmark: string;
+  severity: 'Critical Gap' | 'Moderate Gap' | 'Competitive Advantage' | 'Parity';
+}
+
+export interface RootCausePrioritizationRow {
+  priority: number;
+  rootCause: string;
+  evidence: string;
+  impact: string;
+  confidence: 'High' | 'Medium' | 'Low';
+}
+
+export interface RecoveryRoadmap {
+  immediateDays1To3: string[];
+  shortTermWeeks1To2: string[];
+  midTermWeeks3To8: string[];
+  longTermMonths2To6: string[];
+}
+
+export interface TrafficLossAuditExecutiveSummary {
+  primaryReason: string;
+  topThreeActions: string[];
+  topBacklinkOpportunity: string;
+  highestPrioritySchema: string;
+  topAiSearchOpportunity: string;
+  recoveryPotential: 'High' | 'Medium' | 'Low';
+  ifIOwnedThisWebsiteFiveActions: string[];
+}
+
+export interface TrafficLossAuditReport {
+  id: string;
+  timestamp: string;
+  websiteUrl: string;
+  inputs: TrafficLossAuditInputs;
+  generatedByModel: string;
+  dataValidation: DataValidationFactor[];
+  technicalSeoAudit: TechnicalSeoIssue[];
+  contentQuality: {
+    assessments: ContentQualityAssessment[];
+    highestValueContentOpportunities: string[];
+  };
+  searchPerformance: SearchPerformanceFactor[];
+  backlinkProfile: BacklinkAnalysisSection;
+  schemaMarkupReview: SchemaRecommendationItem[];
+  aiSearchVisibility: AiSearchVisibilitySection;
+  competitiveGapAnalysis: CompetitiveGapItem[];
+  rootCausePrioritization: RootCausePrioritizationRow[];
+  recoveryRoadmap: RecoveryRoadmap;
+  executiveSummary: TrafficLossAuditExecutiveSummary;
+  rawMarkdownReport: string;
+}
+
+export type ContinuousAuditResponsibilityKey = 
+  | 'robots.txt'
+  | 'XML Sitemaps'
+  | 'Schema'
+  | 'Canonicals'
+  | 'Redirects'
+  | 'Internal Linking'
+  | 'AI Search Visibility'
+  | 'Core Web Vitals';
+
+export interface ContinuousAuditResponsibilityItem {
+  key: ContinuousAuditResponsibilityKey;
+  label: string;
+  category: 'Crawlability' | 'Indexation' | 'Structured Data' | 'Integrity' | 'AISO/GEO' | 'User Experience';
+  status: 'OPTIMAL' | 'PASS' | 'WARNING' | 'NEEDS_OPTIMIZATION' | 'CRITICAL';
+  target: string;
+  currentValue: string;
+  details: string;
+  lastAudited: string;
+  diagnosticChecks: string[];
+}
+
+export interface EnforcedDirectiveTargets {
+  coverageErrors: { target: 0; current: number; status: 'PASS' | 'FAIL'; note: string };
+  error404Count: { target: 0; current: number; status: 'PASS' | 'FAIL'; note: string };
+  blockedAiCrawlers: { target: 0; current: number; status: 'PASS' | 'FAIL'; note: string };
+  schemaCoveragePercent: { target: 100; current: number; status: 'PASS' | 'FAIL'; note: string };
+}
+
+export interface MaintainedVisibilityChannel {
+  engine: 'Google' | 'Bing' | 'ChatGPT' | 'Perplexity' | 'Copilot' | 'Gemini';
+  displayName: string;
+  status: 'ACTIVE' | 'OPTIMAL' | 'MAINTAINED' | 'CHECKING';
+  visibilityScore: number;
+  botAccess: 'ALLOWED' | 'RESTRICTED' | 'BLOCKED';
+  indexationStatus: string;
+  geoCitationReadiness: string;
+  crawlers: string[];
+}
+
+export interface DirectiveSubTask {
+  id: string;
+  title: string;
+  description: string;
+  status: 'ENFORCED' | 'ACTIVE' | 'OPTIMAL';
+  actionType: 'launch_auditor' | 'launch_traffic_loss' | 'launch_global_expansion';
+  badge: string;
+}
+
+export interface SeoRecoveryDirectiveState {
+  promptName: string;
+  primaryOwner: string;
+  deploymentLocationNote: string;
+  isMasterEnforced: boolean;
+  overallHealthScore: number;
+  lastAuditTimestamp: string;
+  subDirectives: DirectiveSubTask[];
+  responsibilities: ContinuousAuditResponsibilityItem[];
+  targets: EnforcedDirectiveTargets;
+  visibilityChannels: MaintainedVisibilityChannel[];
+  targetDomain: string;
+  rawDirectivePrompt: string;
+}
+

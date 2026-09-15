@@ -44,6 +44,8 @@ import { FailureRecoveryModeBanner } from './components/FailureRecoveryModeBanne
 import { ConfirmationModal, ConfirmationModalProps } from './components/ConfirmationModal';
 import { UnifiedRevenueMandateModal } from './components/UnifiedRevenueMandateModal';
 import { GlobalRevenueExpansionDashboard } from './components/GlobalRevenueExpansionDashboard';
+import { ComprehensiveTrafficLossAuditModal } from './components/ComprehensiveTrafficLossAuditModal';
+import { SeoRecoveryDirectiveModal } from './components/SeoRecoveryDirectiveModal';
 import { DirectoryEntry, LogItem, SubmissionRecord, SystemSettings, AnalyticsData, AutonomousConfig, ApiHealthReport, WorkspaceSnapshot, DashboardViewType, AuthSession, NewContentDetectedEvent } from './types';
 
 export default function App() {
@@ -147,6 +149,9 @@ export default function App() {
   const [sitemapInitialDomain, setSitemapInitialDomain] = useState('careerpulseai.net');
   const [wizardInitialUrl, setWizardInitialUrl] = useState('');
   const [clarityInitialUrl, setClarityInitialUrl] = useState('');
+  const [isTrafficLossAuditOpen, setIsTrafficLossAuditOpen] = useState(false);
+  const [trafficLossAuditUrl, setTrafficLossAuditUrl] = useState('');
+  const [isSeoRecoveryDirectiveOpen, setIsSeoRecoveryDirectiveOpen] = useState(false);
   const [isSchedulerOpen, setIsSchedulerOpen] = useState(false);
   const [profilerDomain, setProfilerDomain] = useState('');
   const [graderUrl, setGraderUrl] = useState('');
@@ -1029,7 +1034,12 @@ export default function App() {
           onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
           isMobileOpen={isSidebarMobileOpen}
           onCloseMobile={() => setIsSidebarMobileOpen(false)}
+          onOpenSeoRecoveryDirective={() => setIsSeoRecoveryDirectiveOpen(true)}
           onOpenRevenueMandate={() => setIsRevenueMandateOpen(true)}
+          onOpenTrafficLossAudit={(url) => {
+            if (url) setTrafficLossAuditUrl(url);
+            setIsTrafficLossAuditOpen(true);
+          }}
           onOpenConversionWizard={(url) => {
             setWizardInitialUrl(url || '');
             setIsConversionWizardOpen(true);
@@ -1346,6 +1356,11 @@ export default function App() {
           {/* VIEW: Wizards & Strategy Hub */}
           {currentView === 'wizards' && (
             <WizardsHubDashboard
+              onOpenSeoRecoveryDirective={() => setIsSeoRecoveryDirectiveOpen(true)}
+              onOpenTrafficLossAudit={(url) => {
+                if (url) setTrafficLossAuditUrl(url);
+                setIsTrafficLossAuditOpen(true);
+              }}
               onOpenConversionWizard={(url) => {
                 setWizardInitialUrl(url || '');
                 setIsConversionWizardOpen(true);
@@ -1413,6 +1428,7 @@ export default function App() {
               history={history}
               onExportCsv={handleExportCsv}
               onOpenWizard={() => setIsIndexingWizardOpen(true)}
+              onOpenSeoRecoveryDirective={() => setIsSeoRecoveryDirectiveOpen(true)}
             />
           )}
 
@@ -1679,6 +1695,37 @@ export default function App() {
       <UnifiedRevenueMandateModal
         isOpen={isRevenueMandateOpen}
         onClose={() => setIsRevenueMandateOpen(false)}
+      />
+
+      {/* Comprehensive SEO, Traffic Loss & AI Search Visibility Audit Modal */}
+      <ComprehensiveTrafficLossAuditModal
+        isOpen={isTrafficLossAuditOpen}
+        onClose={() => setIsTrafficLossAuditOpen(false)}
+        initialUrl={trafficLossAuditUrl || 'https://careerpulseai.net'}
+      />
+
+      {/* SEO, GEO, AI Search & Indexation Recovery Directive Modal (Primary Owner) */}
+      <SeoRecoveryDirectiveModal
+        isOpen={isSeoRecoveryDirectiveOpen}
+        onClose={() => setIsSeoRecoveryDirectiveOpen(false)}
+        initialDomain="careerpulseai.net"
+        onLaunchAuditor={() => {
+          setIsSeoRecoveryDirectiveOpen(false);
+          setIsAutonomousAuditorOpen(true);
+        }}
+        onLaunchTrafficLoss={(url) => {
+          setIsSeoRecoveryDirectiveOpen(false);
+          if (url) setTrafficLossAuditUrl(url);
+          setIsTrafficLossAuditOpen(true);
+        }}
+        onLaunchRevenueMandate={() => {
+          setIsSeoRecoveryDirectiveOpen(false);
+          setIsRevenueMandateOpen(true);
+        }}
+        onLaunchGlobalExpansion={() => {
+          setIsSeoRecoveryDirectiveOpen(false);
+          setCurrentView('global_expansion');
+        }}
       />
     </div>
   );

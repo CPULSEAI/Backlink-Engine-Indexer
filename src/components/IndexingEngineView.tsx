@@ -38,6 +38,7 @@ interface IndexingEngineViewProps {
   history: SubmissionHistoryItem[];
   onExportCsv: (submissionId?: string) => void;
   onOpenWizard: () => void;
+  onOpenSeoRecoveryDirective?: () => void;
 }
 
 export const IndexingEngineView: React.FC<IndexingEngineViewProps> = ({
@@ -61,6 +62,7 @@ export const IndexingEngineView: React.FC<IndexingEngineViewProps> = ({
   history,
   onExportCsv,
   onOpenWizard,
+  onOpenSeoRecoveryDirective,
 }) => {
   return (
     <div className="space-y-6">
@@ -95,7 +97,7 @@ export const IndexingEngineView: React.FC<IndexingEngineViewProps> = ({
       </div>
 
       {/* Autonomous GEO Engine Directive & Self-Healing Panel */}
-      <GeoSelfHealingPanel />
+      <GeoSelfHealingPanel onOpenSeoRecoveryDirective={onOpenSeoRecoveryDirective} />
 
       {/* Input Form Module */}
       <UrlInputForm

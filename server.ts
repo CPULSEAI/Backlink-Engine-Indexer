@@ -53,6 +53,8 @@ import { geoSelfHealingService } from './server/geoSelfHealingService.js';
 import { revenueAssetService } from './server/revenueAssetService.js';
 import { unifiedRevenueMandateService } from './server/unifiedRevenueMandateService.js';
 import { globalRevenueExpansionService } from './server/globalRevenueExpansionService.js';
+import { runComprehensiveTrafficLossAudit, buildAuditPrompt, generateDeterministicAudit } from './server/trafficLossAuditEngine.js';
+import { seoRecoveryDirectiveService } from './server/seoRecoveryDirectiveService.js';
 
 
 async function startServer() {
@@ -844,6 +846,257 @@ async function startServer() {
     } catch (err: any) {
       console.error('[API Error] /api/global-expansion/cro-signals:', err);
       res.status(500).json({ error: err.message || 'Failed to fetch global CRO signals' });
+    }
+  });
+
+  // =========================================================================
+  // Comprehensive SEO, Traffic Loss & AI Search Visibility Audit Endpoints
+  // =========================================================================
+
+  // Run full diagnosis with live Gemini AISO/GEO consultant or empirical engine fallback
+  app.post('/api/traffic-loss-audit/diagnose', async (req, res) => {
+    try {
+      const inputs = req.body;
+      if (!inputs || typeof inputs !== 'object') {
+        return res.status(400).json({ error: 'Valid TrafficLossAuditInputs payload required' });
+      }
+
+      const report = await runComprehensiveTrafficLossAudit(inputs);
+      res.json({
+        success: true,
+        report,
+      });
+    } catch (err: any) {
+      console.error('[API Error] /api/traffic-loss-audit/diagnose:', err);
+      // Even on unexpected error, fallback to deterministic synthesis
+      try {
+        const fallback = generateDeterministicAudit(req.body);
+        res.json({ success: true, report: fallback, note: 'Generated via fallback rule-engine' });
+      } catch (innerErr: any) {
+        res.status(500).json({ error: err.message || 'Audit diagnosis failed' });
+      }
+    }
+  });
+
+  // Build the exact formatted user consultant prompt for manual copying or export
+  app.post('/api/traffic-loss-audit/build-prompt', (req, res) => {
+    try {
+      const promptText = buildAuditPrompt(req.body);
+      res.json({ success: true, prompt: promptText });
+    } catch (err: any) {
+      console.error('[API Error] /api/traffic-loss-audit/build-prompt:', err);
+      res.status(500).json({ error: err.message || 'Failed to construct prompt' });
+    }
+  });
+
+  // Pre-configured industry datasets for 1-click audit simulation
+  app.get('/api/traffic-loss-audit/presets', (req, res) => {
+    res.json({
+      success: true,
+      presets: [
+        {
+          id: 'saas_migration_drop',
+          name: 'B2B SaaS 42% Traffic Drop Post-Migration',
+          description: 'A venture-backed SaaS platform migrated from WordPress to Next.js; organic clicks collapsed 42% within 6 weeks.',
+          data: {
+            websiteUrl: 'https://careerpulseai.net',
+            websiteDescription: 'AI career intelligence, ATS resume optimization, and high-velocity indexing platform for technical professionals.',
+            industryNiche: 'B2B SaaS / Career Tech / AI Productivity',
+            targetAudience: 'Software Engineers, Technical Leaders, Job Seekers, Hiring Agencies',
+            primaryTrafficGoal: 'Organic Search',
+            dateRangeAnalyzed: 'Last 90 Days vs Previous Period',
+            totalClicks: 14820,
+            clickChangePercent: -42.4,
+            totalImpressions: 489200,
+            impressionChangePercent: -18.2,
+            averageCtr: 3.03,
+            averagePosition: 14.8,
+            indexedPages: 312,
+            coverageErrors: 47,
+            totalUsers: 18450,
+            sessions: 22800,
+            organicTraffic: 11200,
+            directTraffic: 5100,
+            referralTraffic: 1650,
+            socialTraffic: 850,
+            highestPerformingPages: '/tools/resume-optimizer (8,400 impressions, 410 clicks)\n/blog/ats-keywords-2026 (12,200 impressions, 380 clicks)',
+            lowestPerformingPages: '/pricing (1,200 impressions, 14 clicks)\n/features/backlink-pipeline (890 impressions, 9 clicks)',
+            pagesWithTrafficDeclines: '/blog/how-to-beat-workday-ats (-68% clicks)\n/templates/engineering-resume (-54% clicks)\n/guides/ai-cover-letter (-41% clicks)',
+            topQueriesAndKeywords: 'ai resume builder (pos 8.2, 4.1% CTR)\nats keyword scanner (pos 14.5, 1.8% CTR)\ntechnical resume format (pos 19.1, 0.9% CTR)\nfree job tracking dashboard (pos 22.4, 0.5% CTR)',
+            recentChanges: {
+              websiteRedesign: true,
+              cmsMigration: true,
+              domainMigration: false,
+              hostingMigration: true,
+              themeChanges: true,
+              robotsTxtModifications: true,
+              trackingCodeChanges: false,
+              sitemapUpdates: true,
+              canonicalUpdates: true,
+              securityIssues: false,
+              manualPenalties: false,
+              majorContentUpdates: false,
+            },
+            recentChangesNotes: 'Migrated from legacy PHP blog to headless Next.js edge runtime. URLs changed from /p/slug to /blog/slug with partial 301 redirects.',
+            referringDomains: 148,
+            totalBacklinks: 2840,
+            authorityMetrics: 34,
+            newLinksGained: 12,
+            linksLost: 38,
+            anchorTextDistribution: 'Branded: 52%, Naked URL: 28%, Exact Match: 12%, Generic: 8%',
+            topLinkingPages: 'github.com/awesome-career-tools\nproducthunt.com/posts/careerpulse\nnews.ycombinator.com',
+          },
+        },
+        {
+          id: 'ai_overview_cannibalization',
+          name: 'AI Overviews & Zero-Click SERP Disruption',
+          description: 'High-ranking informational site experiencing severe CTR decline despite stable top-3 ranking positions.',
+          data: {
+            websiteUrl: 'https://techinterviewhandbook-preview.io',
+            websiteDescription: 'Authoritative coding interview cheat sheets, algorithmic roadmaps, and salary negotiation frameworks.',
+            industryNiche: 'Developer Education & Career Coaching',
+            targetAudience: 'Senior Software Engineers & Tech Applicants',
+            primaryTrafficGoal: 'AI Search',
+            dateRangeAnalyzed: 'Last 180 Days',
+            totalClicks: 32400,
+            clickChangePercent: -28.5,
+            totalImpressions: 1180000,
+            impressionChangePercent: +6.4,
+            averageCtr: 2.74,
+            averagePosition: 4.2,
+            indexedPages: 1450,
+            coverageErrors: 0,
+            totalUsers: 41200,
+            sessions: 49800,
+            organicTraffic: 27400,
+            directTraffic: 9800,
+            referralTraffic: 2900,
+            socialTraffic: 1100,
+            highestPerformingPages: '/system-design-primer\n/behavioral-questions-matrix\n/faang-salary-guide',
+            lowestPerformingPages: '/glossary/time-complexity\n/definitions/binary-tree',
+            pagesWithTrafficDeclines: '/glossary/dynamic-programming (-78% clicks)\n/algorithms/quick-sort-explanation (-65% clicks)',
+            topQueriesAndKeywords: 'system design interview questions (pos 2.1, 5.2% CTR)\nquick sort time complexity (pos 1.4, 0.8% CTR - AI Overview present)\nstar method interview examples (pos 3.2, 2.1% CTR - AI Overview present)',
+            recentChanges: {
+              websiteRedesign: false,
+              cmsMigration: false,
+              domainMigration: false,
+              hostingMigration: false,
+              themeChanges: false,
+              robotsTxtModifications: false,
+              trackingCodeChanges: false,
+              sitemapUpdates: false,
+              canonicalUpdates: false,
+              securityIssues: false,
+              manualPenalties: false,
+              majorContentUpdates: true,
+            },
+            recentChangesNotes: 'No technical migrations. Impressions actually increased +6%, but clicks collapsed because Google AI Overviews now directly answers short definitional coding queries.',
+            referringDomains: 580,
+            totalBacklinks: 14200,
+            authorityMetrics: 52,
+            newLinksGained: 45,
+            linksLost: 19,
+            anchorTextDistribution: 'Branded: 38%, Topical: 44%, URL: 18%',
+            topLinkingPages: 'hackernews.com\nmedium.com/better-programming\nfreecodecamp.org',
+          },
+        },
+        {
+          id: 'thin_backlink_stagnation',
+          name: 'Early-Stage Domain Authority Stagnation',
+          description: 'A new platform struggling to break onto page 1 due to low referring domain velocity and structured data gaps.',
+          data: {
+            websiteUrl: 'https://growthlaunchpad.dev',
+            websiteDescription: 'Solopreneur marketing playbooks, programmatic SEO scripts, and directory submission tools.',
+            industryNiche: 'Marketing Automation & Indie Tech',
+            targetAudience: 'Founders, Indie Hackers, Growth Engineers',
+            primaryTrafficGoal: 'Multi-Channel',
+            dateRangeAnalyzed: 'Last 60 Days',
+            totalClicks: 320,
+            clickChangePercent: -4.5,
+            totalImpressions: 24500,
+            impressionChangePercent: +1.2,
+            averageCtr: 1.3,
+            averagePosition: 38.4,
+            indexedPages: 42,
+            coverageErrors: 8,
+            totalUsers: 490,
+            sessions: 610,
+            organicTraffic: 240,
+            directTraffic: 190,
+            referralTraffic: 50,
+            socialTraffic: 30,
+            highestPerformingPages: '/directory-list\n/free-seo-audit',
+            lowestPerformingPages: '/guides/programmatic-seo-handbook',
+            pagesWithTrafficDeclines: '/home',
+            topQueriesAndKeywords: 'free directory submission list 2026 (pos 28.5, 1.4% CTR)\nindie hacker backlink sites (pos 34.2, 0.9% CTR)',
+            recentChanges: {
+              websiteRedesign: false,
+              cmsMigration: false,
+              domainMigration: false,
+              hostingMigration: false,
+              themeChanges: false,
+              robotsTxtModifications: false,
+              trackingCodeChanges: false,
+              sitemapUpdates: true,
+              canonicalUpdates: false,
+              securityIssues: false,
+              manualPenalties: false,
+              majorContentUpdates: false,
+            },
+            recentChangesNotes: 'Brand new domain launched 3 months ago. Stagnant traffic with zero rich snippet awards.',
+            referringDomains: 14,
+            totalBacklinks: 110,
+            authorityMetrics: 11,
+            newLinksGained: 2,
+            linksLost: 4,
+            anchorTextDistribution: 'Naked URL: 75%, Branded: 20%, Generic: 5%',
+            topLinkingPages: 'indiehackers.com\ntwitter.com',
+          },
+        },
+      ],
+    });
+  });
+
+  // =========================================================================
+  // Master SEO, GEO, AI Search & Indexation Recovery Directive Endpoints
+  // Primary Owner of SEO Recovery - The Most Important Deployment Location
+  // =========================================================================
+
+  // Fetch full directive state, 8 continuous audit systems, 4 zero-tolerance targets & 6 visibility channels
+  app.get('/api/directives/seo-recovery', (req, res) => {
+    try {
+      const state = seoRecoveryDirectiveService.getState();
+      res.json({ success: true, ...state });
+    } catch (err: any) {
+      console.error('[API Error] /api/directives/seo-recovery:', err);
+      res.status(500).json({ error: err.message || 'Failed to fetch SEO Recovery Directive state' });
+    }
+  });
+
+  // Run real-time continuous audit cycle across all 8 SEO/GEO responsibilities
+  app.post('/api/directives/seo-recovery/audit', (req, res) => {
+    try {
+      const { domain } = req.body || {};
+      const updatedState = seoRecoveryDirectiveService.runContinuousAudit(domain);
+      res.json({
+        success: true,
+        message: 'Continuous audit cycle executed across 8 SEO/GEO responsibilities with 0 target tolerance',
+        ...updatedState,
+      });
+    } catch (err: any) {
+      console.error('[API Error] /api/directives/seo-recovery/audit:', err);
+      res.status(500).json({ error: err.message || 'Failed to run continuous audit cycle' });
+    }
+  });
+
+  // Get raw directive prompt text
+  app.get('/api/directives/seo-recovery/prompt', (req, res) => {
+    try {
+      const prompt = seoRecoveryDirectiveService.generateRawPrompt();
+      res.json({ success: true, prompt });
+    } catch (err: any) {
+      console.error('[API Error] /api/directives/seo-recovery/prompt:', err);
+      res.status(500).json({ error: err.message || 'Failed to generate raw prompt' });
     }
   });
 

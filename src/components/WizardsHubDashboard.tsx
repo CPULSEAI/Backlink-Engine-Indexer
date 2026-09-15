@@ -59,6 +59,8 @@ interface WizardsHubDashboardProps {
   defaultUrl?: string;
   defaultAgencyName?: string;
   initialTab?: 'wizards' | 'citation-sim' | 'whitelabel-pdf' | 'bulk-seo' | 'funnel-map' | 'link-strategist';
+  onOpenTrafficLossAudit?: (url?: string) => void;
+  onOpenSeoRecoveryDirective?: () => void;
 }
 
 export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
@@ -83,6 +85,8 @@ export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
   defaultUrl = 'https://careerpulseai.net',
   defaultAgencyName = 'Apex Search Engine Partners',
   initialTab = 'wizards',
+  onOpenTrafficLossAudit,
+  onOpenSeoRecoveryDirective,
 }) => {
   const [activeTab, setActiveTab] = useState<'wizards' | 'citation-sim' | 'whitelabel-pdf' | 'bulk-seo' | 'funnel-map' | 'link-strategist'>(initialTab);
   const [simUrl, setSimUrl] = useState(defaultUrl);
@@ -205,6 +209,30 @@ export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
                 >
                   <Brain className="w-4 h-4" />
                   <span>Clarity Overload Audit</span>
+                </button>
+              )}
+
+              {onOpenSeoRecoveryDirective && (
+                <button
+                  onClick={() => onOpenSeoRecoveryDirective()}
+                  className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 hover:from-orange-300 hover:to-yellow-300 text-black font-black text-xs tracking-wide shadow-lg shadow-amber-400/30 flex items-center space-x-2 transition-all cursor-pointer active:scale-95 border-2 border-black"
+                  title="Open SEO, GEO, AI Search & Indexation Recovery Directive (Primary Owner)"
+                >
+                  <Sparkles className="w-4 h-4 text-black" />
+                  <span>SEO Recovery Directive</span>
+                  <span className="text-[9px] px-1.5 py-0.5 bg-black text-white font-mono rounded font-bold">
+                    OWNER
+                  </span>
+                </button>
+              )}
+
+              {onOpenTrafficLossAudit && (
+                <button
+                  onClick={() => onOpenTrafficLossAudit()}
+                  className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-black font-black text-xs tracking-wide shadow-lg shadow-orange-500/20 flex items-center space-x-2 transition-all cursor-pointer active:scale-95 border-2 border-black"
+                >
+                  <Sparkles className="w-4 h-4 text-black" />
+                  <span>Traffic Loss &amp; AI Audit</span>
                 </button>
               )}
 
@@ -613,6 +641,99 @@ export const WizardsHubDashboard: React.FC<WizardsHubDashboardProps> = ({
       {/* TAB CONTENT: WIZARDS GRID */}
       {activeTab === 'wizards' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {/* CARD: SEO, GEO, AI SEARCH & INDEXATION RECOVERY DIRECTIVE (Primary Owner) */}
+          <div className="bg-gradient-to-br from-zinc-950 via-slate-950 to-zinc-900 border-2 border-orange-500 rounded-3xl p-6 shadow-2xl flex flex-col justify-between space-y-5 hover:border-orange-400 transition-all group relative overflow-hidden md:col-span-2 lg:col-span-3">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-orange-500/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-3 py-1 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-black text-xs font-mono font-black uppercase tracking-wider shadow-sm">
+                    MOST IMPORTANT DEPLOYMENT LOCATION
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded bg-black text-orange-400 border border-orange-500/50 text-[10px] font-mono font-bold">
+                    PRIMARY OWNER OF SEO RECOVERY
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold">
+                    TARGET: 0 ERRORS &bull; 100% SCHEMA
+                  </span>
+                </div>
+                <h3 className="text-2xl font-black text-white flex items-center gap-2">
+                  <Sparkles className="w-6 h-6 text-orange-400" />
+                  <span>SEO, GEO, AI Search &amp; Indexation Recovery Directive</span>
+                </h3>
+                <p className="text-xs text-zinc-300 max-w-3xl leading-relaxed">
+                  The primary system directive commanding Autonomous Crawl Audits, Organic Revenue Recovery, and Global Market Expansion. Continuously verifies robots.txt, XML Sitemaps, Schema Coverage (100%), Canonicals, Redirects, Internal Links, Core Web Vitals, and Multi-Engine Visibility across Google, Bing, ChatGPT, Perplexity, Copilot, and Gemini.
+                </p>
+              </div>
+
+              {onOpenSeoRecoveryDirective && (
+                <button
+                  type="button"
+                  onClick={() => onOpenSeoRecoveryDirective()}
+                  className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 hover:from-orange-300 hover:to-yellow-300 text-black font-black text-xs tracking-wide shadow-xl shadow-orange-500/30 flex items-center space-x-2 transition-all cursor-pointer active:scale-95 shrink-0 border-2 border-black"
+                >
+                  <Sparkles className="w-4 h-4 text-black" />
+                  <span>Open System Directive</span>
+                  <ArrowRight className="w-4 h-4 text-black" />
+                </button>
+              )}
+            </div>
+
+            <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-400 font-mono flex-wrap gap-2 relative z-10">
+              <span className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Active Channels: Google &bull; Bing &bull; ChatGPT &bull; Perplexity &bull; Copilot &bull; Gemini</span>
+              </span>
+              <span className="text-orange-400 font-bold">Autonomously Enforced 24/7</span>
+            </div>
+          </div>
+
+          {/* CARD: Comprehensive SEO, Traffic Loss & AI Search Visibility Audit */}
+          <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 border-2 border-orange-500/60 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-5 hover:border-orange-400 transition-all group relative overflow-hidden md:col-span-2 lg:col-span-3">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#ff4d00]/20 text-[#ff4d00] border border-[#ff4d00]/40 text-[11px] font-mono font-black uppercase">
+                    AISO / GEO AUDIT SUITE v4.2
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono">
+                    11-SECTION ROADMAP
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-mono">
+                    15 SCHEMA CHECKS + BACKLINKS
+                  </span>
+                </div>
+                <h3 className="text-xl font-black text-zinc-100 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-[#ff4d00]" />
+                  <span>Comprehensive SEO, Traffic Loss &amp; AI Search Visibility Audit</span>
+                </h3>
+                <p className="text-xs text-zinc-300 max-w-3xl leading-relaxed">
+                  Diagnose why a website is experiencing low, stagnant, declining, or zero organic traffic. Analyzes technical SEO blockers, content depth, backlink toxic vs. authority profile, 15 structured schema implementations, and AI search visibility factors (ChatGPT, Perplexity, Google AI Overviews) with a prioritized recovery roadmap.
+                </p>
+              </div>
+
+              {onOpenTrafficLossAudit && (
+                <button
+                  type="button"
+                  onClick={() => onOpenTrafficLossAudit(defaultUrl)}
+                  className="px-6 py-3 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 hover:from-orange-400 hover:to-yellow-400 text-black font-black text-xs tracking-wide shadow-lg shadow-orange-500/20 flex items-center space-x-2 transition-all cursor-pointer active:scale-95 shrink-0"
+                >
+                  <span>Launch Traffic Loss Audit</span>
+                  <ArrowRight className="w-4 h-4 text-black" />
+                </button>
+              )}
+            </div>
+
+            <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-400 font-mono flex-wrap gap-2">
+              <span>Data Validation &bull; Technical Crawl &bull; Backlink Health &bull; 15 Schemas &bull; GEO Citations &bull; Day 1–90 Recovery</span>
+              <span className="text-[#ff4d00] font-bold">Senior Consultant Diagnostic Engine</span>
+            </div>
+          </div>
+
           {/* CARD: AI SEO Link Building Strategist & Outreach Engine */}
           <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 border-2 border-amber-500/50 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-5 hover:border-amber-400 transition-all group relative overflow-hidden md:col-span-2 lg:col-span-3">
             <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />

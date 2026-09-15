@@ -68,6 +68,8 @@ interface SidebarProps {
   wsConnected: boolean;
   authSession: AuthSession | null;
   onOpenRevenueMandate?: () => void;
+  onOpenTrafficLossAudit?: (url?: string) => void;
+  onOpenSeoRecoveryDirective?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -98,6 +100,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   wsConnected,
   authSession,
   onOpenRevenueMandate,
+  onOpenTrafficLossAudit,
+  onOpenSeoRecoveryDirective,
 }) => {
   // Category accordion expansion states
   const [openCategories, setOpenCategories] = useState<{ [key: string]: boolean }>({
@@ -425,6 +429,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         <span>CLARITY OVERLOAD</span>
                         <span className="text-[9px] px-1.5 py-0.2 bg-amber-400 text-black border border-black font-bold">
                           5-SEC
+                        </span>
+                      </div>
+                    )}
+                  </button>
+                )}
+
+                {/* Comprehensive SEO, Traffic Loss & AI Search Visibility Audit */}
+                {onOpenTrafficLossAudit && (
+                  <button
+                    onClick={() => handleNavClick(onOpenTrafficLossAudit)}
+                    className={`w-full flex items-center ${
+                      isCollapsed ? 'justify-center p-2.5' : 'space-x-3 px-3 py-2'
+                    } text-xs font-bold text-black bg-gradient-to-r from-orange-100 to-amber-100 hover:bg-black hover:text-white border-2 border-black shadow-[2px_2px_0_#000] transition-all cursor-pointer uppercase`}
+                    title="Comprehensive SEO, Traffic Loss & AI Search Visibility Audit (AISO/GEO + Backlinks + Schema)"
+                  >
+                    <Sparkles className="w-4 h-4 text-[#ff4d00] shrink-0" />
+                    {!isCollapsed && (
+                      <div className="flex items-center justify-between flex-1">
+                        <span>TRAFFIC LOSS AUDIT</span>
+                        <span className="text-[9px] px-1.5 py-0.2 bg-[#ff4d00] text-black border border-black font-bold">
+                          GEO
                         </span>
                       </div>
                     )}
@@ -848,6 +873,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             {(isCollapsed || openCategories.system) && (
               <div className="space-y-1.5">
+                {/* SEO Recovery Directive (Primary Owner of SEO Recovery) */}
+                {onOpenSeoRecoveryDirective && (
+                  <button
+                    onClick={() => handleNavClick(onOpenSeoRecoveryDirective)}
+                    className={`w-full flex items-center ${
+                      isCollapsed ? 'justify-center p-2.5' : 'space-x-3 px-3 py-2'
+                    } text-xs font-black text-black bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 hover:from-orange-300 hover:to-yellow-300 border-2 border-black shadow-[2px_2px_0_#000] transition-all cursor-pointer uppercase`}
+                    title="SEO, GEO, AI Search & Indexation Recovery Directive (Primary Owner of SEO Recovery)"
+                  >
+                    <Sparkles className="w-4 h-4 text-black shrink-0" />
+                    {!isCollapsed && (
+                      <div className="flex items-center justify-between flex-1 truncate">
+                        <span className="truncate">SEO RECOVERY DIRECTIVE</span>
+                        <span className="text-[9px] px-1.5 py-0.2 bg-black text-white font-mono font-bold shrink-0 ml-1">
+                          OWNER
+                        </span>
+                      </div>
+                    )}
+                  </button>
+                )}
+
                 {/* Unified Revenue Mandate (Real Revenue Only) */}
                 {onOpenRevenueMandate && (
                   <button
